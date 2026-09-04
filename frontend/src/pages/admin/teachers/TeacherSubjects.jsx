@@ -1,0 +1,1041 @@
+// import { useEffect, useState } from "react";
+// import { Link, useParams } from "react-router-dom";
+// import api from "../../../services/api";
+
+// const TeacherSubjects = () => {
+// const { id } = useParams();
+
+// const [teacher, setTeacher] = useState(null);
+// const [subjects, setSubjects] = useState([]);
+// const [classLevels, setClassLevels] = useState([]);
+// const [assignments, setAssignments] = useState([]);
+
+// const [loading, setLoading] = useState(true);
+// const [submitting, setSubmitting] = useState(false);
+
+// const [error, setError] = useState("");
+// const [success, setSuccess] = useState("");
+
+// const [formData, setFormData] = useState({
+// teacher: id,
+// subject: "",
+// class_level: "",
+// is_primary: false,
+// });
+
+// useEffect(() => {
+// fetchData();
+// }, [id]);
+
+// const fetchData = async () => {
+// try {
+// setLoading(true);
+// setError("");
+
+
+//   const [
+//   teacherResponse,
+//   subjectsResponse,
+//   classLevelsResponse,
+//   assignmentsResponse,
+// ] = await Promise.all([
+//   api.get(`/teachers/${id}/`),
+//   api.get("/academics/subjects/"),
+//   api.get("/academics/class-levels/"),
+//   api.get("/teachers/assign-subject/"),
+// ]);
+
+//   setTeacher(teacherResponse.data);
+//   setSubjects(subjectsResponse.data);
+//   setClassLevels(classLevelsResponse.data);
+
+//   // Only assignments belonging to this teacher
+//   const teacherAssignments =
+//     assignmentsResponse.data.filter(
+//       (assignment) =>
+//         Number(assignment.teacher) === Number(id)
+//     );
+
+//   setAssignments(teacherAssignments);
+
+// } catch (error) {
+//   console.error("Error loading data:", error);
+
+//   setError(
+//     error.response?.data?.detail ||
+//     "Failed to load teacher assignments."
+//   );
+
+// } finally {
+//   setLoading(false);
+// }
+
+
+// };
+
+// const handleChange = (e) => {
+// const { name, value, type, checked } = e.target;
+
+
+// setFormData((previousData) => ({
+//   ...previousData,
+//   [name]:
+//     type === "checkbox"
+//       ? checked
+//       : value,
+// }));
+
+
+// };
+
+// const handleSubmit = async (e) => {
+// e.preventDefault();
+
+
+// try {
+//   setSubmitting(true);
+//   setError("");
+//   setSuccess("");
+
+//   await api.post("/teachers/assign-subject/", {
+//   ...formData,
+//   teacher: Number(id),
+//   subject: Number(formData.subject),
+//   class_level: Number(formData.class_level),
+// });
+
+//   setSuccess("Subject assigned successfully.");
+
+//   setFormData({
+//     teacher: id,
+//     subject: "",
+//     class_level: "",
+//     is_primary: false,
+//   });
+
+//   fetchData();
+
+// } catch (error) {
+//   console.error("Error assigning subject:", error);
+
+//   const data = error.response?.data;
+
+//   const errorMessage =
+//     typeof data === "object" && data !== null
+//       ? Object.entries(data)
+//           .map(([key, value]) => {
+//             const message =
+//               Array.isArray(value)
+//                 ? value.join(", ")
+//                 : value;
+
+//             return `${key}: ${message}`;
+//           })
+//           .join(", ")
+//       : "Failed to assign subject.";
+
+//   setError(errorMessage);
+
+// } finally {
+//   setSubmitting(false);
+// }
+
+
+// };
+
+// const handleDelete = async (assignmentId) => {
+// const confirmDelete = window.confirm(
+// "Are you sure you want to remove this subject assignment?"
+// );
+
+
+// if (!confirmDelete) return;
+
+// try {
+//   setError("");
+
+//   await api.delete(`/teachers/assign-subject/${assignmentId}/`)
+
+//   setAssignments((previousAssignments) =>
+//     previousAssignments.filter(
+//       (assignment) =>
+//         assignment.id !== assignmentId
+//     )
+//   );
+
+//   setSuccess(
+//     "Subject assignment removed successfully."
+//   );
+
+// } catch (error) {
+//   console.error(
+//     "Error deleting assignment:",
+//     error
+//   );
+
+//   setError(
+//     error.response?.data?.detail ||
+//     "Failed to remove subject assignment."
+//   );
+// }
+
+
+// };
+
+// const getSubjectName = (subjectId) => {
+// const subject = subjects.find(
+// (item) =>
+// Number(item.id) === Number(subjectId)
+// );
+
+
+// return subject
+//   ? subject.name
+//   : "Unknown Subject";
+
+// };
+
+// const getClassName = (classId) => {
+// const classLevel = classLevels.find(
+// (item) =>
+// Number(item.id) === Number(classId)
+// );
+
+
+// return classLevel
+//   ? classLevel.name
+//   : "Unknown Class";
+
+
+// };
+
+// if (loading) {
+// return ( <div className="p-6 text-center text-gray-500">
+// Loading teacher subjects... </div>
+// );
+// }
+
+// return ( <div className="mx-auto max-w-6xl p-4 md:p-6">
+
+
+//   {/* Header */}
+//   <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+//     <div>
+//       <h1 className="text-2xl font-bold text-gray-800">
+//         Assign Subjects
+//       </h1>
+
+//       <p className="text-sm text-gray-500">
+//         {teacher?.full_name}
+//       </p>
+//     </div>
+
+//     <Link
+//       to="/admin/teachers"
+//       className="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-100"
+//     >
+//       ← Back to Teachers
+//     </Link>
+
+//   </div>
+
+//   {/* Messages */}
+//   {error && (
+//     <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+//       {error}
+//     </div>
+//   )}
+
+//   {success && (
+//     <div className="mb-5 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-600">
+//       {success}
+//     </div>
+//   )}
+
+//   {/* Assignment Form */}
+//   <div className="mb-8 rounded-xl bg-white p-5 shadow md:p-6">
+
+//     <h2 className="mb-5 text-lg font-semibold text-gray-800">
+//       Assign New Subject
+//     </h2>
+
+//     <form
+//       onSubmit={handleSubmit}
+//       className="grid grid-cols-1 gap-5 md:grid-cols-2"
+//     >
+
+//       {/* Subject */}
+//       <div>
+//         <label className="mb-2 block text-sm font-medium text-gray-700">
+//           Subject *
+//         </label>
+
+//         <select
+//           name="subject"
+//           value={formData.subject}
+//           onChange={handleChange}
+//           required
+//           className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+//         >
+//           <option value="">
+//             Select Subject
+//           </option>
+
+//           {subjects.map((subject) => (
+//             <option
+//               key={subject.id}
+//               value={subject.id}
+//             >
+//               {subject.name}
+//             </option>
+//           ))}
+//         </select>
+//       </div>
+
+//       {/* Class Level */}
+//       <div>
+//         <label className="mb-2 block text-sm font-medium text-gray-700">
+//           Class *
+//         </label>
+
+//         <select
+//           name="class_level"
+//           value={formData.class_level}
+//           onChange={handleChange}
+//           required
+//           className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+//         >
+//           <option value="">
+//             Select Class
+//           </option>
+
+//           {classLevels.map((classLevel) => (
+//             <option
+//               key={classLevel.id}
+//               value={classLevel.id}
+//             >
+//               {classLevel.name}
+//             </option>
+//           ))}
+//         </select>
+//       </div>
+
+//       {/* Primary Subject */}
+//       <div className="flex items-center gap-3">
+
+//         <input
+//           type="checkbox"
+//           name="is_primary"
+//           checked={formData.is_primary}
+//           onChange={handleChange}
+//           className="h-4 w-4"
+//         />
+
+//         <label className="text-sm font-medium text-gray-700">
+//           Mark as primary subject
+//         </label>
+
+//       </div>
+
+//       {/* Button */}
+//       <div className="flex items-end">
+
+//         <button
+//           type="submit"
+//           disabled={submitting}
+//           className="w-full rounded-lg bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+//         >
+//           {submitting
+//             ? "Assigning..."
+//             : "Assign Subject"}
+//         </button>
+
+//       </div>
+
+//     </form>
+
+//   </div>
+
+//   {/* Existing Assignments */}
+//   <div className="overflow-hidden rounded-xl bg-white shadow">
+
+//     <div className="border-b border-gray-200 p-5">
+
+//       <h2 className="text-lg font-semibold text-gray-800">
+//         Assigned Subjects
+//       </h2>
+
+//     </div>
+
+//     {assignments.length === 0 ? (
+//       <div className="p-10 text-center text-gray-500">
+//         No subjects have been assigned to this teacher.
+//       </div>
+//     ) : (
+//       <div className="overflow-x-auto">
+
+//         <table className="min-w-full">
+
+//           <thead className="bg-gray-50">
+
+//             <tr>
+
+//               <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+//                 Subject
+//               </th>
+
+//               <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+//                 Class
+//               </th>
+
+//               <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+//                 Primary
+//               </th>
+
+//               <th className="px-5 py-4 text-right text-sm font-semibold text-gray-600">
+//                 Action
+//               </th>
+
+//             </tr>
+
+//           </thead>
+
+//           <tbody>
+
+//             {assignments.map((assignment) => (
+
+//               <tr
+//                 key={assignment.id}
+//                 className="border-t border-gray-100"
+//               >
+
+//                 <td className="px-5 py-4 text-sm font-medium text-gray-800">
+//                   {getSubjectName(
+//                     assignment.subject
+//                   )}
+//                 </td>
+
+//                 <td className="px-5 py-4 text-sm text-gray-600">
+//                   {getClassName(
+//                     assignment.class_level
+//                   )}
+//                 </td>
+
+//                 <td className="px-5 py-4">
+
+//                   {assignment.is_primary ? (
+//                     <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+//                       Primary
+//                     </span>
+//                   ) : (
+//                     <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+//                       Secondary
+//                     </span>
+//                   )}
+
+//                 </td>
+
+//                 <td className="px-5 py-4 text-right">
+
+//                   <button
+//                     onClick={() =>
+//                       handleDelete(
+//                         assignment.id
+//                       )
+//                     }
+//                     className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+//                   >
+//                     Remove
+//                   </button>
+
+//                 </td>
+
+//               </tr>
+
+//             ))}
+
+//           </tbody>
+
+//         </table>
+
+//       </div>
+//     )}
+
+//   </div>
+
+// </div>
+
+
+// );
+// };
+
+// export default TeacherSubjects;
+
+
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import api from "../../../services/api";
+
+const TeacherSubjects = () => {
+  const { id } = useParams();
+
+  const [teacher, setTeacher] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [classLevels, setClassLevels] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const [formData, setFormData] = useState({
+    teacher: id,
+    subject: "",
+    class_level: "",
+    is_primary: false,
+  });
+
+  // ==========================================
+  // LOAD TEACHER, SUBJECTS, CLASSES & ASSIGNMENTS
+  // ==========================================
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const [
+        teacherResponse,
+        subjectsResponse,
+        classLevelsResponse,
+        assignmentsResponse,
+      ] = await Promise.all([
+        api.get(`/teachers/${id}/`),
+        api.get("/academics/subjects/"),
+        api.get("/academics/class-levels/"),
+        api.get("/teachers/assign-subject/"),
+      ]);
+
+      // Teacher
+      setTeacher(teacherResponse.data);
+
+      // Subjects
+      setSubjects(
+        Array.isArray(subjectsResponse.data)
+          ? subjectsResponse.data
+          : subjectsResponse.data.results || []
+      );
+
+      // Class levels
+      setClassLevels(
+        Array.isArray(classLevelsResponse.data)
+          ? classLevelsResponse.data
+          : classLevelsResponse.data.results || []
+      );
+
+      // Only assignments for this teacher
+      const allAssignments = Array.isArray(
+        assignmentsResponse.data
+      )
+        ? assignmentsResponse.data
+        : assignmentsResponse.data.results || [];
+
+      const teacherAssignments = allAssignments.filter(
+        (assignment) =>
+          Number(assignment.teacher) === Number(id)
+      );
+
+      setAssignments(teacherAssignments);
+    } catch (error) {
+      console.error(
+        "Error loading teacher subjects:",
+        error
+      );
+
+      setError(
+        error.response?.data?.detail ||
+          "Failed to load teacher assignments."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // FORM INPUT
+  // ==========================================
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
+    }));
+  };
+
+  // ==========================================
+  // ASSIGN SUBJECT
+  // ==========================================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setSubmitting(true);
+      setError("");
+      setSuccess("");
+
+      await api.post(
+        "/teachers/assign-subject/",
+        {
+          teacher: Number(id),
+          subject: Number(formData.subject),
+          class_level: Number(formData.class_level),
+          is_primary: formData.is_primary,
+        }
+      );
+
+      setSuccess(
+        "Subject assigned successfully."
+      );
+
+      // Reset form
+      setFormData({
+        teacher: id,
+        subject: "",
+        class_level: "",
+        is_primary: false,
+      });
+
+      // Reload assignments
+      await fetchData();
+    } catch (error) {
+      console.error(
+        "Error assigning subject:",
+        error
+      );
+
+      const data = error.response?.data;
+
+      let errorMessage =
+        "Failed to assign subject.";
+
+      if (
+        typeof data === "object" &&
+        data !== null
+      ) {
+        errorMessage = Object.entries(data)
+          .map(([key, value]) => {
+            const message = Array.isArray(value)
+              ? value.join(", ")
+              : value;
+
+            return `${key}: ${message}`;
+          })
+          .join(", ");
+      }
+
+      setError(errorMessage);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ==========================================
+  // DELETE ASSIGNMENT
+  // ==========================================
+  const handleDelete = async (assignmentId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to remove this subject assignment?"
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setError("");
+      setSuccess("");
+
+      await api.delete(
+        `/teachers/assign-subject/${assignmentId}/`
+      );
+
+      setAssignments(
+        (previousAssignments) =>
+          previousAssignments.filter(
+            (assignment) =>
+              assignment.id !== assignmentId
+          )
+      );
+
+      setSuccess(
+        "Subject assignment removed successfully."
+      );
+    } catch (error) {
+      console.error(
+        "Error deleting assignment:",
+        error
+      );
+
+      setError(
+        error.response?.data?.detail ||
+          "Failed to remove subject assignment."
+      );
+    }
+  };
+
+  // ==========================================
+  // GET SUBJECT NAME
+  // ==========================================
+  const getSubjectName = (subjectId) => {
+    const subject = subjects.find(
+      (item) =>
+        Number(item.id) === Number(subjectId)
+    );
+
+    return subject
+      ? subject.name
+      : "Unknown Subject";
+  };
+
+  // ==========================================
+  // GET CLASS NAME
+  // ==========================================
+  const getClassName = (classId) => {
+    const classLevel = classLevels.find(
+      (item) =>
+        Number(item.id) === Number(classId)
+    );
+
+    return classLevel
+      ? classLevel.name
+      : "Unknown Class";
+  };
+
+  // ==========================================
+  // LOADING
+  // ==========================================
+  if (loading) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-gray-500">
+          Loading teacher subjects...
+        </p>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // PAGE
+  // ==========================================
+  return (
+    <div className="p-4 md:p-6">
+
+      {/* ======================================
+          HEADER
+      ====================================== */}
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Assign Subjects
+          </h1>
+
+          <p className="mt-1 text-sm text-gray-500">
+            {teacher?.full_name ||
+              "Teacher"}
+          </p>
+
+          {teacher?.employee_id && (
+            <p className="text-xs text-gray-400">
+              Employee ID:{" "}
+              {teacher.employee_id}
+            </p>
+          )}
+        </div>
+
+        <Link
+          to="/admin/teachers"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+        >
+          ← Back to Teachers
+        </Link>
+
+      </div>
+
+      {/* ======================================
+          ERROR MESSAGE
+      ====================================== */}
+      {error && (
+        <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
+      {/* ======================================
+          SUCCESS MESSAGE
+      ====================================== */}
+      {success && (
+        <div className="mb-5 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-600">
+          {success}
+        </div>
+      )}
+
+      {/* ======================================
+          ASSIGNMENT FORM
+      ====================================== */}
+      <div className="mb-8 rounded-xl bg-white p-5 shadow md:p-6">
+
+        <h2 className="mb-5 text-lg font-semibold text-gray-800">
+          Assign New Subject
+        </h2>
+
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 gap-5 md:grid-cols-2"
+        >
+
+          {/* SUBJECT */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Subject *
+            </label>
+
+            <select
+              name="subject"
+              value={formData.subject}
+              onChange={handleChange}
+              required
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">
+                Select Subject
+              </option>
+
+              {subjects.map((subject) => (
+                <option
+                  key={subject.id}
+                  value={subject.id}
+                >
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* CLASS LEVEL */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Class *
+            </label>
+
+            <select
+              name="class_level"
+              value={formData.class_level}
+              onChange={handleChange}
+              required
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">
+                Select Class
+              </option>
+
+              {classLevels.map((classLevel) => (
+                <option
+                  key={classLevel.id}
+                  value={classLevel.id}
+                >
+                  {classLevel.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* PRIMARY SUBJECT */}
+          <div className="flex items-center gap-3">
+
+            <input
+              id="is_primary"
+              type="checkbox"
+              name="is_primary"
+              checked={formData.is_primary}
+              onChange={handleChange}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+
+            <label
+              htmlFor="is_primary"
+              className="text-sm font-medium text-gray-700"
+            >
+              Mark as primary subject
+            </label>
+
+          </div>
+
+          {/* SUBMIT BUTTON */}
+          <div className="flex items-end">
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-lg bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting
+                ? "Assigning..."
+                : "Assign Subject"}
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+      {/* ======================================
+          EXISTING ASSIGNMENTS
+      ====================================== */}
+      <div className="overflow-hidden rounded-xl bg-white shadow">
+
+        <div className="border-b border-gray-200 p-5">
+
+          <div className="flex items-center justify-between">
+
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">
+                Assigned Subjects
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Subjects currently assigned to this teacher
+              </p>
+            </div>
+
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600">
+              {assignments.length}
+            </span>
+
+          </div>
+
+        </div>
+
+        {/* NO ASSIGNMENTS */}
+        {assignments.length === 0 ? (
+          <div className="p-10 text-center text-gray-500">
+            <p className="text-sm">
+              No subjects have been assigned to this teacher.
+            </p>
+          </div>
+        ) : (
+
+          /* ASSIGNMENT TABLE */
+          <div className="overflow-x-auto">
+
+            <table className="min-w-full">
+
+              <thead className="bg-gray-50">
+
+                <tr>
+
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+                    Subject
+                  </th>
+
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+                    Class
+                  </th>
+
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+                    Primary
+                  </th>
+
+                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-600">
+                    Action
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {assignments.map(
+                  (assignment) => (
+                    <tr
+                      key={assignment.id}
+                      className="border-t border-gray-100"
+                    >
+
+                      {/* SUBJECT */}
+                      <td className="px-5 py-4 text-sm font-medium text-gray-800">
+                        {getSubjectName(
+                          assignment.subject
+                        )}
+                      </td>
+
+                      {/* CLASS */}
+                      <td className="px-5 py-4 text-sm text-gray-600">
+                        {getClassName(
+                          assignment.class_level
+                        )}
+                      </td>
+
+                      {/* PRIMARY */}
+                      <td className="px-5 py-4">
+
+                        {assignment.is_primary ? (
+                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                            Primary
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                            Secondary
+                          </span>
+                        )}
+
+                      </td>
+
+                      {/* DELETE */}
+                      <td className="px-5 py-4 text-right">
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDelete(
+                              assignment.id
+                            )
+                          }
+                          className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                        >
+                          Remove
+                        </button>
+
+                      </td>
+
+                    </tr>
+                  )
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+        )}
+
+      </div>
+
+    </div>
+  );
+};
+
+export default TeacherSubjects;
+
