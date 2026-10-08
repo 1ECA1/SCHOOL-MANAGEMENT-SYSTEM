@@ -137,6 +137,7 @@ INSTALLED_APPS = [
 ]
 
 
+
 # ============================================================
 # MIDDLEWARE
 # ============================================================
@@ -333,7 +334,9 @@ REST_FRAMEWORK = {
 # CORS
 # ============================================================
 
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOWED_ORIGINS = [
+    "https://school-management-system-git-main-alexone.vercel.app",
+]
 
 configured_cors_origins = get_csv_env(
     "CORS_ALLOWED_ORIGINS",
