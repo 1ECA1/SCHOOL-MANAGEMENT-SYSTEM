@@ -19,7 +19,7 @@
 //   UserCircle,
 // } from "lucide-react";
 
-// const API_URL = "http://127.0.0.1:8000/api";
+// const API_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 // function StudentDetails() {
 //   const { id } = useParams();
@@ -199,7 +199,7 @@
 
 //     return image.startsWith("http")
 //       ? image
-//       : `http://127.0.0.1:8000${image}`;
+//       : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${image}`;
 //   };
 
 //   const getInitials = () => {
@@ -803,7 +803,7 @@ import {
   UserCircle,
 } from "lucide-react";
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 function StudentDetails() {
   const { id } = useParams();
@@ -1024,7 +1024,7 @@ function StudentDetails() {
 
     return image.startsWith("http")
       ? image
-      : `http://127.0.0.1:8000${image}`;
+      : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${image}`;
   };
 
   const getInitials = () => {

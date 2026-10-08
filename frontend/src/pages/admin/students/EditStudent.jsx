@@ -110,7 +110,7 @@ function EditStudent() {
         if (studentData.profile_image) {
           const imageUrl = studentData.profile_image.startsWith("http")
             ? studentData.profile_image
-            : `http://127.0.0.1:8000${studentData.profile_image}`;
+            : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${studentData.profile_image}`;
 
           setProfilePreview(imageUrl);
         } else {

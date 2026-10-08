@@ -28,7 +28,7 @@ import {
   Link,
 } from "lucide-react";
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 const WEBSITE_URL = window.location.origin;
 
 function ApplicantDetails() {

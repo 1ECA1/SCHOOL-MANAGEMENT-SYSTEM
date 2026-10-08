@@ -54,7 +54,7 @@ function TeacherProfile() {
   const profileImage = teacher?.profile_image
     ? teacher.profile_image.startsWith("http")
       ? teacher.profile_image
-      : `http://127.0.0.1:8000${teacher.profile_image}`
+      : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${teacher.profile_image}`
     : null;
 
   if (loading) {

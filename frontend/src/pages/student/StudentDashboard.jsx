@@ -204,7 +204,7 @@
 //   const profileImage = student?.profile_image
 //     ? student.profile_image.startsWith("http")
 //       ? student.profile_image
-//       : `http://127.0.0.1:8000${student.profile_image}`
+//       : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${student.profile_image}`
 //     : null;
 
 //   /* =========================
@@ -776,7 +776,7 @@ const getImageUrl = (image) => {
     return image;
   }
 
-  return `http://127.0.0.1:8000${image}`;
+  return `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${image}`;
 };
 
 const formatDate = (date) => {

@@ -89,7 +89,7 @@
 //               src={
 //                 user.profile_image.startsWith("http")
 //                   ? user.profile_image
-//                   : `http://127.0.0.1:8000${user.profile_image}`
+//                   : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${user.profile_image}`
 //               }
 //               alt={`${user?.first_name || ""} ${user?.last_name || ""}`}
 //               className="h-10 w-10 rounded-full border-2 border-primary object-cover"

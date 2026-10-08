@@ -286,7 +286,7 @@ const Teachers = () => {
       return image;
     }
 
-    return `http://127.0.0.1:8000${image}`;
+    return `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${image}`;
   };
 
   // =====================================================

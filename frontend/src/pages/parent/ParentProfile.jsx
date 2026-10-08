@@ -71,7 +71,7 @@ export default function ParentProfile() {
   const profileImage = parent.profile_image
     ? parent.profile_image.startsWith("http")
       ? parent.profile_image
-      : `http://127.0.0.1:8000${parent.profile_image}`
+      : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${parent.profile_image}`
     : null;
 
   const initials = parent.full_name

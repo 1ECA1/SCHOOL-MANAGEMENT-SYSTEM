@@ -25,7 +25,7 @@ function BookDetails() {
       return image;
     }
 
-    return `http://127.0.0.1:8000${
+    return `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${
       image.startsWith("/") ? image : `/${image}`
     }`;
   };

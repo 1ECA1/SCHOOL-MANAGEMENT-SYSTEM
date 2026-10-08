@@ -15,7 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 function AdmissionOfficerStudents() {
   const navigate = useNavigate();
@@ -678,7 +678,7 @@ function StudentAvatar({ student, getStudentName }) {
   const imageUrl = image
     ? image.startsWith("http")
       ? image
-      : `http://127.0.0.1:8000${image}`
+      : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${image}`
     : null;
 
   if (imageUrl) {

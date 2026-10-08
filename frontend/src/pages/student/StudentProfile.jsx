@@ -99,7 +99,7 @@ function StudentProfile() {
   const profileImage = student.profile_image
     ? student.profile_image.startsWith("http")
       ? student.profile_image
-      : `http://127.0.0.1:8000${student.profile_image}`
+      : `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${student.profile_image}`
     : null;
 
   const className =
@@ -302,7 +302,7 @@ export default StudentProfile;
 //   getStudentParents,
 // } from "../../services/studentsService";
 
-// const API_BASE_URL = "http://127.0.0.1:8000";
+// const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 // const StudentProfile = () => {
 //   const { user } = useAuth();
