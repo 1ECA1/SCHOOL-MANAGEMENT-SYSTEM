@@ -22,6 +22,10 @@ const AddDepartment = () => {
     is_active: true,
   });
 
+  // ============================================================
+  // LOAD SCHOOLS
+  // ============================================================
+
   useEffect(() => {
     const loadSchools = async () => {
       try {
@@ -38,6 +42,10 @@ const AddDepartment = () => {
     loadSchools();
   }, []);
 
+  // ============================================================
+  // HANDLE INPUT CHANGES
+  // ============================================================
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -46,6 +54,10 @@ const AddDepartment = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+
+  // ============================================================
+  // SUBMIT
+  // ============================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,35 +99,53 @@ const AddDepartment = () => {
     }
   };
 
+  // ============================================================
+  // UI
+  // ============================================================
+
   return (
-    <div>
+    <div className="min-h-full bg-[var(--color-background)] text-[var(--color-text)]">
+      {/* ======================================================
+          PAGE HEADER
+      ====================================================== */}
+
       <div className="mb-6">
         <button
           type="button"
           onClick={() => navigate("/admin/departments")}
-          className="mb-3 text-sm font-medium text-blue-600 hover:text-blue-800"
+          className="mb-3 text-sm font-medium text-[var(--color-primary)] transition hover:opacity-80"
         >
           ← Back to Departments
         </button>
 
-        <h1 className="text-2xl font-bold">Add Department</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">
+          Add Department
+        </h1>
 
-        <p className="text-sm text-slate-500">
+        <p className="mt-1 text-sm text-[var(--color-text)]/60">
           Create a new school department.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow">
+      {/* ======================================================
+          FORM CARD
+      ====================================================== */}
+
+      <div className="rounded-xl border border-[var(--color-text)]/10 bg-[var(--color-card)] p-6 shadow-sm">
+        {/* Error */}
         {error && (
-          <div className="mb-5 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-5 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* School */}
+          {/* ==================================================
+              SCHOOL
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               School
             </label>
 
@@ -125,12 +155,10 @@ const AddDepartment = () => {
               onChange={handleChange}
               disabled={loadingSchools}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-[var(--color-primary)]"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">
-                {loadingSchools
-                  ? "Loading schools..."
-                  : "Select school"}
+                {loadingSchools ? "Loading schools..." : "Select school"}
               </option>
 
               {schools.map((school) => (
@@ -141,10 +169,14 @@ const AddDepartment = () => {
             </select>
           </div>
 
-          {/* Name + Code */}
+          {/* ==================================================
+              NAME + CODE
+          ================================================== */}
+
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            {/* Department Name */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
                 Department Name
               </label>
 
@@ -155,12 +187,13 @@ const AddDepartment = () => {
                 onChange={handleChange}
                 required
                 placeholder="Example: Science Department"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-[var(--color-primary)]"
+                className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-[var(--color-text)] placeholder:text-[var(--color-text)]/40 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
               />
             </div>
 
+            {/* Department Code */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
                 Department Code
               </label>
 
@@ -171,14 +204,17 @@ const AddDepartment = () => {
                 onChange={handleChange}
                 required
                 placeholder="Example: SCI"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 uppercase outline-none focus:border-[var(--color-primary)]"
+                className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 uppercase text-[var(--color-text)] placeholder:normal-case placeholder:text-[var(--color-text)]/40 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
               />
             </div>
           </div>
 
-          {/* Head */}
+          {/* ==================================================
+              HEAD OF DEPARTMENT
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               Head of Department
             </label>
 
@@ -188,13 +224,16 @@ const AddDepartment = () => {
               value={formData.head_name}
               onChange={handleChange}
               placeholder="Enter head of department"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-[var(--color-primary)]"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-[var(--color-text)] placeholder:text-[var(--color-text)]/40 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
           </div>
 
-          {/* Description */}
+          {/* ==================================================
+              DESCRIPTION
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               Description
             </label>
 
@@ -204,39 +243,47 @@ const AddDepartment = () => {
               onChange={handleChange}
               rows={4}
               placeholder="Enter department description"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-[var(--color-primary)]"
+              className="w-full resize-y rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-[var(--color-text)] placeholder:text-[var(--color-text)]/40 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
           </div>
 
-          {/* Active */}
+          {/* ==================================================
+              ACTIVE
+          ================================================== */}
+
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
               name="is_active"
               checked={formData.is_active}
               onChange={handleChange}
-              className="h-4 w-4"
+              className="h-4 w-4 cursor-pointer accent-[var(--color-primary)]"
             />
 
-            <label className="text-sm font-medium text-slate-700">
+            <label className="cursor-pointer text-sm font-medium text-[var(--color-text)]">
               Active Department
             </label>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 border-t pt-5">
+          {/* ==================================================
+              BUTTONS
+          ================================================== */}
+
+          <div className="flex flex-col gap-3 border-t border-[var(--color-text)]/10 pt-5 sm:flex-row">
+            {/* Cancel */}
             <button
               type="button"
               onClick={() => navigate("/admin/departments")}
-              className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-5 py-2.5 text-sm font-medium text-[var(--color-text)] transition hover:bg-[var(--color-background)]"
             >
               Cancel
             </button>
 
+            {/* Create */}
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Creating..." : "Create Department"}
             </button>

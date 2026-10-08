@@ -252,18 +252,35 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
     setLoading(true);
+
     try {
       const user = await login(form.username, form.password);
-      const role = user.role ? user.role.toLowerCase() : "";
 
-      if (role === "school_admin" || role === "super_admin") {
+      const role = user.role?.trim().toLowerCase();
+
+      if (role === "school_admin") {
+        navigate("/school-admin");
+      } else if (role === "super_admin") {
         navigate("/admin");
       } else if (role === "teacher") {
         navigate("/teacher");
       } else if (role === "student") {
         navigate("/student");
+      } else if (role === "parent") {
+        navigate("/parent");
+      } else if (role === "principal") {
+        navigate("/principal");
+      } else if (role === "librarian") {
+        navigate("/librarian");
+      } else if (role === "exam_officer") {
+        navigate("/exam-officer");
+      } else if (role === "admission_officer") {
+        navigate("/admission-officer");
+      } else if (role === "accountant") {
+        navigate("/accountant");
       } else {
         navigate("/");
       }
@@ -273,6 +290,7 @@ function Login() {
         err.response.data &&
         err.response.data.non_field_errors &&
         err.response.data.non_field_errors[0];
+
       setError(message || "Login failed. Check your credentials.");
     } finally {
       setLoading(false);

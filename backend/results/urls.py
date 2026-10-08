@@ -1,3 +1,4 @@
+
 from django.urls import path
 
 from .views import (
@@ -7,14 +8,16 @@ from .views import (
     StudentResultDetailView,
     ReportCardListCreateView,
     ReportCardDetailView,
+    MyReportCardListView,
+    MyReportCardDetailView,
 )
 
 
 urlpatterns = [
 
-    # =========================
-    # Grade Scales
-    # =========================
+    # ========================================================
+    # GRADE SCALES
+    # ========================================================
 
     path(
         "grade-scales/",
@@ -28,9 +31,9 @@ urlpatterns = [
         name="grade-scale-detail",
     ),
 
-    # =========================
-    # Student Results
-    # =========================
+    # ========================================================
+    # STUDENT RESULTS
+    # ========================================================
 
     path(
         "student-results/",
@@ -44,9 +47,9 @@ urlpatterns = [
         name="student-result-detail",
     ),
 
-    # =========================
-    # Report Cards
-    # =========================
+    # ========================================================
+    # REPORT CARDS
+    # ========================================================
 
     path(
         "report-cards/",
@@ -58,5 +61,26 @@ urlpatterns = [
         "report-cards/<int:pk>/",
         ReportCardDetailView.as_view(),
         name="report-card-detail",
+    ),
+
+    # ========================================================
+    # STUDENT RESULTS
+    # ========================================================
+    # These endpoints are ONLY for the logged-in student.
+    #
+    # They return published report cards belonging to
+    # request.user.student_profile.
+    # ========================================================
+
+    path(
+        "my-report-cards/",
+        MyReportCardListView.as_view(),
+        name="my-report-card-list",
+    ),
+
+    path(
+        "my-report-cards/<int:pk>/",
+        MyReportCardDetailView.as_view(),
+        name="my-report-card-detail",
     ),
 ]

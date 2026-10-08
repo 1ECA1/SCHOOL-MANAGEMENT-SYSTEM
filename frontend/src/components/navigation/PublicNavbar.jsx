@@ -1,68 +1,3 @@
-// const PublicNavbar = () => {
-//   return (
-//     <nav className="border-b bg-white">
-//       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-//         {/* School Logo / Name */}
-//         <div>
-//           <h1 className="text-xl font-bold">EduManageERP</h1>
-//           <p className="text-sm text-gray-500">School Management System</p>
-//         </div>
-
-//         {/* Navigation Links */}
-//         <div className="hidden items-center gap-6 md:flex">
-//           <a href="/" className="text-sm font-medium hover:text-blue-600">
-//             Home
-//           </a>
-
-//           <a
-//             href="/academy"
-//             className="text-sm font-medium hover:text-blue-600"
-//           >
-//             Academy
-//           </a>
-
-//           <a
-//             href="/admission"
-//             className="text-sm font-medium hover:text-blue-600"
-//           >
-//             Admission
-//           </a>
-
-//           <a
-//             href="/research"
-//             className="text-sm font-medium hover:text-blue-600"
-//           >
-//             Research
-//           </a>
-
-//           <a
-//             href="/resources"
-//             className="text-sm font-medium hover:text-blue-600"
-//           >
-//             Resources
-//           </a>
-
-//           <a href="/news" className="text-sm font-medium hover:text-blue-600">
-//             News
-//           </a>
-//         </div>
-
-//         {/* Login Button */}
-//         <div>
-//           <a
-//             href="/login"
-//             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-//           >
-//             Login
-//           </a>
-//         </div>
-//       </div>
-//     </nav>
-//   );
-// };
-
-// export default PublicNavbar;
-
 import { useState } from "react";
 
 const PublicNavbar = () => {
@@ -157,19 +92,22 @@ const PublicNavbar = () => {
 
             {/* ABOUT */}
             <a
-              href="/about"
+              href="/"
               className="text-xl font-semibold text-gray-700 transition hover:text-blue-700"
             >
               About
             </a>
 
-            {/* ACADEMICS */}
+            {/* =====================================================
+                ACADEMICS
+            ===================================================== */}
             <div className="group relative">
               <button
                 type="button"
                 className="flex items-center gap-2 text-xl font-semibold text-gray-700 transition hover:text-blue-700"
               >
                 Academics
+
                 <svg
                   className="h-5 w-5 transition-transform duration-200 group-hover:rotate-180"
                   fill="none"
@@ -188,28 +126,28 @@ const PublicNavbar = () => {
               {/* DROPDOWN */}
               <div className="invisible absolute left-0 top-full z-50 mt-4 w-64 translate-y-2 rounded-xl bg-white py-3 opacity-0 shadow-2xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                 <a
-                  href="/academics/nursery"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
                 >
                   Nursery
                 </a>
 
                 <a
-                  href="/academics/primary"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
                 >
                   Primary
                 </a>
 
                 <a
-                  href="/academics/secondary"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
                 >
                   Secondary
                 </a>
 
                 <a
-                  href="/academics/departments"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
                 >
                   Departments
@@ -217,13 +155,16 @@ const PublicNavbar = () => {
               </div>
             </div>
 
-            {/* ADMISSIONS */}
+            {/* =====================================================
+                ADMISSIONS
+            ===================================================== */}
             <div className="group relative">
               <button
                 type="button"
                 className="flex items-center gap-2 text-xl font-semibold text-gray-700 transition hover:text-blue-700"
               >
                 Admissions
+
                 <svg
                   className="h-5 w-5 transition-transform duration-200 group-hover:rotate-180"
                   fill="none"
@@ -240,20 +181,23 @@ const PublicNavbar = () => {
               </button>
 
               <div className="invisible absolute left-0 top-full z-50 mt-4 w-72 translate-y-2 rounded-xl bg-white py-3 opacity-0 shadow-2xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                {/* NOT BUILT YET → HOME */}
                 <a
-                  href="/admissions/process"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700"
                 >
                   Admission Process
                 </a>
 
+                {/* NOT BUILT YET → HOME */}
                 <a
-                  href="/admissions/requirements"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700"
                 >
                   Requirements
                 </a>
 
+                {/* REAL PAGE */}
                 <a
                   href="/admissions/apply"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700"
@@ -263,13 +207,16 @@ const PublicNavbar = () => {
               </div>
             </div>
 
-            {/* SCHOOL LIFE */}
+            {/* =====================================================
+                SCHOOL LIFE
+            ===================================================== */}
             <div className="group relative">
               <button
                 type="button"
                 className="flex items-center gap-2 text-xl font-semibold text-gray-700 transition hover:text-blue-700"
               >
                 School Life
+
                 <svg
                   className="h-5 w-5 transition-transform duration-200 group-hover:rotate-180"
                   fill="none"
@@ -287,21 +234,21 @@ const PublicNavbar = () => {
 
               <div className="invisible absolute left-0 top-full z-50 mt-4 w-64 translate-y-2 rounded-xl bg-white py-3 opacity-0 shadow-2xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                 <a
-                  href="/school-life/day-student"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700"
                 >
                   Day Student
                 </a>
 
                 <a
-                  href="/school-life/boarding"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700"
                 >
                   Boarding
                 </a>
 
                 <a
-                  href="/school-life/transportation"
+                  href="/"
                   className="block px-6 py-4 text-lg font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700"
                 >
                   Transportation
@@ -309,17 +256,17 @@ const PublicNavbar = () => {
               </div>
             </div>
 
-            {/* NEWS */}
+            {/* NEWS → HOME */}
             <a
-              href="/news"
+              href="/"
               className="text-xl font-semibold text-gray-700 transition hover:text-blue-700"
             >
               News
             </a>
 
-            {/* CONTACT */}
+            {/* CONTACT → HOME */}
             <a
-              href="/contact"
+              href="/"
               className="text-xl font-semibold text-gray-700 transition hover:text-blue-700"
             >
               Contact
@@ -335,7 +282,9 @@ const PublicNavbar = () => {
           </a>
         </div>
 
-        {/* MOBILE BUTTON */}
+        {/* =========================================================
+            MOBILE BUTTON
+        ========================================================= */}
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -351,6 +300,7 @@ const PublicNavbar = () => {
       {mobileMenuOpen && (
         <div className="border-t bg-white lg:hidden">
           <nav className="flex flex-col px-8 py-5">
+            {/* HOME */}
             <a
               href="/"
               className="border-b py-5 text-xl font-semibold text-gray-700"
@@ -358,14 +308,17 @@ const PublicNavbar = () => {
               Home
             </a>
 
+            {/* ABOUT */}
             <a
-              href="/about"
+              href="/"
               className="border-b py-5 text-xl font-semibold text-gray-700"
             >
               About
             </a>
 
-            {/* MOBILE ACADEMICS */}
+            {/* =====================================================
+                MOBILE ACADEMICS
+            ===================================================== */}
             <div className="border-b">
               <button
                 type="button"
@@ -373,6 +326,7 @@ const PublicNavbar = () => {
                 className="flex w-full items-center justify-between py-5 text-xl font-semibold text-gray-700"
               >
                 Academics
+
                 <span className="text-2xl">
                   {mobileDropdown === "academics" ? "−" : "+"}
                 </span>
@@ -381,28 +335,28 @@ const PublicNavbar = () => {
               {mobileDropdown === "academics" && (
                 <div className="mb-4 ml-4 rounded-xl bg-gray-50">
                   <a
-                    href="/academics/nursery"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Nursery
                   </a>
 
                   <a
-                    href="/academics/primary"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Primary
                   </a>
 
                   <a
-                    href="/academics/secondary"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Secondary
                   </a>
 
                   <a
-                    href="/academics/departments"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Departments
@@ -411,7 +365,9 @@ const PublicNavbar = () => {
               )}
             </div>
 
-            {/* MOBILE ADMISSIONS */}
+            {/* =====================================================
+                MOBILE ADMISSIONS
+            ===================================================== */}
             <div className="border-b">
               <button
                 type="button"
@@ -419,6 +375,7 @@ const PublicNavbar = () => {
                 className="flex w-full items-center justify-between py-5 text-xl font-semibold text-gray-700"
               >
                 Admissions
+
                 <span className="text-2xl">
                   {mobileDropdown === "admissions" ? "−" : "+"}
                 </span>
@@ -426,20 +383,23 @@ const PublicNavbar = () => {
 
               {mobileDropdown === "admissions" && (
                 <div className="mb-4 ml-4 rounded-xl bg-gray-50">
+                  {/* NOT BUILT YET → HOME */}
                   <a
-                    href="/admissions/process"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Admission Process
                   </a>
 
+                  {/* NOT BUILT YET → HOME */}
                   <a
-                    href="/admissions/requirements"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Requirements
                   </a>
 
+                  {/* REAL PAGE */}
                   <a
                     href="/admissions/apply"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
@@ -450,7 +410,9 @@ const PublicNavbar = () => {
               )}
             </div>
 
-            {/* MOBILE SCHOOL LIFE */}
+            {/* =====================================================
+                MOBILE SCHOOL LIFE
+            ===================================================== */}
             <div className="border-b">
               <button
                 type="button"
@@ -458,6 +420,7 @@ const PublicNavbar = () => {
                 className="flex w-full items-center justify-between py-5 text-xl font-semibold text-gray-700"
               >
                 School Life
+
                 <span className="text-2xl">
                   {mobileDropdown === "schoolLife" ? "−" : "+"}
                 </span>
@@ -466,21 +429,21 @@ const PublicNavbar = () => {
               {mobileDropdown === "schoolLife" && (
                 <div className="mb-4 ml-4 rounded-xl bg-gray-50">
                   <a
-                    href="/school-life/day-student"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Day Student
                   </a>
 
                   <a
-                    href="/school-life/boarding"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Boarding
                   </a>
 
                   <a
-                    href="/school-life/transportation"
+                    href="/"
                     className="block px-6 py-4 text-lg text-gray-600 hover:text-blue-700"
                   >
                     Transportation
@@ -489,17 +452,17 @@ const PublicNavbar = () => {
               )}
             </div>
 
-            {/* NEWS */}
+            {/* NEWS → HOME */}
             <a
-              href="/news"
+              href="/"
               className="border-b py-5 text-xl font-semibold text-gray-700"
             >
               News
             </a>
 
-            {/* CONTACT */}
+            {/* CONTACT → HOME */}
             <a
-              href="/contact"
+              href="/"
               className="border-b py-5 text-xl font-semibold text-gray-700"
             >
               Contact

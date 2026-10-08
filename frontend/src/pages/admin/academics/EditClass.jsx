@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import {
   getClassLevel,
   getDepartments,
@@ -20,6 +20,7 @@ const EditClass = () => {
     name: "",
     code: "",
     description: "",
+    education_level: "",
     department: "",
     capacity: 40,
     is_active: true,
@@ -29,34 +30,50 @@ const EditClass = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // --------------------------------------------------
+  // Determine whether this is Senior Secondary
+  // --------------------------------------------------
+  const isSeniorSecondary =
+    formData.education_level === "SS";
+
+  // --------------------------------------------------
+  // Load class, schools and departments
+  // --------------------------------------------------
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const [classData, schoolsData, departmentsData] =
-          await Promise.all([
-            getClassLevel(id),
-            getSchools(),
-            getDepartments(),
-          ]);
+        const [
+          classData,
+          schoolsData,
+          departmentsData,
+        ] = await Promise.all([
+          getClassLevel(id),
+          getSchools(),
+          getDepartments(),
+        ]);
 
         setSchools(schoolsData);
         setDepartments(departmentsData);
 
         setFormData({
-          school: classData.school || "",
-          name: classData.name || "",
-          code: classData.code || "",
-          description: classData.description || "",
-          department: classData.department || "",
-          capacity: classData.capacity || 40,
+          school: classData.school ?? "",
+          name: classData.name ?? "",
+          code: classData.code ?? "",
+          description: classData.description ?? "",
+          education_level: classData.education_level ?? "",
+          department: classData.department ?? "",
+          capacity: classData.capacity ?? 40,
           is_active: classData.is_active ?? true,
         });
       } catch (err) {
         console.error("Failed to load class:", err);
-        setError("Failed to load class information.");
+
+        setError(
+          "Failed to load class information."
+        );
       } finally {
         setLoading(false);
       }
@@ -65,53 +82,154 @@ const EditClass = () => {
     loadData();
   }, [id]);
 
+  // --------------------------------------------------
+  // Handle input changes
+  // --------------------------------------------------
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]:
+          type === "checkbox"
+            ? checked
+            : value,
+      };
+
+      // ----------------------------------------------
+      // Primary/JSS cannot have a department
+      // ----------------------------------------------
+      if (
+        name === "education_level" &&
+        value !== "SS"
+      ) {
+        updated.department = "";
+      }
+
+      return updated;
+    });
   };
 
+  // --------------------------------------------------
+  // Submit
+  // --------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setError("");
+
+    // ----------------------------------------------
+    // Validate Senior Secondary department
+    // ----------------------------------------------
+    if (
+      isSeniorSecondary &&
+      !formData.department
+    ) {
+      setError(
+        "Please select a department for Senior Secondary."
+      );
+      return;
+    }
+
+    // ----------------------------------------------
+    // Department must not exist for Primary/JSS
+    // ----------------------------------------------
+    if (
+      !isSeniorSecondary &&
+      formData.department
+    ) {
+      setError(
+        "Department is only allowed for Senior Secondary."
+      );
+      return;
+    }
+
     try {
       setSaving(true);
-      setError("");
 
       const payload = {
-        ...formData,
         school: Number(formData.school),
+        name: formData.name.trim(),
+        code: formData.code.trim().toUpperCase(),
+        description:
+          formData.description?.trim() || "",
+        education_level:
+          formData.education_level,
+
+        // Department is only sent for SS
+        department:
+          isSeniorSecondary && formData.department
+            ? Number(formData.department)
+            : null,
+
         capacity: Number(formData.capacity),
-        department: formData.department
-          ? Number(formData.department)
-          : null,
+
+        is_active: formData.is_active,
       };
+
+      console.log(
+        "Updating class with payload:",
+        payload
+      );
 
       await updateClassLevel(id, payload);
 
+      // Go back to class details
       navigate(`/admin/classes/${id}`);
     } catch (err) {
-      console.error("Failed to update class:", err);
+      console.error(
+        "Failed to update class:",
+        err
+      );
 
-      const responseData = err?.response?.data;
+      const responseData =
+        err?.response?.data;
 
       if (responseData) {
-        setError(
+        if (
           typeof responseData === "object"
-            ? Object.values(responseData).flat().join(" ")
-            : "Failed to update class.",
-        );
+        ) {
+          const messages = Object.entries(
+            responseData
+          )
+            .flatMap(([field, messages]) => {
+              if (Array.isArray(messages)) {
+                return messages.map(
+                  (message) =>
+                    `${field}: ${message}`
+                );
+              }
+
+              return [`${field}: ${messages}`];
+            });
+
+          setError(
+            messages.join(" ")
+          );
+        } else {
+          setError(
+            "Failed to update class."
+          );
+        }
       } else {
-        setError("Failed to update class.");
+        setError(
+          "Failed to update class."
+        );
       }
     } finally {
       setSaving(false);
     }
   };
 
+  // --------------------------------------------------
+  // Loading
+  // --------------------------------------------------
   if (loading) {
     return (
       <div className="p-6">
@@ -122,27 +240,38 @@ const EditClass = () => {
     );
   }
 
+  // --------------------------------------------------
+  // Page
+  // --------------------------------------------------
   return (
     <div className="p-6">
+      {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Edit Class
         </h1>
 
         <p className="mt-1 text-sm text-gray-500">
-          Update the information for this class level.
+          Update the information for this
+          class level.
         </p>
       </div>
 
       <div className="max-w-3xl rounded-lg bg-white p-6 shadow">
+        {/* Error */}
         {error && (
           <div className="mb-6 rounded-lg bg-red-50 p-4 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
+          {/* -------------------------------------- */}
           {/* School */}
+          {/* -------------------------------------- */}
           <div>
             <label
               htmlFor="school"
@@ -159,17 +288,24 @@ const EditClass = () => {
               required
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500"
             >
-              <option value="">Select school</option>
+              <option value="">
+                Select school
+              </option>
 
               {schools.map((school) => (
-                <option key={school.id} value={school.id}>
+                <option
+                  key={school.id}
+                  value={school.id}
+                >
                   {school.name}
                 </option>
               ))}
             </select>
           </div>
 
+          {/* -------------------------------------- */}
           {/* Class Name */}
+          {/* -------------------------------------- */}
           <div>
             <label
               htmlFor="name"
@@ -189,7 +325,9 @@ const EditClass = () => {
             />
           </div>
 
-          {/* Code */}
+          {/* -------------------------------------- */}
+          {/* Class Code */}
+          {/* -------------------------------------- */}
           <div>
             <label
               htmlFor="code"
@@ -209,33 +347,98 @@ const EditClass = () => {
             />
           </div>
 
-          {/* Department */}
+          {/* -------------------------------------- */}
+          {/* Education Level */}
+          {/* -------------------------------------- */}
           <div>
             <label
-              htmlFor="department"
+              htmlFor="education_level"
               className="mb-2 block text-sm font-medium text-gray-700"
             >
-              Department
+              Education Level
             </label>
 
             <select
-              id="department"
-              name="department"
-              value={formData.department}
+              id="education_level"
+              name="education_level"
+              value={formData.education_level}
               onChange={handleChange}
+              required
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500"
             >
-              <option value="">No department</option>
+              <option value="">
+                Select education level
+              </option>
 
-              {departments.map((department) => (
-                <option key={department.id} value={department.id}>
-                  {department.name}
-                </option>
-              ))}
+              <option value="PRIMARY">
+                Primary
+              </option>
+
+              <option value="JSS">
+                Junior Secondary
+              </option>
+
+              <option value="SS">
+                Senior Secondary
+              </option>
             </select>
           </div>
 
+          {/* -------------------------------------- */}
+          {/* Department */}
+          {/* -------------------------------------- */}
+          {isSeniorSecondary && (
+            <div>
+              <label
+                htmlFor="department"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Department{" "}
+                <span className="text-red-500">
+                  *
+                </span>
+              </label>
+
+              <select
+                id="department"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                required
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+              >
+                <option value="">
+                  Select department
+                </option>
+
+                {departments
+                  .filter((department) => {
+                    if (!formData.school) {
+                      return true;
+                    }
+
+                    return (
+                      Number(
+                        department.school
+                      ) ===
+                      Number(formData.school)
+                    );
+                  })
+                  .map((department) => (
+                    <option
+                      key={department.id}
+                      value={department.id}
+                    >
+                      {department.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+
+          {/* -------------------------------------- */}
           {/* Capacity */}
+          {/* -------------------------------------- */}
           <div>
             <label
               htmlFor="capacity"
@@ -256,7 +459,9 @@ const EditClass = () => {
             />
           </div>
 
+          {/* -------------------------------------- */}
           {/* Description */}
+          {/* -------------------------------------- */}
           <div>
             <label
               htmlFor="description"
@@ -276,7 +481,9 @@ const EditClass = () => {
             />
           </div>
 
+          {/* -------------------------------------- */}
           {/* Status */}
+          {/* -------------------------------------- */}
           <div className="flex items-center gap-3">
             <input
               id="is_active"
@@ -295,19 +502,27 @@ const EditClass = () => {
             </label>
           </div>
 
+          {/* -------------------------------------- */}
           {/* Buttons */}
+          {/* -------------------------------------- */}
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
               disabled={saving}
               className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
             </button>
 
             <button
               type="button"
-              onClick={() => navigate(`/admin/classes/${id}`)}
+              onClick={() =>
+                navigate(
+                  `/admin/classes/${id}`
+                )
+              }
               className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Cancel
@@ -320,4 +535,3 @@ const EditClass = () => {
 };
 
 export default EditClass;
-

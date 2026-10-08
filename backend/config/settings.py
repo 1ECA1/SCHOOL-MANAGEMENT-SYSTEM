@@ -1,11 +1,17 @@
 import os
+from datetime import timedelta
+from pathlib import Path
+
+import dj_database_url
 from dotenv import load_dotenv
+
+
+# ============================================================
+# ENVIRONMENT
+# ============================================================
 
 load_dotenv()
 
-
-import os
-from pathlib import Path
 
 # ============================================================
 # BASE DIRECTORY
@@ -18,17 +24,74 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # ============================================================
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-edumanage-development-key-change-in-production"
-)
-
 DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-]
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = (
+            "django-insecure-edumanage-development-key-"
+            "change-in-production"
+        )
+    else:
+        raise RuntimeError(
+            "DJANGO_SECRET_KEY must be set when DJANGO_DEBUG=False."
+        )
+
+
+# ============================================================
+# FRONTEND
+# ============================================================
+
+FRONTEND_URL = os.environ.get(
+    "FRONTEND_URL",
+    "http://localhost:5173",
+).rstrip("/")
+
+
+# ============================================================
+# ALLOWED HOSTS
+# ============================================================
+
+def get_csv_env(name, default=""):
+    return [
+        value.strip()
+        for value in os.environ.get(name, default).split(",")
+        if value.strip()
+    ]
+
+
+ALLOWED_HOSTS = get_csv_env(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1",
+)
+
+# Render provides this environment variable automatically.
+RENDER_EXTERNAL_HOSTNAME = os.environ.get(
+    "RENDER_EXTERNAL_HOSTNAME"
+)
+
+if (
+    RENDER_EXTERNAL_HOSTNAME
+    and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS
+):
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+
+# ============================================================
+# PAYSTACK
+# ============================================================
+
+PAYSTACK_SECRET_KEY = os.environ.get(
+    "PAYSTACK_SECRET_KEY",
+    "",
+)
+
+PAYSTACK_PUBLIC_KEY = os.environ.get(
+    "PAYSTACK_PUBLIC_KEY",
+    "",
+)
 
 
 # ============================================================
@@ -68,6 +131,9 @@ INSTALLED_APPS = [
     "timetable",
     "transport",
     "audit",
+    "principal",
+    "admissions",
+    "schoolsuperadmin",
 ]
 
 
@@ -77,6 +143,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+
+    # WhiteNoise serves Django static files in production.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 
     # CORS
     "corsheaders.middleware.CorsMiddleware",
@@ -125,19 +194,47 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 # ============================================================
-# DATABASE - POSTGRESQL
+# DATABASE
 # ============================================================
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "edumanage_db"),
-        "USER": os.environ.get("DB_USER", "postgres"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    # Render PostgreSQL provides DATABASE_URL.
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
     }
-}
+else:
+    # Local development fallback.
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get(
+                "DB_NAME",
+                "edumanage_db",
+            ),
+            "USER": os.environ.get(
+                "DB_USER",
+                "postgres",
+            ),
+            "PASSWORD": os.environ.get(
+                "DB_PASSWORD",
+                "",
+            ),
+            "HOST": os.environ.get(
+                "DB_HOST",
+                "localhost",
+            ),
+            "PORT": os.environ.get(
+                "DB_PORT",
+                "5432",
+            ),
+        }
+    }
 
 
 # ============================================================
@@ -189,9 +286,23 @@ USE_TZ = True
 # STATIC FILES
 # ============================================================
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "django.core.files.storage.FileSystemStorage"
+        ),
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage."
+            "CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
 
 
 # ============================================================
@@ -222,23 +333,92 @@ REST_FRAMEWORK = {
 # CORS
 # ============================================================
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+CORS_ALLOWED_ORIGINS = []
+
+configured_cors_origins = get_csv_env(
+    "CORS_ALLOWED_ORIGINS",
+)
+
+for origin in [
+    FRONTEND_URL,
+    *configured_cors_origins,
+]:
+    if origin and origin not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(origin)
+
+if DEBUG:
+    for origin in [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]:
+        if origin not in CORS_ALLOWED_ORIGINS:
+            CORS_ALLOWED_ORIGINS.append(origin)
+
+
+# ============================================================
+# CSRF TRUSTED ORIGINS
+# ============================================================
+
+CSRF_TRUSTED_ORIGINS = []
+
+configured_csrf_origins = get_csv_env(
+    "CSRF_TRUSTED_ORIGINS",
+)
+
+for origin in [
+    FRONTEND_URL,
+    *configured_csrf_origins,
+]:
+    if origin and origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
+
+if DEBUG:
+    for origin in [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]:
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
+
+
+# ============================================================
+# PRODUCTION SECURITY
+# ============================================================
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+
+    SECURE_PROXY_SSL_HEADER = (
+        "HTTP_X_FORWARDED_PROTO",
+        "https",
+    )
+
+    SESSION_COOKIE_SECURE = True
+
+    CSRF_COOKIE_SECURE = True
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    SECURE_HSTS_SECONDS = 31536000
+
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+    SECURE_HSTS_PRELOAD = True
+
+    X_FRAME_OPTIONS = "DENY"
 
 
 # ============================================================
 # JWT
 # ============================================================
 
-from datetime import timedelta
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 
     "ROTATE_REFRESH_TOKENS": True,
+
     "BLACKLIST_AFTER_ROTATION": False,
 
     "AUTH_HEADER_TYPES": ("Bearer",),
@@ -249,8 +429,9 @@ SIMPLE_JWT = {
 # EMAIL
 # ============================================================
 
-EMAIL_BACKEND = (
-    "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
 )
 
 
@@ -259,5 +440,10 @@ EMAIL_BACKEND = (
 # ============================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# ============================================================
+# CUSTOM USER MODEL
+# ============================================================
 
 AUTH_USER_MODEL = "accounts.User"

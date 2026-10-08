@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (
-    AuditLogListCreateView,
+    AuditLogListView,
     AuditLogDetailView,
 )
 
@@ -9,8 +9,8 @@ from .views import (
 urlpatterns = [
     path(
         "",
-        AuditLogListCreateView.as_view(),
-        name="audit-log-list-create",
+        AuditLogListView.as_view(),
+        name="audit-log-list",
     ),
 
     path(

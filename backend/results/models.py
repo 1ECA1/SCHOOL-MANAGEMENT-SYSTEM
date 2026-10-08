@@ -118,12 +118,29 @@ class StudentResult(models.Model):
                 name="unique_student_examination_result",
             )
         ]
-
     def save(self, *args, **kwargs):
+        # Calculate total score
         self.total_score = (
-            Decimal(self.ca_score) +
-            Decimal(self.exam_score)
+            Decimal(self.ca_score or 0)
+            + Decimal(self.exam_score or 0)
         )
+
+        # Find the active grade scale that matches the total score
+        grade_scale = GradeScale.objects.filter(
+            minimum_score__lte=self.total_score,
+            maximum_score__gte=self.total_score,
+            is_active=True,
+        ).order_by("-minimum_score").first()
+
+        if grade_scale:
+            self.grade = grade_scale.grade
+            self.remark = grade_scale.remark
+            self.grade_point = grade_scale.grade_point
+        else:
+            # No matching grade scale
+            self.grade = ""
+            self.remark = ""
+            self.grade_point = Decimal("0.00")
 
         super().save(*args, **kwargs)
 

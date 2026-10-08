@@ -1,43 +1,98 @@
+
 import api from "./api";
 
-export const getAttendanceRecords = async ({
-  classLevel,
-  academicSession,
-  term,
-  date,
-  subject,
-} = {}) => {
-  const params = {};
-  if (classLevel) params.class_level = classLevel;
-  if (academicSession) params.academic_session = academicSession;
-  if (term) params.term = term;
-  if (date) params.date = date;
-  if (subject) params.subject = subject;
+// =====================================================
+// ATTENDANCE RECORDS
+// =====================================================
 
-  const { data } = await api.get("/attendance/", { params });
-  return data;
-};
-
-export const createAttendanceRecord = async (payload) => {
-  const { data } = await api.post("/attendance/", payload);
-  return data;
-};
-
-export const updateAttendanceRecord = async (id, payload) => {
-  const { data } = await api.put(`/attendance/${id}/`, payload);
-  return data;
-};
-
-// Marks attendance for a full class roster in one call.
-// Creates new records for students not yet marked, updates existing ones.
-export const bulkMarkAttendance = async (records, existingRecordsMap) => {
-  const requests = records.map((record) => {
-    const existingId = existingRecordsMap[record.student];
-    if (existingId) {
-      return updateAttendanceRecord(existingId, record);
-    }
-    return createAttendanceRecord(record);
+export const getAttendance = async (params = {}) => {
+  const { data } = await api.get("/attendance/", {
+    params,
   });
 
-  return Promise.all(requests);
+  return data;
+};
+
+export const getAttendanceRecord = async (id) => {
+  const { data } = await api.get(`/attendance/${id}/`);
+  return data;
+};
+
+export const createAttendance = async (attendanceData) => {
+  const { data } = await api.post(
+    "/attendance/",
+    attendanceData,
+  );
+
+  return data;
+};
+
+export const updateAttendance = async (
+  id,
+  attendanceData,
+) => {
+  const { data } = await api.patch(
+    `/attendance/${id}/`,
+    attendanceData,
+  );
+
+  return data;
+};
+
+export const deleteAttendance = async (id) => {
+  await api.delete(`/attendance/${id}/`);
+};
+
+// =====================================================
+// ATTENDANCE SUMMARY
+// =====================================================
+
+export const getAttendanceSummary = async (
+  studentId,
+  academicSessionId,
+  termId,
+  classLevelId,
+) => {
+  const { data } = await api.get(
+    `/attendance/summary/${studentId}/${academicSessionId}/${termId}/${classLevelId}/`,
+  );
+
+  return data;
+};
+
+
+export const getAttendanceSettings = async () => {
+  const { data } = await api.get("/attendance/settings/");
+  return data;
+};
+
+export const getAttendanceSetting = async (id) => {
+  const { data } = await api.get(`/attendance/settings/${id}/`);
+  return data;
+};
+
+export const createAttendanceSetting = async (settingData) => {
+  const { data } = await api.post(
+    "/attendance/settings/",
+    settingData
+  );
+  return data;
+};
+
+export const updateAttendanceSetting = async (
+  id,
+  settingData
+) => {
+  const { data } = await api.patch(
+    `/attendance/settings/${id}/`,
+    settingData
+  );
+  return data;
+};
+
+export const deleteAttendanceSetting = async (id) => {
+  const { data } = await api.delete(
+    `/attendance/settings/${id}/`
+  );
+  return data;
 };

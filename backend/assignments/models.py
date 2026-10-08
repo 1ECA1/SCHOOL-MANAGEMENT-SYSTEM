@@ -8,6 +8,13 @@ class Assignment(models.Model):
         PUBLISHED = "PUBLISHED", "Published"
         CLOSED = "CLOSED", "Closed"
 
+    class TargetType(models.TextChoices):
+        WHOLE_CLASS = "WHOLE_CLASS", "Whole Class"
+        SELECTED_STUDENTS = (
+            "SELECTED_STUDENTS",
+            "Selected Students",
+        )
+
     school = models.ForeignKey(
         "academics.School",
         on_delete=models.CASCADE,
@@ -38,13 +45,58 @@ class Assignment(models.Model):
         related_name="assignments",
     )
 
+    target_type = models.CharField(
+        max_length=30,
+        choices=TargetType.choices,
+        default=TargetType.WHOLE_CLASS,
+    )
+
+    target_students = models.ManyToManyField(
+        "students.Student",
+        related_name="targeted_assignments",
+        blank=True,
+    )
+
+    # --------------------------------------------------------
+    # TEACHER
+    # --------------------------------------------------------
+    #
+    # Teacher is required for teacher-created assignments.
+    #
+    # Principal-created assignments do not require a teacher,
+    # so teacher can be NULL.
+    #
     teacher = models.ForeignKey(
         "teachers.Teacher",
         on_delete=models.PROTECT,
         related_name="assignments",
+        null=True,
+        blank=True,
     )
 
-    title = models.CharField(max_length=255)
+    # --------------------------------------------------------
+    # ASSIGNMENT TARGET
+    # --------------------------------------------------------
+
+    target_type = models.CharField(
+        max_length=30,
+        choices=TargetType.choices,
+        default=TargetType.WHOLE_CLASS,
+    )
+
+    target_students = models.ManyToManyField(
+        "students.Student",
+        blank=True,
+        related_name="targeted_assignments",
+    )
+
+    # --------------------------------------------------------
+    # ASSIGNMENT CONTENT
+    # --------------------------------------------------------
+
+    title = models.CharField(
+        max_length=255,
+    )
 
     instructions = models.TextField()
 
@@ -64,7 +116,9 @@ class Assignment(models.Model):
         default=100,
     )
 
-    allow_late_submission = models.BooleanField(default=False)
+    allow_late_submission = models.BooleanField(
+        default=False,
+    )
 
     status = models.CharField(
         max_length=20,
@@ -72,12 +126,19 @@ class Assignment(models.Model):
         default=Status.DRAFT,
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
 
     class Meta:
-        ordering = ["-assigned_date", "-created_at"]
+        ordering = [
+            "-assigned_date",
+            "-created_at",
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.subject.name}"
@@ -109,9 +170,13 @@ class AssignmentSubmission(models.Model):
         null=True,
     )
 
-    answer_text = models.TextField(blank=True)
+    answer_text = models.TextField(
+        blank=True,
+    )
 
-    submitted_at = models.DateTimeField(auto_now_add=True)
+    submitted_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     score = models.DecimalField(
         max_digits=6,
@@ -120,7 +185,9 @@ class AssignmentSubmission(models.Model):
         blank=True,
     )
 
-    teacher_feedback = models.TextField(blank=True)
+    teacher_feedback = models.TextField(
+        blank=True,
+    )
 
     status = models.CharField(
         max_length=20,
@@ -138,8 +205,13 @@ class AssignmentSubmission(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=["assignment", "student"],
-                name="unique_assignment_student_submission",
+                fields=[
+                    "assignment",
+                    "student",
+                ],
+                name=(
+                    "unique_assignment_student_submission"
+                ),
             )
         ]
 

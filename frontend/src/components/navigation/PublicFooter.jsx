@@ -13,7 +13,9 @@ const PublicFooter = () => {
             <div>
               <h2 className="text-2xl font-bold">EduManageERP</h2>
 
-              <p className="text-sm text-gray-400">School Management System</p>
+              <p className="text-sm text-gray-400">
+                School Management System
+              </p>
             </div>
           </div>
 
@@ -37,21 +39,21 @@ const PublicFooter = () => {
             </a>
 
             <a
-              href="/academy"
+              href="/"
               className="block text-gray-400 transition hover:text-white"
             >
               Academy
             </a>
 
             <a
-              href="/admission"
+              href="/admissions/apply"
               className="block text-gray-400 transition hover:text-white"
             >
               Admission
             </a>
 
             <a
-              href="/news"
+              href="/"
               className="block text-gray-400 transition hover:text-white"
             >
               News
@@ -65,21 +67,21 @@ const PublicFooter = () => {
 
           <div className="mt-6 space-y-4">
             <a
-              href="/research"
+              href="/"
               className="block text-gray-400 transition hover:text-white"
             >
               Research
             </a>
 
             <a
-              href="/resources"
+              href="/"
               className="block text-gray-400 transition hover:text-white"
             >
               Learning Resources
             </a>
 
             <a
-              href="/admission"
+              href="/"
               className="block text-gray-400 transition hover:text-white"
             >
               Admission Guide
@@ -101,9 +103,9 @@ const PublicFooter = () => {
           <div className="mt-6 space-y-4 text-gray-400">
             <p>Abuja, Nigeria</p>
 
-            <p>+234 XXX XXX XXXX</p>
+            <p>+2348122314775</p>
 
-            <p>info@edumanageerp.com</p>
+            <p>edubridgesupportinfo@gmail.com</p>
 
             <p>
               Monday – Friday
@@ -120,11 +122,11 @@ const PublicFooter = () => {
           <p>© 2026 EduManageERP. All rights reserved.</p>
 
           <div className="flex gap-6">
-            <a href="#" className="transition hover:text-white">
+            <a href="/" className="transition hover:text-white">
               Privacy Policy
             </a>
 
-            <a href="#" className="transition hover:text-white">
+            <a href="/" className="transition hover:text-white">
               Terms of Service
             </a>
           </div>

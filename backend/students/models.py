@@ -1,7 +1,13 @@
 from django.conf import settings
 from django.db import models
 
-from academics.models import School, AcademicSession, Term, ClassLevel, Department
+from academics.models import (
+    School,
+    AcademicSession,
+    Term,
+    ClassLevel,
+    Department,
+)
 
 
 class ParentGuardian(models.Model):
@@ -20,23 +26,19 @@ class ParentGuardian(models.Model):
     )
 
     full_name = models.CharField(max_length=200)
-    relationship = models.CharField(
-        max_length=50,
-        help_text="Example: Father, Mother, Guardian",
-    )
-
+    relationship = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField(blank=True)
 
-    address = models.TextField(blank=True)
-
-    occupation = models.CharField(
-        max_length=150,
+    profile_image = models.ImageField(
+        upload_to="parents/profile_images/",
         blank=True,
+        null=True,
     )
 
+    address = models.TextField(blank=True)
+    occupation = models.CharField(max_length=150, blank=True)
     emergency_contact = models.BooleanField(default=False)
-
     is_active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -80,10 +82,7 @@ class Student(models.Model):
     )
 
     first_name = models.CharField(max_length=100)
-    middle_name = models.CharField(
-        max_length=100,
-        blank=True,
-    )
+    middle_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100)
 
     date_of_birth = models.DateField()
@@ -94,10 +93,7 @@ class Student(models.Model):
     )
 
     email = models.EmailField(blank=True)
-    phone_number = models.CharField(
-        max_length=20,
-        blank=True,
-    )
+    phone_number = models.CharField(max_length=20, blank=True)
 
     profile_image = models.ImageField(
         upload_to="students/profile_images/",
@@ -149,7 +145,22 @@ class Student(models.Model):
         blank=True,
     )
 
-    medical_notes = models.TextField(
+    medical_notes = models.TextField(blank=True)
+
+    # ---------------------------------------------------------
+    # GRADUATION INFORMATION
+    # ---------------------------------------------------------
+
+    graduation_session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="graduated_students",
+    )
+
+    graduation_year = models.PositiveIntegerField(
+        null=True,
         blank=True,
     )
 
@@ -172,10 +183,14 @@ class Student(models.Model):
         )
 
     def __str__(self):
-        return f"{self.full_name} ({self.admission_number})"
+        return (
+            f"{self.full_name} "
+            f"({self.admission_number})"
+        )
 
 
 class StudentEnrollment(models.Model):
+
     student = models.ForeignKey(
         Student,
         on_delete=models.CASCADE,
@@ -197,14 +212,6 @@ class StudentEnrollment(models.Model):
     class_level = models.ForeignKey(
         ClassLevel,
         on_delete=models.PROTECT,
-        related_name="student_enrollments",
-    )
-
-    academic_track = models.ForeignKey(
-        "AcademicTrack",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
         related_name="student_enrollments",
     )
 
@@ -230,7 +237,10 @@ class StudentEnrollment(models.Model):
     )
 
     class Meta:
-        ordering = ["class_level", "roll_number"]
+        ordering = [
+            "class_level",
+            "roll_number",
+        ]
 
     def __str__(self):
         return (
@@ -240,7 +250,190 @@ class StudentEnrollment(models.Model):
         )
 
 
+# ============================================================
+# PROMOTION HISTORY
+# ============================================================
+
+class PromotionRecord(models.Model):
+
+    class PromotionType(models.TextChoices):
+        PROMOTED = "PROMOTED", "Promoted"
+        GRADUATED = "GRADUATED", "Graduated"
+        REPEATED = "REPEATED", "Repeated"
+        WITHDRAWN = "WITHDRAWN", "Withdrawn"
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name="promotion_records",
+    )
+
+    # ---------------------------------------------------------
+    # PREVIOUS CLASS
+    # ---------------------------------------------------------
+
+    from_session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.PROTECT,
+        related_name="promotion_records_from",
+    )
+
+    from_term = models.ForeignKey(
+        Term,
+        on_delete=models.PROTECT,
+        related_name="promotion_records_from_term",
+    )
+
+    from_class = models.ForeignKey(
+        ClassLevel,
+        on_delete=models.PROTECT,
+        related_name="promotion_records_from_class",
+    )
+
+    # ---------------------------------------------------------
+    # NEW CLASS
+    # ---------------------------------------------------------
+
+    to_session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.PROTECT,
+        related_name="promotion_records_to",
+    )
+
+    to_term = models.ForeignKey(
+        Term,
+        on_delete=models.PROTECT,
+        related_name="promotion_records_to_term",
+    )
+
+    to_class = models.ForeignKey(
+        ClassLevel,
+        on_delete=models.PROTECT,
+        related_name="promotion_records_to_class",
+    )
+
+    promotion_type = models.CharField(
+        max_length=20,
+        choices=PromotionType.choices,
+        default=PromotionType.PROMOTED,
+    )
+
+    promotion_date = models.DateField(
+        auto_now_add=True,
+    )
+
+    graduation_year = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+    )
+
+    is_final = models.BooleanField(
+        default=False,
+    )
+
+    remarks = models.TextField(
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = [
+            "-promotion_date",
+            "-id",
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.student.full_name} - "
+            f"{self.from_class.name} → "
+            f"{self.to_class.name}"
+        )
+
+
+class OptionalSubjectSelectionSetting(models.Model):
+
+    school = models.ForeignKey(
+        School,
+        on_delete=models.CASCADE,
+        related_name="optional_subject_selection_settings",
+    )
+
+    academic_session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.CASCADE,
+        related_name="optional_subject_selection_settings",
+    )
+
+    term = models.ForeignKey(
+        Term,
+        on_delete=models.CASCADE,
+        related_name="optional_subject_selection_settings",
+    )
+
+    class_level = models.ForeignKey(
+        ClassLevel,
+        on_delete=models.CASCADE,
+        related_name="optional_subject_selection_settings",
+    )
+
+    is_enabled = models.BooleanField(
+        default=False,
+    )
+
+    max_optional_subjects = models.PositiveIntegerField(
+        default=1,
+    )
+
+    start_datetime = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    end_datetime = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = [
+            "-academic_session",
+            "term",
+            "class_level",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "school",
+                    "academic_session",
+                    "term",
+                    "class_level",
+                ],
+                name="unique_optional_subject_selection_setting",
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.school.name} - "
+            f"{self.class_level.name} - "
+            f"{self.term.name}"
+        )
+
+
 class StudentSubjectEnrollment(models.Model):
+
     student_enrollment = models.ForeignKey(
         StudentEnrollment,
         on_delete=models.CASCADE,
@@ -265,7 +458,9 @@ class StudentSubjectEnrollment(models.Model):
         related_name="student_subject_enrollments",
     )
 
-    is_core = models.BooleanField(default=False)
+    is_core = models.BooleanField(
+        default=False,
+    )
 
     enrolled_at = models.DateTimeField(
         auto_now_add=True,
@@ -277,6 +472,7 @@ class StudentSubjectEnrollment(models.Model):
 
     class Meta:
         ordering = ["subject__name"]
+
         constraints = [
             models.UniqueConstraint(
                 fields=[
@@ -295,36 +491,3 @@ class StudentSubjectEnrollment(models.Model):
             f"{self.subject.name} - "
             f"{self.term.get_name_display()}"
         )
-
-
-        
-class AcademicTrack(models.Model):
-    school = models.ForeignKey(
-        School,
-        on_delete=models.CASCADE,
-        related_name="academic_tracks",
-    )
-
-    name = models.CharField(max_length=100)
-
-    code = models.CharField(max_length=20)
-
-    description = models.TextField(blank=True)
-
-    is_active = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ["name"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["school", "code"],
-                name="unique_school_academic_track_code",
-            )
-        ]
-
-    def __str__(self):
-        return f"{self.name} ({self.code})"
-

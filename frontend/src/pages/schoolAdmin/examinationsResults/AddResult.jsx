@@ -1,0 +1,918 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  Loader2,
+  Save,
+} from "lucide-react";
+
+import {
+  createStudentResult,
+} from "../../../services/resultsService";
+
+import {
+  getExaminations,
+  getExaminationSubjects,
+} from "../../../services/examinationsService";
+
+import {
+  getSessions,
+  getTerms,
+  getClassLevels,
+} from "../../../services/academicsService";
+
+import api from "../../../services/api";
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+const getArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+};
+
+const formatScore = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+
+  return String(value);
+};
+
+// ============================================================
+// COMPONENT
+// ============================================================
+
+export default function AddResult() {
+  const navigate = useNavigate();
+
+  // ----------------------------------------------------------
+  // DATA
+  // ----------------------------------------------------------
+
+  const [students, setStudents] = useState([]);
+  const [examinations, setExaminations] = useState([]);
+  const [examinationSubjects, setExaminationSubjects] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [terms, setTerms] = useState([]);
+  const [classLevels, setClassLevels] = useState([]);
+
+  // ----------------------------------------------------------
+  // FORM
+  // ----------------------------------------------------------
+
+  const [form, setForm] = useState({
+    student: "",
+    examination_subject: "",
+    ca_score: "",
+    exam_score: "",
+  });
+
+  // ----------------------------------------------------------
+  // UI
+  // ----------------------------------------------------------
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // ----------------------------------------------------------
+  // FILTERS
+  // ----------------------------------------------------------
+
+  const [sessionFilter, setSessionFilter] = useState("");
+  const [termFilter, setTermFilter] = useState("");
+  const [classFilter, setClassFilter] = useState("");
+  const [examinationFilter, setExaminationFilter] = useState("");
+
+  // ==========================================================
+  // LOAD DATA
+  // ==========================================================
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadData = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const [
+          studentsResponse,
+          examinationsResponse,
+          subjectsResponse,
+          sessionsResponse,
+          termsResponse,
+          classesResponse,
+        ] = await Promise.all([
+          api.get("/students/"),
+          getExaminations(),
+          getExaminationSubjects(),
+          getSessions(),
+          getTerms(),
+          getClassLevels(),
+        ]);
+
+        if (!mounted) return;
+
+        setStudents(getArray(studentsResponse.data));
+        setExaminations(getArray(examinationsResponse));
+        setExaminationSubjects(getArray(subjectsResponse));
+        setSessions(getArray(sessionsResponse));
+        setTerms(getArray(termsResponse));
+        setClassLevels(getArray(classesResponse));
+      } catch (err) {
+        console.error("Failed to load Add Result data:", err);
+
+        if (!mounted) return;
+
+        setError(
+          err?.response?.data?.detail ||
+            "Failed to load the information required to enter a result."
+        );
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // ==========================================================
+  // NORMALIZED VALUES
+  // ==========================================================
+
+  const selectedExamination = useMemo(() => {
+    return examinations.find(
+      (exam) => String(exam.id) === String(examinationFilter)
+    );
+  }, [examinations, examinationFilter]);
+
+  const selectedSubject = useMemo(() => {
+    return examinationSubjects.find(
+      (item) => String(item.id) === String(form.examination_subject)
+    );
+  }, [examinationSubjects, form.examination_subject]);
+
+  // ==========================================================
+  // FILTER EXAMINATIONS
+  // ==========================================================
+
+  const filteredExaminations = useMemo(() => {
+    return examinations.filter((exam) => {
+      const sessionMatches =
+        !sessionFilter ||
+        String(exam.academic_session) === String(sessionFilter);
+
+      const termMatches =
+        !termFilter ||
+        String(exam.term) === String(termFilter);
+
+      const classMatches =
+        !classFilter ||
+        String(exam.class_level) === String(classFilter);
+
+      return sessionMatches && termMatches && classMatches;
+    });
+  }, [
+    examinations,
+    sessionFilter,
+    termFilter,
+    classFilter,
+  ]);
+
+  // ==========================================================
+  // FILTER SUBJECTS
+  // ==========================================================
+
+  const filteredSubjects = useMemo(() => {
+    if (!examinationFilter) {
+      return [];
+    }
+
+    return examinationSubjects.filter(
+      (item) =>
+        String(item.examination) === String(examinationFilter)
+    );
+  }, [examinationSubjects, examinationFilter]);
+
+  // ==========================================================
+  // FILTER STUDENTS
+  // ==========================================================
+
+  const filteredStudents = useMemo(() => {
+    let result = [...students];
+
+    // If an examination has been selected, restrict students
+    // to the examination class where the available student
+    // information contains class_level/class.
+    if (selectedExamination?.class_level) {
+      const classId = String(selectedExamination.class_level);
+
+      const studentsWithClass = result.filter((student) => {
+        const studentClass =
+          student.class_level ??
+          student.current_class_level ??
+          student.class ??
+          student.current_class;
+
+        return studentClass !== undefined && studentClass !== null;
+      });
+
+      if (studentsWithClass.length > 0) {
+        result = studentsWithClass.filter((student) => {
+          const studentClass =
+            student.class_level ??
+            student.current_class_level ??
+            student.class ??
+            student.current_class;
+
+          return String(studentClass) === classId;
+        });
+      }
+    }
+
+    return result;
+  }, [students, selectedExamination]);
+
+  // ==========================================================
+  // SCORE LIMIT
+  // ==========================================================
+
+  const maximumScore = useMemo(() => {
+    if (!selectedSubject) return null;
+
+    const value = Number(selectedSubject.maximum_score);
+
+    return Number.isFinite(value) ? value : null;
+  }, [selectedSubject]);
+
+  // ==========================================================
+  // HANDLE FORM
+  // ==========================================================
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
+    setError("");
+    setSuccess("");
+  };
+
+  // ==========================================================
+  // HANDLE SESSION FILTER
+  // ==========================================================
+
+  const handleSessionChange = (event) => {
+    const value = event.target.value;
+
+    setSessionFilter(value);
+
+    setExaminationFilter("");
+    setForm((previous) => ({
+      ...previous,
+      examination_subject: "",
+      student: "",
+    }));
+
+    setError("");
+  };
+
+  // ==========================================================
+  // HANDLE TERM FILTER
+  // ==========================================================
+
+  const handleTermChange = (event) => {
+    const value = event.target.value;
+
+    setTermFilter(value);
+
+    setExaminationFilter("");
+    setForm((previous) => ({
+      ...previous,
+      examination_subject: "",
+      student: "",
+    }));
+
+    setError("");
+  };
+
+  // ==========================================================
+  // HANDLE CLASS FILTER
+  // ==========================================================
+
+  const handleClassChange = (event) => {
+    const value = event.target.value;
+
+    setClassFilter(value);
+
+    setExaminationFilter("");
+    setForm((previous) => ({
+      ...previous,
+      examination_subject: "",
+      student: "",
+    }));
+
+    setError("");
+  };
+
+  // ==========================================================
+  // HANDLE EXAMINATION
+  // ==========================================================
+
+  const handleExaminationChange = (event) => {
+    const value = event.target.value;
+
+    setExaminationFilter(value);
+
+    setForm((previous) => ({
+      ...previous,
+      examination_subject: "",
+      student: "",
+    }));
+
+    setError("");
+  };
+
+  // ==========================================================
+  // VALIDATION
+  // ==========================================================
+
+  const validateForm = () => {
+    if (!form.student) {
+      return "Please select a student.";
+    }
+
+    if (!form.examination_subject) {
+      return "Please select an examination subject.";
+    }
+
+    const ca = Number(form.ca_score || 0);
+    const exam = Number(form.exam_score || 0);
+
+    if (!Number.isFinite(ca) || ca < 0) {
+      return "CA score must be a valid non-negative number.";
+    }
+
+    if (!Number.isFinite(exam) || exam < 0) {
+      return "Exam score must be a valid non-negative number.";
+    }
+
+    if (maximumScore !== null && ca + exam > maximumScore) {
+      return `The combined CA and examination score cannot exceed ${maximumScore}.`;
+    }
+
+    return "";
+  };
+
+  // ==========================================================
+  // SUBMIT
+  // ==========================================================
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    setError("");
+    setSuccess("");
+
+    const validationError = validateForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const payload = {
+        student: Number(form.student),
+        examination_subject: Number(form.examination_subject),
+        ca_score: Number(form.ca_score || 0),
+        exam_score: Number(form.exam_score || 0),
+      };
+
+      await createStudentResult(payload);
+
+      setSuccess("Student result was created successfully.");
+
+      setTimeout(() => {
+        navigate("/school-admin/examinations-results/results");
+      }, 700);
+    } catch (err) {
+      console.error("Failed to create student result:", err);
+
+      const responseData = err?.response?.data;
+
+      let message =
+        responseData?.detail ||
+        responseData?.error ||
+        "Failed to create the student result.";
+
+      if (typeof responseData === "object" && !responseData?.detail) {
+        const fieldErrors = Object.entries(responseData)
+          .map(([field, messages]) => {
+            const text = Array.isArray(messages)
+              ? messages.join(" ")
+              : String(messages);
+
+            return `${field}: ${text}`;
+          })
+          .join(" ");
+
+        if (fieldErrors) {
+          message = fieldErrors;
+        }
+      }
+
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ==========================================================
+  // LOADING
+  // ==========================================================
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-background text-text">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm opacity-70">
+            Loading result entry form...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
+  return (
+    <div className="min-h-screen bg-background text-text p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto space-y-6">
+
+        {/* ==================================================
+            HEADER
+        ================================================== */}
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(
+                  "/school-admin/examinations-results/results"
+                )
+              }
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline mb-3"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Results
+            </button>
+
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              Add Student Result
+            </h1>
+
+            <p className="text-sm opacity-70 mt-1">
+              Enter CA and examination scores for a student.
+            </p>
+          </div>
+        </div>
+
+        {/* ==================================================
+            ALERTS
+        ================================================== */}
+
+        {error && (
+          <div className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-4 text-red-700 dark:text-red-300">
+            <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+
+            <div>
+              <p className="font-semibold">
+                Unable to save result
+              </p>
+
+              <p className="text-sm mt-1">
+                {error}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {success && (
+          <div className="flex items-start gap-3 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/30 p-4 text-green-700 dark:text-green-300">
+            <CheckCircle className="w-5 h-5 mt-0.5 shrink-0" />
+
+            <p className="text-sm font-medium">
+              {success}
+            </p>
+          </div>
+        )}
+
+        {/* ==================================================
+            FORM
+        ================================================== */}
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-card rounded-2xl border border-black/5 dark:border-white/10 shadow-sm overflow-hidden"
+        >
+          {/* -----------------------------------------------
+              EXAMINATION CONTEXT
+          ------------------------------------------------ */}
+
+          <div className="p-5 sm:p-6 border-b border-black/5 dark:border-white/10">
+            <h2 className="text-lg font-semibold">
+              Examination
+            </h2>
+
+            <p className="text-sm opacity-60 mt-1">
+              Select the academic context and examination.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+
+              {/* SESSION */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Academic Session
+                </label>
+
+                <select
+                  value={sessionFilter}
+                  onChange={handleSessionChange}
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">
+                    All Sessions
+                  </option>
+
+                  {sessions.map((session) => (
+                    <option
+                      key={session.id}
+                      value={session.id}
+                    >
+                      {session.name ||
+                        session.session_name ||
+                        `Session ${session.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* TERM */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Term
+                </label>
+
+                <select
+                  value={termFilter}
+                  onChange={handleTermChange}
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">
+                    All Terms
+                  </option>
+
+                  {terms.map((term) => (
+                    <option
+                      key={term.id}
+                      value={term.id}
+                    >
+                      {term.name ||
+                        term.term_name ||
+                        term.term_display ||
+                        `Term ${term.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* CLASS */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Class
+                </label>
+
+                <select
+                  value={classFilter}
+                  onChange={handleClassChange}
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">
+                    All Classes
+                  </option>
+
+                  {classLevels.map((classLevel) => (
+                    <option
+                      key={classLevel.id}
+                      value={classLevel.id}
+                    >
+                      {classLevel.name ||
+                        classLevel.class_name ||
+                        classLevel.code ||
+                        `Class ${classLevel.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* EXAMINATION */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Examination
+                </label>
+
+                <select
+                  value={examinationFilter}
+                  onChange={handleExaminationChange}
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">
+                    Select Examination
+                  </option>
+
+                  {filteredExaminations.map((exam) => (
+                    <option
+                      key={exam.id}
+                      value={exam.id}
+                    >
+                      {exam.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* -----------------------------------------------
+              STUDENT & SUBJECT
+          ------------------------------------------------ */}
+
+          <div className="p-5 sm:p-6 border-b border-black/5 dark:border-white/10">
+            <h2 className="text-lg font-semibold">
+              Student & Subject
+            </h2>
+
+            <p className="text-sm opacity-60 mt-1">
+              Select the student and examination subject.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+
+              {/* STUDENT */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Student
+                </label>
+
+                <select
+                  name="student"
+                  value={form.student}
+                  onChange={handleChange}
+                  disabled={!examinationFilter}
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                >
+                  <option value="">
+                    {!examinationFilter
+                      ? "Select examination first"
+                      : "Select Student"}
+                  </option>
+
+                  {filteredStudents.map((student) => (
+                    <option
+                      key={student.id}
+                      value={student.id}
+                    >
+                      {student.full_name ||
+                        student.student_name ||
+                        student.name ||
+                        `${student.first_name || ""} ${
+                          student.last_name || ""
+                        }`.trim() ||
+                        student.admission_number ||
+                        `Student ${student.id}`}
+                      {student.admission_number
+                        ? ` — ${student.admission_number}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+
+                {examinationFilter &&
+                  filteredStudents.length === 0 && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                      No students were returned for this
+                      examination class.
+                    </p>
+                  )}
+              </div>
+
+              {/* SUBJECT */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Examination Subject
+                </label>
+
+                <select
+                  name="examination_subject"
+                  value={form.examination_subject}
+                  onChange={handleChange}
+                  disabled={!examinationFilter}
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                >
+                  <option value="">
+                    {!examinationFilter
+                      ? "Select examination first"
+                      : "Select Subject"}
+                  </option>
+
+                  {filteredSubjects.map((item) => (
+                    <option
+                      key={item.id}
+                      value={item.id}
+                    >
+                      {item.subject_name ||
+                        item.subject?.name ||
+                        item.subject ||
+                        `Subject ${item.id}`}
+                    </option>
+                  ))}
+                </select>
+
+                {examinationFilter &&
+                  filteredSubjects.length === 0 && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                      No subjects have been added to this
+                      examination.
+                    </p>
+                  )}
+              </div>
+            </div>
+          </div>
+
+          {/* -----------------------------------------------
+              SCORES
+          ------------------------------------------------ */}
+
+          <div className="p-5 sm:p-6">
+            <h2 className="text-lg font-semibold">
+              Scores
+            </h2>
+
+            <p className="text-sm opacity-60 mt-1">
+              Enter the CA and examination scores.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
+
+              {/* CA */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  CA Score
+                </label>
+
+                <input
+                  type="number"
+                  name="ca_score"
+                  min="0"
+                  step="0.01"
+                  value={formatScore(form.ca_score)}
+                  onChange={handleChange}
+                  placeholder="0"
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary"
+                />
+
+                <p className="text-xs opacity-50 mt-2">
+                  Enter 0 if there is no CA score.
+                </p>
+              </div>
+
+              {/* EXAM */}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Examination Score
+                </label>
+
+                <input
+                  type="number"
+                  name="exam_score"
+                  min="0"
+                  step="0.01"
+                  value={formatScore(form.exam_score)}
+                  onChange={handleChange}
+                  placeholder="0"
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-background px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary"
+                />
+
+                <p className="text-xs opacity-50 mt-2">
+                  Enter 0 if there is no examination score.
+                </p>
+              </div>
+            </div>
+
+            {/* SCORE PREVIEW */}
+
+            {selectedSubject && (
+              <div className="mt-5 rounded-xl bg-background border border-black/5 dark:border-white/10 p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium">
+                      Score Preview
+                    </p>
+
+                    <p className="text-xs opacity-60 mt-1">
+                      Maximum score:{" "}
+                      {maximumScore ?? "—"}
+                    </p>
+                  </div>
+
+                  <div className="text-left sm:text-right">
+                    <p className="text-2xl font-bold text-primary">
+                      {(
+                        Number(form.ca_score || 0) +
+                        Number(form.exam_score || 0)
+                      ).toFixed(2)}
+                    </p>
+
+                    <p className="text-xs opacity-60">
+                      Combined Score
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ---------------------------------------------
+                ACTIONS
+            ---------------------------------------------- */}
+
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    "/school-admin/examinations-results/results"
+                  )
+                }
+                disabled={saving}
+                className="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-background transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white hover:opacity-90 transition disabled:opacity-50"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Result
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

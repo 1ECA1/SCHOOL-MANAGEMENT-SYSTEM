@@ -26,6 +26,10 @@ const AddTerm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // ============================================================
+  // LOAD DATA
+  // ============================================================
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -50,6 +54,10 @@ const AddTerm = () => {
     loadData();
   }, []);
 
+  // ============================================================
+  // HANDLE INPUT CHANGES
+  // ============================================================
+
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
 
@@ -58,6 +66,10 @@ const AddTerm = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+
+  // ============================================================
+  // SUBMIT
+  // ============================================================
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -80,15 +92,12 @@ const AddTerm = () => {
     } catch (err) {
       console.error("Failed to create term:", err);
 
-      const backendError =
-        err.response?.data;
+      const backendError = err.response?.data;
 
       if (backendError) {
         setError(
           typeof backendError === "object"
-            ? Object.values(backendError)
-                .flat()
-                .join(" ")
+            ? Object.values(backendError).flat().join(" ")
             : String(backendError),
         );
       } else {
@@ -99,43 +108,73 @@ const AddTerm = () => {
     }
   };
 
+  // ============================================================
+  // LOADING STATE
+  // ============================================================
+
   if (loading) {
     return (
-      <div className="py-10 text-center text-slate-500">
-        Loading...
+      <div className="flex min-h-[300px] items-center justify-center bg-[var(--color-background)] text-[var(--color-text)]">
+        <p className="text-sm text-[var(--color-text)]/60">
+          Loading...
+        </p>
       </div>
     );
   }
 
+  // ============================================================
+  // UI
+  // ============================================================
+
   return (
-    <div>
-      {/* Header */}
+    <div className="min-h-full bg-[var(--color-background)] text-[var(--color-text)]">
+      {/* ======================================================
+          HEADER
+      ====================================================== */}
+
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">
+        <button
+          type="button"
+          onClick={() => navigate("/admin/terms")}
+          className="mb-3 text-sm font-medium text-[var(--color-primary)] transition hover:opacity-80"
+        >
+          ← Back to Terms
+        </button>
+
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">
           Add Term
         </h1>
 
-        <p className="text-sm text-slate-500">
+        <p className="mt-1 text-sm text-[var(--color-text)]/60">
           Create a new academic term.
         </p>
       </div>
 
-      {/* Error */}
+      {/* ======================================================
+          ERROR
+      ====================================================== */}
+
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+        <div className="mb-6 max-w-3xl rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400">
           {error}
         </div>
       )}
 
-      {/* Form */}
+      {/* ======================================================
+          FORM
+      ====================================================== */}
+
       <form
         onSubmit={handleSubmit}
-        className="max-w-3xl rounded-xl bg-white p-6 shadow"
+        className="max-w-3xl rounded-xl border border-[var(--color-text)]/10 bg-[var(--color-card)] p-6 shadow-sm"
       >
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {/* School */}
+          {/* ==================================================
+              SCHOOL
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               School
             </label>
 
@@ -144,26 +183,24 @@ const AddTerm = () => {
               value={formData.school}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-4 py-2.5 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             >
-              <option value="">
-                Select school
-              </option>
+              <option value="">Select school</option>
 
               {schools.map((school) => (
-                <option
-                  key={school.id}
-                  value={school.id}
-                >
+                <option key={school.id} value={school.id}>
                   {school.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Academic Session */}
+          {/* ==================================================
+              ACADEMIC SESSION
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               Academic Session
             </label>
 
@@ -172,26 +209,24 @@ const AddTerm = () => {
               value={formData.academic_session}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-4 py-2.5 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             >
-              <option value="">
-                Select academic session
-              </option>
+              <option value="">Select academic session</option>
 
               {sessions.map((session) => (
-                <option
-                  key={session.id}
-                  value={session.id}
-                >
+                <option key={session.id} value={session.id}>
                   {session.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Term Name */}
+          {/* ==================================================
+              TERM NAME
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               Term Name
             </label>
 
@@ -202,13 +237,16 @@ const AddTerm = () => {
               onChange={handleChange}
               placeholder="e.g. FIRST"
               required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-4 py-2.5 text-[var(--color-text)] placeholder:text-[var(--color-text)]/40 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
           </div>
 
-          {/* Start Date */}
+          {/* ==================================================
+              START DATE
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               Start Date
             </label>
 
@@ -218,13 +256,16 @@ const AddTerm = () => {
               value={formData.start_date}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-4 py-2.5 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
           </div>
 
-          {/* End Date */}
+          {/* ==================================================
+              END DATE
+          ================================================== */}
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               End Date
             </label>
 
@@ -234,12 +275,15 @@ const AddTerm = () => {
               value={formData.end_date}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-4 py-2.5 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
           </div>
         </div>
 
-        {/* Current Term */}
+        {/* ======================================================
+            CURRENT TERM
+        ====================================================== */}
+
         <div className="mt-6 flex items-center gap-3">
           <input
             type="checkbox"
@@ -247,18 +291,21 @@ const AddTerm = () => {
             name="is_current"
             checked={formData.is_current}
             onChange={handleChange}
-            className="h-4 w-4"
+            className="h-4 w-4 cursor-pointer accent-[var(--color-primary)]"
           />
 
           <label
             htmlFor="is_current"
-            className="text-sm font-medium text-slate-700"
+            className="cursor-pointer text-sm font-medium text-[var(--color-text)]"
           >
             Set as current term
           </label>
         </div>
 
-        {/* Active */}
+        {/* ======================================================
+            ACTIVE
+        ====================================================== */}
+
         <div className="mt-4 flex items-center gap-3">
           <input
             type="checkbox"
@@ -266,23 +313,26 @@ const AddTerm = () => {
             name="is_active"
             checked={formData.is_active}
             onChange={handleChange}
-            className="h-4 w-4"
+            className="h-4 w-4 cursor-pointer accent-[var(--color-primary)]"
           />
 
           <label
             htmlFor="is_active"
-            className="text-sm font-medium text-slate-700"
+            className="cursor-pointer text-sm font-medium text-[var(--color-text)]"
           >
             Active
           </label>
         </div>
 
-        {/* Buttons */}
-        <div className="mt-8 flex gap-3">
+        {/* ======================================================
+            BUTTONS
+        ====================================================== */}
+
+        <div className="mt-8 flex flex-col gap-3 border-t border-[var(--color-text)]/10 pt-5 sm:flex-row">
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white shadow hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "Saving..." : "Save Term"}
           </button>
@@ -290,7 +340,7 @@ const AddTerm = () => {
           <button
             type="button"
             onClick={() => navigate("/admin/terms")}
-            className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-5 py-2.5 text-sm font-medium text-[var(--color-text)] transition hover:bg-[var(--color-background)]"
           >
             Cancel
           </button>

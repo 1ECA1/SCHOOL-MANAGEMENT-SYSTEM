@@ -30,14 +30,18 @@
 
 // export default App;
 import { BrowserRouter } from "react-router-dom";
+
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ThemeProvider>
+          <AppRoutes />
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

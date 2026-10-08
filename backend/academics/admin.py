@@ -7,6 +7,7 @@ from .models import (
     AcademicSession,
     Term,
     Subject,
+     ClassSubject,
 )
 
 
@@ -125,4 +126,27 @@ class SubjectAdmin(admin.ModelAdmin):
     list_filter = (
         "school",
         "is_active",
+    )
+
+
+@admin.register(ClassSubject)
+class ClassSubjectAdmin(admin.ModelAdmin):
+    list_display = (
+        "class_level",
+        "subject",
+        "assignment_type",
+        "is_active",
+        "created_at",
+    )
+
+    list_filter = (
+        "assignment_type",
+        "is_active",
+        "class_level__education_level",
+    )
+
+    search_fields = (
+        "class_level__name",
+        "subject__name",
+        "subject__code",
     )

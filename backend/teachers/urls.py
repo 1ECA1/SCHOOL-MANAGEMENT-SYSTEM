@@ -7,6 +7,8 @@ from .views import (
     TeacherSubjectDetailView,
     ClassTeacherListCreateView,
     ClassTeacherDetailView,
+    MyTeacherSubjectListView,
+    MyClassTeacherListView,
 )
 
 
@@ -23,6 +25,22 @@ urlpatterns = [
         "<int:pk>/",
         TeacherDetailView.as_view(),
         name="teacher-detail",
+    ),
+
+     # =====================================================
+    # TEACHER PORTAL
+    # =====================================================
+
+    path(
+        "my-subjects/",
+        MyTeacherSubjectListView.as_view(),
+        name="my-teacher-subjects",
+    ),
+
+    path(
+        "my-classes/",
+        MyClassTeacherListView.as_view(),
+        name="my-class-teacher-assignments",
     ),
 
     # Teacher Subjects

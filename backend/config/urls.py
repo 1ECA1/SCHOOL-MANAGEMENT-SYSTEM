@@ -14,16 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+
 from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
     TokenRefreshView,
 )
-
 urlpatterns = [
     path("admin/", admin.site.urls),
+
+    path(
+        "api/school-super-admin/",
+        include("schoolsuperadmin.urls"),
+    ),
 
     # Accounts
     path(
@@ -51,6 +58,8 @@ urlpatterns = [
 
     # Report
     path("api/reports/", include("reports.urls")),
+
+    path("api/principals/", include("principal.urls")),
 
     # Noiffication
     path(
@@ -99,7 +108,11 @@ urlpatterns = [
 
 
     # Examination
-    path("api/examinations/", include("examinations.urls")),
+# Examination
+path(
+    "api/examinations/",
+    include("examinations.urls"),
+),
 
     # Timetable
     path("api/timetable/", include("timetable.urls")),
@@ -107,11 +120,29 @@ urlpatterns = [
     
 
     # JWT token refresh
-    path(
-        "api/token/refresh/",
-        TokenRefreshView.as_view(),
-        name="token_refresh",
-    ),
+    # path(
+    #     "api/token/refresh/",
+    #     TokenRefreshView.as_view(),
+    #     name="token_refresh",
+    # ),
+
+    # JWT token login
+path(
+    "api/token/",
+    TokenObtainPairView.as_view(),
+    name="token_obtain_pair",
+),
+
+# JWT token refresh
+path(
+    "api/token/refresh/",
+    TokenRefreshView.as_view(),
+    name="token_refresh",
+),
+
+path("api/admissions/", include("admissions.urls")),
+
+
 
 ]
 

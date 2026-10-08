@@ -3,6 +3,51 @@ from django.db import models
 from academics.models import School
 from students.models import Student
 from teachers.models import Teacher
+from accounts.models import User
+
+
+
+class LibrarianProfile(models.Model):
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="librarian_profile",
+    )
+
+    school = models.ForeignKey(
+        School,
+        on_delete=models.CASCADE,
+        related_name="librarians",
+    )
+
+    employee_number = models.CharField(
+        max_length=50,
+        unique=True,
+    )
+
+    employment_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    def __str__(self):
+        return (
+            f"{self.user.get_full_name() or self.user.username} "
+            f"- {self.employee_number}"
+        )
 
 
 class Author(models.Model):

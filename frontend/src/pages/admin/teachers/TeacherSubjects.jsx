@@ -472,7 +472,6 @@
 
 // export default TeacherSubjects;
 
-
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../../services/api";
@@ -529,38 +528,38 @@ const TeacherSubjects = () => {
       setSubjects(
         Array.isArray(subjectsResponse.data)
           ? subjectsResponse.data
-          : subjectsResponse.data.results || []
+          : subjectsResponse.data.results || [],
       );
 
       // Class levels
       setClassLevels(
         Array.isArray(classLevelsResponse.data)
           ? classLevelsResponse.data
-          : classLevelsResponse.data.results || []
+          : classLevelsResponse.data.results || [],
       );
 
       // Only assignments for this teacher
       const allAssignments = Array.isArray(
-        assignmentsResponse.data
+        assignmentsResponse.data,
       )
         ? assignmentsResponse.data
         : assignmentsResponse.data.results || [];
 
       const teacherAssignments = allAssignments.filter(
         (assignment) =>
-          Number(assignment.teacher) === Number(id)
+          Number(assignment.teacher) === Number(id),
       );
 
       setAssignments(teacherAssignments);
     } catch (error) {
       console.error(
         "Error loading teacher subjects:",
-        error
+        error,
       );
 
       setError(
         error.response?.data?.detail ||
-          "Failed to load teacher assignments."
+          "Failed to load teacher assignments.",
       );
     } finally {
       setLoading(false);
@@ -600,11 +599,11 @@ const TeacherSubjects = () => {
           subject: Number(formData.subject),
           class_level: Number(formData.class_level),
           is_primary: formData.is_primary,
-        }
+        },
       );
 
       setSuccess(
-        "Subject assigned successfully."
+        "Subject assigned successfully.",
       );
 
       // Reset form
@@ -620,7 +619,7 @@ const TeacherSubjects = () => {
     } catch (error) {
       console.error(
         "Error assigning subject:",
-        error
+        error,
       );
 
       const data = error.response?.data;
@@ -654,7 +653,7 @@ const TeacherSubjects = () => {
   // ==========================================
   const handleDelete = async (assignmentId) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to remove this subject assignment?"
+      "Are you sure you want to remove this subject assignment?",
     );
 
     if (!confirmDelete) {
@@ -666,29 +665,29 @@ const TeacherSubjects = () => {
       setSuccess("");
 
       await api.delete(
-        `/teachers/assign-subject/${assignmentId}/`
+        `/teachers/assign-subject/${assignmentId}/`,
       );
 
       setAssignments(
         (previousAssignments) =>
           previousAssignments.filter(
             (assignment) =>
-              assignment.id !== assignmentId
-          )
+              assignment.id !== assignmentId,
+          ),
       );
 
       setSuccess(
-        "Subject assignment removed successfully."
+        "Subject assignment removed successfully.",
       );
     } catch (error) {
       console.error(
         "Error deleting assignment:",
-        error
+        error,
       );
 
       setError(
         error.response?.data?.detail ||
-          "Failed to remove subject assignment."
+          "Failed to remove subject assignment.",
       );
     }
   };
@@ -699,7 +698,7 @@ const TeacherSubjects = () => {
   const getSubjectName = (subjectId) => {
     const subject = subjects.find(
       (item) =>
-        Number(item.id) === Number(subjectId)
+        Number(item.id) === Number(subjectId),
     );
 
     return subject
@@ -713,7 +712,7 @@ const TeacherSubjects = () => {
   const getClassName = (classId) => {
     const classLevel = classLevels.find(
       (item) =>
-        Number(item.id) === Number(classId)
+        Number(item.id) === Number(classId),
     );
 
     return classLevel
@@ -726,8 +725,8 @@ const TeacherSubjects = () => {
   // ==========================================
   if (loading) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-gray-500">
+      <div className="flex min-h-[300px] items-center justify-center bg-[var(--color-background)]">
+        <p className="text-slate-500 dark:text-slate-400">
           Loading teacher subjects...
         </p>
       </div>
@@ -738,45 +737,40 @@ const TeacherSubjects = () => {
   // PAGE
   // ==========================================
   return (
-    <div className="p-4 md:p-6">
-
+    <div className="min-h-screen bg-[var(--color-background)] p-4 text-[var(--color-text)] md:p-6">
       {/* ======================================
           HEADER
       ====================================== */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">
             Assign Subjects
           </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
-            {teacher?.full_name ||
-              "Teacher"}
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {teacher?.full_name || "Teacher"}
           </p>
 
           {teacher?.employee_id && (
-            <p className="text-xs text-gray-400">
-              Employee ID:{" "}
-              {teacher.employee_id}
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              Employee ID: {teacher.employee_id}
             </p>
           )}
         </div>
 
         <Link
           to="/admin/teachers"
-          className="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+          className="rounded-xl border border-slate-200 bg-[var(--color-card)] px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
         >
           ← Back to Teachers
         </Link>
-
       </div>
 
       {/* ======================================
           ERROR MESSAGE
       ====================================== */}
       {error && (
-        <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
           {error}
         </div>
       )}
@@ -785,7 +779,7 @@ const TeacherSubjects = () => {
           SUCCESS MESSAGE
       ====================================== */}
       {success && (
-        <div className="mb-5 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-600">
+        <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-600 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300">
           {success}
         </div>
       )}
@@ -793,9 +787,8 @@ const TeacherSubjects = () => {
       {/* ======================================
           ASSIGNMENT FORM
       ====================================== */}
-      <div className="mb-8 rounded-xl bg-white p-5 shadow md:p-6">
-
-        <h2 className="mb-5 text-lg font-semibold text-gray-800">
+      <div className="mb-8 rounded-2xl border border-slate-200 bg-[var(--color-card)] p-5 shadow-sm dark:border-slate-700 md:p-6">
+        <h2 className="mb-5 text-lg font-semibold text-[var(--color-text)]">
           Assign New Subject
         </h2>
 
@@ -803,10 +796,9 @@ const TeacherSubjects = () => {
           onSubmit={handleSubmit}
           className="grid grid-cols-1 gap-5 md:grid-cols-2"
         >
-
           {/* SUBJECT */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               Subject *
             </label>
 
@@ -815,7 +807,7 @@ const TeacherSubjects = () => {
               value={formData.subject}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-slate-200 bg-[var(--color-background)] px-4 py-3 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 dark:border-slate-700"
             >
               <option value="">
                 Select Subject
@@ -834,7 +826,7 @@ const TeacherSubjects = () => {
 
           {/* CLASS LEVEL */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
+            <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
               Class *
             </label>
 
@@ -843,7 +835,7 @@ const TeacherSubjects = () => {
               value={formData.class_level}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-slate-200 bg-[var(--color-background)] px-4 py-3 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 dark:border-slate-700"
             >
               <option value="">
                 Select Class
@@ -862,180 +854,147 @@ const TeacherSubjects = () => {
 
           {/* PRIMARY SUBJECT */}
           <div className="flex items-center gap-3">
-
             <input
               id="is_primary"
               type="checkbox"
               name="is_primary"
               checked={formData.is_primary}
               onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-4 w-4 rounded border-slate-300 accent-[var(--color-primary)] dark:border-slate-600"
             />
 
             <label
               htmlFor="is_primary"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-[var(--color-text)]"
             >
               Mark as primary subject
             </label>
-
           </div>
 
           {/* SUBMIT BUTTON */}
           <div className="flex items-end">
-
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-lg bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-[var(--color-primary)] px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting
                 ? "Assigning..."
                 : "Assign Subject"}
             </button>
-
           </div>
-
         </form>
-
       </div>
 
       {/* ======================================
           EXISTING ASSIGNMENTS
       ====================================== */}
-      <div className="overflow-hidden rounded-xl bg-white shadow">
-
-        <div className="border-b border-gray-200 p-5">
-
-          <div className="flex items-center justify-between">
-
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-700">
+        <div className="border-b border-slate-200 p-5 dark:border-slate-700">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800">
+              <h2 className="text-lg font-semibold text-[var(--color-text)]">
                 Assigned Subjects
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Subjects currently assigned to this teacher
               </p>
             </div>
 
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600">
+            <span className="rounded-full bg-[var(--color-primary)]/10 px-3 py-1 text-sm font-medium text-[var(--color-primary)]">
               {assignments.length}
             </span>
-
           </div>
-
         </div>
 
         {/* NO ASSIGNMENTS */}
         {assignments.length === 0 ? (
-          <div className="p-10 text-center text-gray-500">
+          <div className="p-10 text-center text-slate-500 dark:text-slate-400">
             <p className="text-sm">
               No subjects have been assigned to this teacher.
             </p>
           </div>
         ) : (
-
           /* ASSIGNMENT TABLE */
           <div className="overflow-x-auto">
-
             <table className="min-w-full">
-
-              <thead className="bg-gray-50">
-
+              <thead className="bg-[var(--color-background)]">
                 <tr>
-
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
                     Subject
                   </th>
 
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
                     Class
                   </th>
 
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-gray-600">
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
                     Primary
                   </th>
 
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-600">
+                  <th className="px-5 py-4 text-right text-sm font-semibold text-slate-600 dark:text-slate-300">
                     Action
                   </th>
-
                 </tr>
-
               </thead>
 
               <tbody>
+                {assignments.map((assignment) => (
+                  <tr
+                    key={assignment.id}
+                    className="border-t border-slate-100 transition hover:bg-[var(--color-background)] dark:border-slate-700"
+                  >
+                    {/* SUBJECT */}
+                    <td className="px-5 py-4 text-sm font-medium text-[var(--color-text)]">
+                      {getSubjectName(
+                        assignment.subject,
+                      )}
+                    </td>
 
-                {assignments.map(
-                  (assignment) => (
-                    <tr
-                      key={assignment.id}
-                      className="border-t border-gray-100"
-                    >
+                    {/* CLASS */}
+                    <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
+                      {getClassName(
+                        assignment.class_level,
+                      )}
+                    </td>
 
-                      {/* SUBJECT */}
-                      <td className="px-5 py-4 text-sm font-medium text-gray-800">
-                        {getSubjectName(
-                          assignment.subject
-                        )}
-                      </td>
+                    {/* PRIMARY */}
+                    <td className="px-5 py-4">
+                      {assignment.is_primary ? (
+                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                          Primary
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          Secondary
+                        </span>
+                      )}
+                    </td>
 
-                      {/* CLASS */}
-                      <td className="px-5 py-4 text-sm text-gray-600">
-                        {getClassName(
-                          assignment.class_level
-                        )}
-                      </td>
-
-                      {/* PRIMARY */}
-                      <td className="px-5 py-4">
-
-                        {assignment.is_primary ? (
-                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                            Primary
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-                            Secondary
-                          </span>
-                        )}
-
-                      </td>
-
-                      {/* DELETE */}
-                      <td className="px-5 py-4 text-right">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDelete(
-                              assignment.id
-                            )
-                          }
-                          className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
-                        >
-                          Remove
-                        </button>
-
-                      </td>
-
-                    </tr>
-                  )
-                )}
-
+                    {/* DELETE */}
+                    <td className="px-5 py-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDelete(
+                            assignment.id,
+                          )
+                        }
+                        className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
-
             </table>
-
           </div>
         )}
-
       </div>
-
     </div>
   );
 };
 
 export default TeacherSubjects;
-

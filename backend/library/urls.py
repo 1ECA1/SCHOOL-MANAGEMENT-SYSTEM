@@ -1,6 +1,8 @@
 from django.urls import path
 
 from .views import (
+    LibrarianListCreateView,
+    LibrarianDetailView,
     AuthorListCreateView,
     AuthorDetailView,
     CategoryListCreateView,
@@ -14,7 +16,26 @@ from .views import (
 
 urlpatterns = [
 
-    # Authors
+    # =====================================================
+    # LIBRARIANS
+    # =====================================================
+
+    path(
+        "librarians/",
+        LibrarianListCreateView.as_view(),
+        name="librarian-list-create",
+    ),
+
+    path(
+        "librarians/<int:pk>/",
+        LibrarianDetailView.as_view(),
+        name="librarian-detail",
+    ),
+
+    # =====================================================
+    # AUTHORS
+    # =====================================================
+
     path(
         "authors/",
         AuthorListCreateView.as_view(),
@@ -27,7 +48,10 @@ urlpatterns = [
         name="author-detail",
     ),
 
-    # Categories
+    # =====================================================
+    # CATEGORIES
+    # =====================================================
+
     path(
         "categories/",
         CategoryListCreateView.as_view(),
@@ -40,7 +64,10 @@ urlpatterns = [
         name="category-detail",
     ),
 
-    # Books
+    # =====================================================
+    # BOOKS
+    # =====================================================
+
     path(
         "books/",
         BookListCreateView.as_view(),
@@ -53,7 +80,10 @@ urlpatterns = [
         name="book-detail",
     ),
 
-    # Book Loans
+    # =====================================================
+    # BOOK LOANS
+    # =====================================================
+
     path(
         "loans/",
         BookLoanListCreateView.as_view(),

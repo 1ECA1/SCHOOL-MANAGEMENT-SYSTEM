@@ -10,12 +10,14 @@ import AllStudents from "../pages/admin/students/AllStudents";
 import StudentDetails from "../pages/admin/students/StudentDetails";
 import EditStudent from "../pages/admin/students/EditStudent";
 import EditEnrollment from "../pages/admin/students/EditEnrollment";
+import PromotionEnrollment from "../pages/admin/students/PromotionEnrollment";
 
 // =====================================================
 // TEACHERS
 // =====================================================
 import Teachers from "../pages/admin/teachers/Teachers";
 import AddTeacher from "../pages/admin/teachers/AddTeacher";
+import TeacherDetail from "../pages/admin/teachers/TeacherDetail";
 import EditTeacher from "../pages/admin/teachers/EditTeacher";
 import TeacherSubjects from "../pages/admin/teachers/TeacherSubjects";
 import ClassTeacher from "../pages/admin/teachers/ClassTeacher";
@@ -63,6 +65,52 @@ import AddAcademicSession from "../pages/admin/academics/AddAcademicSession";
 import AcademicSessionDetails from "../pages/admin/academics/AcademicSessionDetails";
 import EditAcademicSession from "../pages/admin/academics/EditAcademicSession";
 
+import AllBooks from "../pages/admin/library/AllBooks";
+import AddBook from "../pages/admin/library/AddBook";
+import BookDetails from "../pages/admin/library/BookDetails";
+import LibrarySetup from "../pages/admin/library/LibrarySetup";
+import EditBook from "../pages/admin/library/EditBook";
+
+import AllLoans from "../pages/admin/library/AllLoans";
+import IssueBook from "../pages/admin/library/IssueBook";
+
+import AllClassSubjects from "../pages/admin/academics/AllClassSubjects";
+import AddClassSubject from "../pages/admin/academics/AddClassSubject";
+import EditClassSubject from "../pages/admin/academics/EditClassSubject";
+
+import OptionalSubjectSettings from "../pages/admin/optionalSubjects/OptionalSubjectSettings";
+
+import AllExaminations from "../pages/admin/examinations/AllExaminations";
+import AddExamination from "../pages/admin/examinations/AddExamination";
+import ExaminationDetails from "../pages/admin/examinations/ExaminationDetails";
+import AddExaminationSubject from "../pages/admin/examinations/AddExaminationSubject";
+import EditExaminationSubject from "../pages/admin/examinations/EditExaminationSubject";
+import EditExamination from "../pages/admin/examinations/EditExamination";
+
+import AllResults from "../pages/admin/results/AllResults";
+import AddResult from "../pages/admin/results/AddResult";
+import EditResult from "../pages/admin/results/EditResult";
+import AllGradeScales from "../pages/admin/results/AllGradeScales";
+import AddGradeScale from "../pages/admin/results/AddGradeScale";
+import EditGradeScale from "../pages/admin/results/EditGradeScale";
+
+import AddReportCard from "../pages/admin/results/AddReportCard";
+import AllReportCards from "../pages/admin/results/AllReportCards";
+import ReportCardDetails from "../pages/admin/results/ReportCardDetails";
+import PrintResults from "../pages/admin/results/PrintResults";
+import EditReportCard from "../pages/admin/results/EditReportCard";
+
+import StudentPromotion from "../pages/admin/students/StudentPromotion";
+
+import AttendanceSettings from "../pages/admin/attendance/AttendanceSettings";
+
+import AllAssignments from "../pages/admin/assignments/AllAssignment";
+import AddAssignment from "../pages/admin/assignments/AddAssignment";
+import EditAssignment from "../pages/admin/assignments/EditAssignment";
+import AssignmentDetails from "../pages/admin/assignments/AssignmentDetails";
+import Submissions from "../pages/admin/assignments/Submissions";
+import SubmissionDetails from "../pages/admin/assignments/SubmissionDetails";
+
 // =====================================================
 // LAZY LOADED PAGES
 // =====================================================
@@ -70,14 +118,55 @@ const ParentDetails = lazy(
   () => import("../pages/admin/parents/ParentDetails"),
 );
 
-const MarkAttendance = lazy(
-  () => import("../pages/admin/attendance/MarkAttendance"),
+const TakeAttendance = lazy(
+  () => import("../pages/admin/attendance/TakeAttendance"),
 );
 
-const Dashboard = lazy(
-  () => import("../pages/admin/Dashboard"),
+const AttendanceRecords = lazy(
+  () => import("../pages/admin/attendance/AttendanceRecords"),
 );
 
+const StudentAttendance = lazy(
+  () => import("../pages/admin/attendance/StudentAttendance"),
+);
+
+const AttendanceReports = lazy(
+  () => import("../pages/admin/attendance/AttendanceReports"),
+);
+
+const AdminNotifications = lazy(
+  () => import("../pages/admin/notifications/AdminNotifications"),
+);
+
+const AdminNotificationDetails = lazy(
+  () => import("../pages/admin/notifications/AdminNotificationDetails"),
+);
+
+const ComposeAdminNotification = lazy(
+  () => import("../pages/admin/notifications/ComposeAdminNotification"),
+);
+
+const AdminSentNotificationDetails = lazy(
+  () => import("../pages/admin/notifications/AdminSentNotificationDetails"),
+);
+
+const Dashboard = lazy(() => import("../pages/admin/Dashboard"));
+
+import Payments from "../pages/admin/finance/Payments";
+import Fees from "../pages/admin/finance/Fees";
+import FinancialReports from "../pages/admin/finance/FinancialReports";
+
+import AuditLogs from "../pages/admin/settings/AuditLogs";
+import UserPermissions from "../pages/admin/settings/UserPermissions";
+import GradingSettings from "../pages/schoolAdmin/settings/GradingSettings";
+import AcademicSettings from "../pages/admin/settings/AcademicSettings";
+
+import SchoolAdmins from "../pages/admin/schoolAdmins/SchoolAdmins";
+import AddSchoolAdmin from "../pages/admin/schoolAdmins/AddSchoolAdmin";
+import SchoolAdminDetails from "../pages/admin/schoolAdmins/SchoolAdminDetails";
+import EditSchoolAdmin from "../pages/admin/schoolAdmins/EditSchoolAdmin";
+
+import PersonalSettings from "../pages/admin/settings/PersonalSettings";
 // =====================================================
 // ADMIN ROUTES
 // =====================================================
@@ -101,10 +190,6 @@ export const adminRoutes = [
     path: "academic",
     label: "Academic",
     icon: "🎓",
-
-    // NOTE:
-    // AppRoutes.jsx currently does not render children.
-    // These children are therefore navigation metadata.
     children: [
       {
         path: "classes",
@@ -123,6 +208,10 @@ export const adminRoutes = [
         label: "Subjects",
       },
       {
+        path: "class-subjects",
+        label: "Class Subjects",
+      },
+      {
         path: "terms",
         label: "Terms",
       },
@@ -134,14 +223,16 @@ export const adminRoutes = [
         path: "sessions",
         label: "Sessions",
       },
+      {
+        path: "academic/optional-subject-settings",
+        label: "Optional Subject Selection",
+      },
     ],
   },
 
   // ===================================================
   // ACADEMIC - CLASSES
   // ===================================================
-
-  // New URL
   {
     path: "academic/classes",
     element: <AllClasses />,
@@ -188,8 +279,6 @@ export const adminRoutes = [
   // ===================================================
   // ACADEMIC - DEPARTMENTS
   // ===================================================
-
-  // New URL
   {
     path: "academic/departments",
     element: <AllDepartments />,
@@ -236,8 +325,6 @@ export const adminRoutes = [
   // ===================================================
   // ACADEMIC - ACADEMIC SECTIONS
   // ===================================================
-
-  // New URL
   {
     path: "academic/academic-sections",
     element: <AllAcademicSections />,
@@ -284,8 +371,6 @@ export const adminRoutes = [
   // ===================================================
   // ACADEMIC - SUBJECTS
   // ===================================================
-
-  // New URL
   {
     path: "academic/subjects",
     element: <AllSubjects />,
@@ -330,10 +415,27 @@ export const adminRoutes = [
   },
 
   // ===================================================
+  // ACADEMIC - CLASS SUBJECTS
+  // ===================================================
+  {
+    path: "academic/class-subjects",
+    element: <AllClassSubjects />,
+    hideInNav: true,
+  },
+  {
+    path: "academic/class-subjects/add",
+    element: <AddClassSubject />,
+    hideInNav: true,
+  },
+  {
+    path: "academic/class-subjects/:id/edit",
+    element: <EditClassSubject />,
+    hideInNav: true,
+  },
+
+  // ===================================================
   // ACADEMIC - TERMS
   // ===================================================
-
-  // Old URL
   {
     path: "terms",
     element: <AllTerms />,
@@ -380,8 +482,6 @@ export const adminRoutes = [
   // ===================================================
   // ACADEMIC - SCHOOLS
   // ===================================================
-
-  // Old URL
   {
     path: "schools",
     element: <AllSchools />,
@@ -428,28 +528,26 @@ export const adminRoutes = [
   // ===================================================
   // ACADEMIC - SESSIONS
   // ===================================================
-
   {
     path: "academic/sessions",
     element: <AllAcademicSessions />,
     hideInNav: true,
   },
   {
-  path: "academic/sessions/add",
-  element: <AddAcademicSession />,
-  hideInNav: true,
-},
-{
-  path: "academic/sessions/:id",
-  element: <AcademicSessionDetails />,
-  hideInNav: true,
-},
-
-{
-  path: "academic/sessions/:id/edit",
-  element: <EditAcademicSession />,
-  hideInNav: true,
-},
+    path: "academic/sessions/add",
+    element: <AddAcademicSession />,
+    hideInNav: true,
+  },
+  {
+    path: "academic/sessions/:id",
+    element: <AcademicSessionDetails />,
+    hideInNav: true,
+  },
+  {
+    path: "academic/sessions/:id/edit",
+    element: <EditAcademicSession />,
+    hideInNav: true,
+  },
 
   // Old URL
   {
@@ -458,10 +556,14 @@ export const adminRoutes = [
     hideInNav: true,
   },
 
+  {
+    path: "academic/optional-subject-settings",
+    element: <OptionalSubjectSettings />,
+  },
+
   // ===================================================
   // STUDENTS
   // ===================================================
-
   {
     path: "students",
     label: "Students",
@@ -488,11 +590,25 @@ export const adminRoutes = [
     element: <StudentDetails />,
     hideInNav: true,
   },
+  {
+    path: "students/:studentId/promotion",
+    element: <StudentPromotion />,
+    hideInNav: true,
+  },
+
+  // ===================================================
+  // PROMOTION & ENROLLMENT
+  // ===================================================
+  {
+    path: "promotion-enrollment",
+    label: "Promotion & Enrollment",
+    icon: "🎓",
+    element: <PromotionEnrollment />,
+  },
 
   // ===================================================
   // TEACHERS
   // ===================================================
-
   {
     path: "teachers",
     label: "Teachers",
@@ -502,6 +618,11 @@ export const adminRoutes = [
   {
     path: "teachers/add",
     element: <AddTeacher />,
+    hideInNav: true,
+  },
+  {
+    path: "teachers/:id",
+    element: <TeacherDetail />,
     hideInNav: true,
   },
   {
@@ -523,7 +644,6 @@ export const adminRoutes = [
   // ===================================================
   // PARENTS
   // ===================================================
-
   {
     path: "parents",
     label: "Parents",
@@ -539,71 +659,457 @@ export const adminRoutes = [
   // ===================================================
   // ATTENDANCE
   // ===================================================
-
   {
     path: "attendance",
     label: "Attendance",
-    icon: "✓",
-    element: <MarkAttendance />,
+    icon: "📝",
+    children: [
+      {
+        path: "attendance/records",
+        label: "Attendance Records",
+        element: <AttendanceRecords />,
+      },
+      {
+        path: "attendance/take",
+        label: "Take Attendance",
+        element: <TakeAttendance />,
+      },
+      {
+        path: "attendance/student",
+        label: "Student Attendance",
+        element: <StudentAttendance />,
+      },
+      {
+        path: "attendance/reports",
+        label: "Attendance Reports",
+        element: <AttendanceReports />,
+      },
+      {
+        path: "attendance/settings",
+        label: "Attendance Settings",
+        icon: "⚙️",
+      },
+    ],
+  },
+
+  {
+    path: "attendance/take",
+    element: <TakeAttendance />,
+  },
+  {
+    path: "attendance/records",
+    element: <AttendanceRecords />,
+  },
+  {
+    path: "attendance/student",
+    element: <StudentAttendance />,
+  },
+  {
+    path: "attendance/reports",
+    element: <AttendanceReports />,
+  },
+  {
+    path: "attendance/settings",
+    element: <AttendanceSettings />,
   },
 
   // ===================================================
-  // COMING SOON
+  // ASSIGNMENTS
   // ===================================================
-
   {
     path: "assignments",
     label: "Assignments",
     icon: "📝",
-    element: <ComingSoon title="Assignments" />,
+    element: <AllAssignments />,
   },
+  {
+    path: "assignments/:id/submissions/:submissionId",
+    element: <SubmissionDetails />,
+    hideInNav: true,
+  },
+  {
+    path: "assignments/new",
+    element: <AddAssignment />,
+    hideInNav: true,
+  },
+  {
+    path: "assignments/:id/edit",
+    element: <EditAssignment />,
+    hideInNav: true,
+  },
+  {
+    path: "assignments/:id",
+    element: <AssignmentDetails />,
+    hideInNav: true,
+  },
+  {
+    path: "assignments/:id/submissions",
+    element: <Submissions />,
+    hideInNav: true,
+  },
+
+  // ===================================================
+  // EXAMINATIONS
+  // ===================================================
   {
     path: "examinations",
     label: "Examinations",
     icon: "📋",
-    element: <ComingSoon title="Examinations" />,
+    element: <AllExaminations />,
   },
+  {
+    path: "examinations/add",
+    element: <AddExamination />,
+  },
+  {
+    path: "examinations/:id",
+    element: <ExaminationDetails />,
+  },
+  {
+    path: "examinations/add",
+    element: <ExaminationDetails />,
+  },
+  {
+    path: "examinations/:id/subjects/add",
+    element: <AddExaminationSubject />,
+  },
+  {
+    path: "examinations/:id/subjects/:subjectId/edit",
+    element: <EditExaminationSubject />,
+  },
+  {
+    path: "examinations/:id/edit",
+    element: <EditExamination />,
+  },
+
+  // ===================================================
+  // RESULTS
+  // ===================================================
   {
     path: "results",
     label: "Results",
     icon: "📊",
-    element: <ComingSoon title="Results" />,
+    element: <AllResults />,
+    children: [
+      {
+        path: "results",
+        label: "Results",
+      },
+      {
+        path: "results/grade-scales",
+        label: "Grade Scales",
+      },
+      {
+        path: "results/report-cards",
+        label: "Report Cards",
+      },
+      {
+        path: "results/print-results",
+        label: "Print Results",
+      },
+    ],
   },
+  {
+    path: "results/add",
+    element: <AddResult />,
+    hideInNav: true,
+  },
+  {
+    path: "results/:id/edit",
+    element: <EditResult />,
+    hideInNav: true,
+  },
+  {
+    path: "results/grade-scales",
+    element: <AllGradeScales />,
+  },
+  {
+    path: "results/grade-scales/add",
+    element: <AddGradeScale />,
+    hideInNav: true,
+  },
+  {
+    path: "results/grade-scales/:id/edit",
+    element: <EditGradeScale />,
+    hideInNav: true,
+  },
+  {
+    path: "results/report-cards/add",
+    element: <AddReportCard />,
+    hideInNav: true,
+  },
+  {
+    path: "results/report-cards",
+    element: <AllReportCards />,
+    hideInNav: true,
+  },
+  {
+    path: "results/report-cards/:id",
+    element: <ReportCardDetails />,
+    hideInNav: true,
+  },
+  {
+    path: "results/print-results",
+    element: <PrintResults />,
+    hideInNav: true,
+  },
+  {
+    path: "results/report-cards/:id/edit",
+    element: <EditReportCard />,
+    hideInNav: true,
+  },
+
+  // ===================================================
+  // FINANCE
+  // ===================================================
   {
     path: "finance",
     label: "Finance",
     icon: "💰",
-    element: <ComingSoon title="Finance" />,
+    children: [
+      {
+        path: "finance/fees",
+        label: "Fees",
+      },
+      {
+        path: "finance/payments",
+        label: "Payments",
+      },
+      // {
+      //   path: "finance/outstanding-balances",
+      //   label: "Outstanding Balances",
+      // },
+      {
+        path: "finance/reports",
+        label: "Financial Reports",
+      },
+    ],
   },
+  {
+    path: "finance/fees",
+    element: <Fees />,
+  },
+  {
+    path: "finance/payments",
+    element: <Payments />,
+  },
+  {
+    path: "finance/reports",
+    element: <FinancialReports />,
+  },
+
+  // ===================================================
+  // LIBRARY
+  // ===================================================
   {
     path: "library",
     label: "Library",
     icon: "📚",
-    element: <ComingSoon title="Library" />,
+    children: [
+      {
+        path: "library/books",
+        label: "Books",
+      },
+      {
+        path: "library/books/add",
+        label: "Add Book",
+      },
+      {
+        path: "library/setup",
+        label: "Authors & Categories",
+      },
+      {
+        path: "library/loans",
+        label: "Loans",
+      },
+      {
+        path: "library/loans/add",
+        label: "Issue Book",
+      },
+    ],
+  },
+
+  // ===================================================
+  // LIBRARY PAGES
+  // ===================================================
+  {
+    path: "library/books",
+    element: <AllBooks />,
   },
   {
-    path: "communication",
-    label: "Communication",
-    icon: "💬",
-    element: <ComingSoon title="Communication" />,
+    path: "library/books/add",
+    element: <AddBook />,
+    hideInNav: true,
   },
+  {
+    path: "library/books/:id",
+    element: <BookDetails />,
+    hideInNav: true,
+  },
+  {
+    path: "library/setup",
+    element: <LibrarySetup />,
+    hideInNav: true,
+  },
+  {
+    path: "library/books/:id/edit",
+    element: <EditBook />,
+    hideInNav: true,
+  },
+
+  // ===================================================
+  // LIBRARY LOANS
+  // ===================================================
+  {
+    path: "library/loans",
+    element: <AllLoans />,
+    hideInNav: true,
+  },
+  {
+    path: "library/loans/add",
+    element: <IssueBook />,
+    hideInNav: true,
+  },
+
+  // ===================================================
+  // COMMUNICATION
+  // ===================================================
+  // {
+  //   path: "communication",
+  //   label: "Communication",
+  //   icon: "💬",
+  //   element: <ComingSoon title="Communication" />,
+  // },
+
+  // ===================================================
+  // NOTIFICATIONS
+  // ===================================================
   {
     path: "notifications",
     label: "Notifications",
     icon: "🔔",
-    element: <ComingSoon title="Notifications" />,
+    element: <AdminNotifications />,
   },
   {
-    path: "reports",
-    label: "Reports",
-    icon: "📈",
-    element: <ComingSoon title="Reports" />,
+    path: "notifications/sent/:id",
+    element: <AdminSentNotificationDetails />,
+    hideInNav: true,
   },
   {
-    path: "settings",
-    label: "Settings",
-    icon: "⚙",
-    element: <ComingSoon title="Settings" />,
-    bottom: true,
+    path: "notifications/:id",
+    element: <AdminNotificationDetails />,
+    hideInNav: true,
   },
+  {
+    path: "notifications/compose",
+    element: <ComposeAdminNotification />,
+    hideInNav: true,
+  },
+
+  // ===================================================
+  // REPORTS
+  // ===================================================
+
+  {
+    path: "school-admins",
+    label: "School Admins",
+    icon: "🛡️",
+    element: <SchoolAdmins />,
+  },
+  {
+    path: "school-admins/add",
+    element: <AddSchoolAdmin />,
+    hideInNav: true,
+  },
+  {
+    path: "school-admins/:id",
+    element: <SchoolAdminDetails />,
+    hideInNav: true,
+  },
+  {
+    path: "school-admins/:id/edit",
+    element: <EditSchoolAdmin />,
+    hideInNav: true,
+  },
+  // ===================================================
+  // SETTINGS
+  // ===================================================
+  // ===================================================
+// SETTINGS
+// ===================================================
+{
+  path: "settings",
+  label: "Settings",
+  icon: "⚙",
+  bottom: true,
+  children: [
+    {
+      path: "settings/academic-settings",
+      label: "Academic Settings",
+    },
+    {
+      path: "settings/grading-settings",
+      label: "Grading Settings",
+    },
+    {
+      path: "settings/user-permissions",
+      label: "User Permissions",
+    },
+    {
+      path: "settings/audit",
+      label: "Audit Logs",
+    },
+    {
+      path: "settings/personal-settings",
+      label: "Personal Settings",
+    },
+  ],
+},
+
+// ===================================================
+// SETTINGS - AUDIT LOGS
+// ===================================================
+{
+  path: "settings/audit",
+  element: <AuditLogs />,
+  hideInNav: true,
+},
+
+// ===================================================
+// SETTINGS - USER PERMISSIONS
+// ===================================================
+{
+  path: "settings/user-permissions",
+  element: <UserPermissions />,
+  hideInNav: true,
+},
+
+// ===================================================
+// SETTINGS - GRADING
+// ===================================================
+{
+  path: "settings/grading-settings",
+  element: <GradingSettings />,
+  hideInNav: true,
+},
+
+// ===================================================
+// SETTINGS - ACADEMIC
+// ===================================================
+{
+  path: "settings/academic-settings",
+  element: <AcademicSettings />,
+  hideInNav: true,
+},
+
+// ===================================================
+// SETTINGS - PERSONAL
+// ===================================================
+{
+  path: "settings/personal-settings",
+  element: <PersonalSettings />,
+  hideInNav: true,
+},
+
+  
 ];

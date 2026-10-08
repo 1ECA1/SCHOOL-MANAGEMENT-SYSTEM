@@ -1,9 +1,12 @@
 from django.urls import path
 
 from .views import (
+    SchoolAttendanceSettingListCreateView,
+    SchoolAttendanceSettingDetailView,
     AttendanceRecordListCreateView,
     AttendanceRecordDetailView,
     AttendanceSummaryView,
+    TeacherAttendanceStudentsView,
 )
 
 
@@ -25,4 +28,21 @@ urlpatterns = [
         AttendanceSummaryView.as_view(),
         name="attendance-summary",
     ),
+
+    path(
+    "settings/",
+    SchoolAttendanceSettingListCreateView.as_view(),
+    name="school-attendance-setting-list-create",
+),
+
+path(
+    "settings/<int:pk>/",
+    SchoolAttendanceSettingDetailView.as_view(),
+    name="school-attendance-setting-detail",
+),
+path(
+    "teacher-students/",
+    TeacherAttendanceStudentsView.as_view(),
+    name="teacher-attendance-students",
+),
 ]

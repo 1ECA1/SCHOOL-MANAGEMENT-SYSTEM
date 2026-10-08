@@ -1,14 +1,26 @@
 from django.urls import path
 
 from .views import (
+    ExamOfficerListCreateView,
+    ExamOfficerDetailView,
     ExaminationListCreateView,
     ExaminationDetailView,
     ExaminationSubjectListCreateView,
     ExaminationSubjectDetailView,
 )
 
-
 urlpatterns = [
+
+    path(
+    "officers/",
+    ExamOfficerListCreateView.as_view(),
+    name="exam-officer-list-create",
+),
+path(
+    "officers/<int:pk>/",
+    ExamOfficerDetailView.as_view(),
+    name="exam-officer-detail",
+),
 
     # Examinations
     path(

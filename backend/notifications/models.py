@@ -1,3 +1,6 @@
+import uuid
+
+from django.conf import settings
 from django.db import models
 
 
@@ -14,11 +17,48 @@ class Notification(models.Model):
         TRANSPORT = "TRANSPORT", "Transport"
         MESSAGE = "MESSAGE", "Message"
 
+    # ============================================================
+    # SEND BATCH
+    # ============================================================
+
+    batch_id = models.UUIDField(
+        default=uuid.uuid4,
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+
+    recipient_type = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True,
+    )
+
+    # ============================================================
+    # SENDER
+    # ============================================================
+
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sent_notifications",
+    )
+
+    # ============================================================
+    # RECIPIENT
+    # ============================================================
+
     recipient = models.ForeignKey(
-        "accounts.User",
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="notifications",
     )
+
+    # ============================================================
+    # NOTIFICATION
+    # ============================================================
 
     notification_type = models.CharField(
         max_length=20,
@@ -27,7 +67,7 @@ class Notification(models.Model):
     )
 
     title = models.CharField(
-        max_length=255,
+        max_length=255
     )
 
     message = models.TextField()
@@ -37,8 +77,12 @@ class Notification(models.Model):
         blank=True,
     )
 
+    # ============================================================
+    # READ STATUS
+    # ============================================================
+
     is_read = models.BooleanField(
-        default=False,
+        default=False
     )
 
     read_at = models.DateTimeField(
@@ -46,15 +90,16 @@ class Notification(models.Model):
         blank=True,
     )
 
+    # ============================================================
+    # DATE
+    # ============================================================
+
     created_at = models.DateTimeField(
-        auto_now_add=True,
+        auto_now_add=True
     )
 
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self):
-        return (
-            f"{self.recipient} - "
-            f"{self.title}"
-        )
+        return f"{self.recipient} - {self.title}"

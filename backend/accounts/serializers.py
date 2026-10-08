@@ -4,11 +4,28 @@ from rest_framework import serializers
 from .models import User
 
 
+# =========================================================
+# USER SERIALIZER
+# =========================================================
+
 class UserSerializer(serializers.ModelSerializer):
     role_display = serializers.CharField(
         source="get_role_display",
         read_only=True,
     )
+
+    # School information
+    school_id = serializers.IntegerField(
+        read_only=True,
+        allow_null=True,
+    )
+
+    school_name = serializers.SerializerMethodField()
+
+    student_id = serializers.SerializerMethodField()
+    teacher_id = serializers.SerializerMethodField()
+    parent_id = serializers.SerializerMethodField()
+    exam_officer_id = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -23,6 +40,17 @@ class UserSerializer(serializers.ModelSerializer):
             "role_display",
             "phone_number",
             "profile_image",
+
+            # School
+            "school_id",
+            "school_name",
+
+            # Role profile IDs
+            "student_id",
+            "teacher_id",
+            "parent_id",
+            "exam_officer_id",
+
             "is_active",
             "created_at",
             "updated_at",
@@ -31,10 +59,90 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "id",
             "role_display",
+
+            # School
+            "school_id",
+            "school_name",
+
+            # Role profile IDs
+            "student_id",
+            "teacher_id",
+            "parent_id",
+            "exam_officer_id",
+
             "created_at",
             "updated_at",
         )
 
+    # =====================================================
+    # SCHOOL NAME
+    # =====================================================
+
+    def get_school_name(self, obj):
+        if not obj.school_id:
+            return None
+
+        try:
+            return obj.school.name
+        except AttributeError:
+            return None
+
+    # =====================================================
+    # STUDENT PROFILE ID
+    # =====================================================
+
+    def get_student_id(self, obj):
+        if obj.role != User.Role.STUDENT:
+            return None
+
+        try:
+            return obj.student_profile.id
+        except AttributeError:
+            return None
+
+    # =====================================================
+    # TEACHER PROFILE ID
+    # =====================================================
+
+    def get_teacher_id(self, obj):
+        if obj.role != User.Role.TEACHER:
+            return None
+
+        try:
+            return obj.teacher_profile.id
+        except AttributeError:
+            return None
+
+    # =====================================================
+    # PARENT PROFILE ID
+    # =====================================================
+
+    def get_parent_id(self, obj):
+        if obj.role != User.Role.PARENT:
+            return None
+
+        try:
+            return obj.parent_profile.id
+        except AttributeError:
+            return None
+
+    # =====================================================
+    # EXAM OFFICER PROFILE ID
+    # =====================================================
+
+    def get_exam_officer_id(self, obj):
+        if obj.role != User.Role.EXAM_OFFICER:
+            return None
+
+        try:
+            return obj.exam_officer_profile.id
+        except AttributeError:
+            return None
+
+
+# =========================================================
+# LOGIN
+# =========================================================
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -66,6 +174,10 @@ class LoginSerializer(serializers.Serializer):
 
         return attrs
 
+
+# =========================================================
+# REGISTER
+# =========================================================
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(

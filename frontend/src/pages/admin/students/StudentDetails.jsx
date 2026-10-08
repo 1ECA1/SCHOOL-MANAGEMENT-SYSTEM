@@ -1,1048 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-
-// import { getStudent, getEnrollments } from "../../../services/studentsService";
-
-// function StudentDetails() {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-
-//   const [student, setStudent] = useState(null);
-//   const [enrollment, setEnrollment] = useState(null);
-
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     const loadStudent = async () => {
-//       try {
-//         setLoading(true);
-//         setError("");
-
-//         // Load student and enrollments together
-//         const [studentData, enrollmentsData] = await Promise.all([
-//           getStudent(id),
-//           getEnrollments(),
-//         ]);
-
-//         setStudent(studentData);
-
-//         const enrollmentList = Array.isArray(enrollmentsData)
-//           ? enrollmentsData
-//           : enrollmentsData?.results || [];
-
-//         // Find enrollment belonging to this student
-//         const studentEnrollment =
-//           enrollmentList.find(
-//             (item) =>
-//               String(item.student) === String(id) && item.is_current === true,
-//           ) ||
-//           enrollmentList.find((item) => String(item.student) === String(id));
-
-//         setEnrollment(studentEnrollment || null);
-//       } catch (err) {
-//         console.error("Failed to load student:", err);
-
-//         setError(
-//           err.response?.data?.detail || "Unable to load student details.",
-//         );
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     loadStudent();
-//   }, [id]);
-
-//   // =====================================================
-//   // LOADING
-//   // =====================================================
-
-//   if (loading) {
-//     return (
-//       <div className="w-full">
-//         <div className="rounded-xl border border-slate-200 bg-[var(--color-card)] p-8 text-center shadow-sm dark:border-slate-800">
-//           <p className="text-sm text-slate-500 dark:text-slate-400">
-//             Loading student...
-//           </p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   // =====================================================
-//   // ERROR
-//   // =====================================================
-
-//   if (error) {
-//     return (
-//       <div className="w-full">
-//         <button
-//           type="button"
-//           onClick={() => navigate("/admin/students")}
-//           className="mb-5 text-sm font-medium text-[var(--color-primary)] hover:underline"
-//         >
-//           ← Back to Students
-//         </button>
-
-//         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-//           {error}
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   // =====================================================
-//   // STUDENT NOT FOUND
-//   // =====================================================
-
-//   if (!student) {
-//     return (
-//       <div className="w-full">
-//         <div className="rounded-xl border border-slate-200 bg-[var(--color-card)] p-8 text-center shadow-sm dark:border-slate-800">
-//           <p className="text-sm text-slate-500 dark:text-slate-400">
-//             Student not found.
-//           </p>
-
-//           <button
-//             type="button"
-//             onClick={() => navigate("/admin/students")}
-//             className="mt-4 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white"
-//           >
-//             Back to Students
-//           </button>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   // =====================================================
-//   // FULL NAME
-//   // =====================================================
-
-//   const fullName =
-//     student.full_name ||
-//     [student.first_name, student.middle_name, student.last_name]
-//       .filter(Boolean)
-//       .join(" ");
-
-//   // =====================================================
-//   // RENDER
-//   // =====================================================
-
-//   return (
-//     <div className="w-full">
-//       {/* =================================================
-//           HEADER
-//       ================================================= */}
-
-//       <div className="mb-6 flex items-center justify-between">
-//         <div>
-//           <button
-//             type="button"
-//             onClick={() => navigate("/admin/students")}
-//             className="mb-2 text-sm font-medium text-[var(--color-primary)] hover:underline"
-//           >
-//             ← Back to Students
-//           </button>
-
-//           <h1 className="text-2xl font-bold text-[var(--color-text)]">
-//             Student Details
-//           </h1>
-
-//           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//             View complete information about this student.
-//           </p>
-//         </div>
-
-//         <button
-//           type="button"
-//           onClick={() => navigate(`/admin/students/${student.id}/edit`)}
-//           className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
-//         >
-//           Edit Student
-//         </button>
-//       </div>
-
-//       {/* =================================================
-//           STUDENT PROFILE
-//       ================================================= */}
-
-//       <div className="mb-6 rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
-//         {/* Profile Header */}
-
-//         <div className="border-b border-slate-200 p-6 dark:border-slate-800">
-//           <div className="flex items-center gap-4">
-//             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary)] text-xl font-bold text-white">
-//               {fullName?.charAt(0)?.toUpperCase() || "S"}
-//             </div>
-
-//             <div>
-//               <h2 className="text-xl font-bold text-[var(--color-text)]">
-//                 {fullName || "Unnamed Student"}
-//               </h2>
-
-//               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//                 Admission No: {student.admission_number || "N/A"}
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Student Information */}
-
-//         <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-//           <InfoItem label="First Name" value={student.first_name} />
-
-//           <InfoItem label="Middle Name" value={student.middle_name} />
-
-//           <InfoItem label="Last Name" value={student.last_name} />
-
-//           <InfoItem label="Admission Number" value={student.admission_number} />
-
-//           <InfoItem label="Gender" value={student.gender} />
-
-//           <InfoItem label="Date of Birth" value={student.date_of_birth} />
-
-//           <InfoItem label="Admission Date" value={student.admission_date} />
-
-//           <InfoItem label="Status" value={student.status || "ACTIVE"} />
-
-//           <InfoItem label="Email" value={student.email} />
-
-//           <InfoItem
-//             label="Phone"
-//             value={student.phone_number || student.phone}
-//           />
-
-//           <InfoItem label="Address" value={student.address} />
-
-//           <InfoItem label="Created At" value={student.created_at} />
-
-//           <InfoItem label="Updated At" value={student.updated_at} />
-//         </div>
-//       </div>
-
-//       {/* =================================================
-//           CURRENT ENROLLMENT
-//       ================================================= */}
-
-//       <div className="rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
-//         {/* Enrollment Header */}
-
-//         <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-slate-800">
-//           <div>
-//             <h2 className="text-lg font-bold text-[var(--color-text)]">
-//               Current Enrollment
-//             </h2>
-
-//             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//               Current academic enrollment for this student.
-//             </p>
-//           </div>
-
-//           {enrollment && (
-//             <button
-//               type="button"
-//               onClick={() =>
-//                 navigate(`/admin/students/enrollments/${enrollment.id}/edit`)
-//               }
-//               className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-//             >
-//               Edit Enrollment
-//             </button>
-//           )}
-//         </div>
-
-//         {/* Enrollment Content */}
-
-//         {enrollment ? (
-//           <div className="p-6">
-//             {/* Current Badge */}
-
-//             <div className="mb-6">
-//               <span
-//                 className={`rounded-full px-3 py-1 text-xs font-semibold ${
-//                   enrollment.is_current
-//                     ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-//                     : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-//                 }`}
-//               >
-//                 {enrollment.is_current ? "CURRENT ENROLLMENT" : "INACTIVE"}
-//               </span>
-//             </div>
-
-//             {/* Enrollment Information */}
-
-//             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-//               <InfoItem
-//                 label="Academic Session"
-//                 value={enrollment.session_name}
-//               />
-
-//               <InfoItem label="Term" value={enrollment.term_name} />
-
-//               <InfoItem label="Class" value={enrollment.class_name} />
-
-//               <InfoItem label="Roll Number" value={enrollment.roll_number} />
-
-//               <InfoItem
-//                 label="Enrollment Date"
-//                 value={enrollment.enrollment_date}
-//               />
-
-//               <InfoItem label="Enrollment ID" value={enrollment.id} />
-
-//               <InfoItem label="Remarks" value={enrollment.remarks} />
-
-//               <InfoItem label="Created At" value={enrollment.created_at} />
-//             </div>
-//           </div>
-//         ) : (
-//           /* No Enrollment */
-
-//           <div className="p-8 text-center">
-//             <p className="text-sm font-medium text-[var(--color-text)]">
-//               No enrollment found.
-//             </p>
-
-//             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//               This student does not currently have an enrollment record.
-//             </p>
-
-//             <button
-//               type="button"
-//               onClick={() => navigate(`/admin/students/${student.id}/enroll`)}
-//               className="mt-4 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white"
-//             >
-//               Enroll Student
-//             </button>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-// // =====================================================
-// // INFO ITEM
-// // =====================================================
-
-// function InfoItem({ label, value }) {
-//   return (
-//     <div>
-//       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-//         {label}
-//       </p>
-
-//       <p className="mt-1 break-words text-sm font-medium text-[var(--color-text)]">
-//         {value !== null && value !== undefined && value !== "" ? value : "—"}
-//       </p>
-//     </div>
-//   );
-// }
-
-// export default StudentDetails;
-
-// import { useEffect, useState } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-
-// import {
-//   getStudent,
-//   getStudentParents,
-//   addStudentParent,
-//   removeStudentParent,
-// } from "../../../services/studentsService";
-
-// function StudentDetails() {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-
-//   const [student, setStudent] = useState(null);
-//   const [parents, setParents] = useState([]);
-
-//   const [loading, setLoading] = useState(true);
-//   const [parentsLoading, setParentsLoading] = useState(true);
-
-//   const [error, setError] = useState("");
-//   const [parentsError, setParentsError] = useState("");
-
-//   const [showParentModal, setShowParentModal] = useState(false);
-//   const [savingParent, setSavingParent] = useState(false);
-//   const [removingParentId, setRemovingParentId] = useState(null);
-
-//   const [parentForm, setParentForm] = useState({
-//     full_name: "",
-//     relationship: "",
-//     phone_number: "",
-//     email: "",
-//     address: "",
-//     occupation: "",
-//     emergency_contact: false,
-//   });
-
-//   // =====================================================
-//   // LOAD STUDENT
-//   // =====================================================
-
-//   useEffect(() => {
-//     const loadStudent = async () => {
-//       try {
-//         setLoading(true);
-//         setError("");
-
-//         const data = await getStudent(id);
-
-//         setStudent(data);
-//       } catch (err) {
-//         console.error("Failed to load student:", err);
-
-//         setError(
-//           err.response?.data?.detail || "Unable to load student details.",
-//         );
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     loadStudent();
-//   }, [id]);
-
-//   // =====================================================
-//   // LOAD PARENTS
-//   // =====================================================
-
-//   const loadParents = async () => {
-//     try {
-//       setParentsLoading(true);
-//       setParentsError("");
-
-//       const data = await getStudentParents(id);
-
-//       setParents(Array.isArray(data) ? data : data?.results || []);
-//     } catch (err) {
-//       console.error("Failed to load student parents:", err);
-
-//       setParentsError(
-//         err.response?.data?.detail || "Unable to load parents/guardians.",
-//       );
-//     } finally {
-//       setParentsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (id) {
-//       loadParents();
-//     }
-//   }, [id]);
-
-//   // =====================================================
-//   // PARENT FORM
-//   // =====================================================
-
-//   const handleParentChange = (event) => {
-//     const { name, value, type, checked } = event.target;
-
-//     setParentForm((current) => ({
-//       ...current,
-//       [name]: type === "checkbox" ? checked : value,
-//     }));
-//   };
-
-//   const resetParentForm = () => {
-//     setParentForm({
-//       full_name: "",
-//       relationship: "",
-//       phone_number: "",
-//       email: "",
-//       address: "",
-//       occupation: "",
-//       emergency_contact: false,
-//     });
-//   };
-
-//   const openParentModal = () => {
-//     resetParentForm();
-//     setShowParentModal(true);
-//   };
-
-//   const closeParentModal = () => {
-//     if (savingParent) return;
-
-//     setShowParentModal(false);
-//     resetParentForm();
-//   };
-
-//   // =====================================================
-//   // ADD PARENT
-//   // =====================================================
-
-//   const handleAddParent = async (event) => {
-//     event.preventDefault();
-
-//     try {
-//       setSavingParent(true);
-//       setParentsError("");
-
-//       await addStudentParent(id, parentForm);
-
-//       await loadParents();
-
-//       closeParentModal();
-//     } catch (err) {
-//       console.error("Failed to add parent:", err);
-
-//       setParentsError(
-//         err.response?.data?.detail || "Unable to add parent/guardian.",
-//       );
-//     } finally {
-//       setSavingParent(false);
-//     }
-//   };
-
-//   // =====================================================
-//   // REMOVE PARENT
-//   // =====================================================
-
-//   const handleRemoveParent = async (parent) => {
-//     const confirmed = window.confirm(
-//       `Remove ${parent.full_name} from this student?`,
-//     );
-
-//     if (!confirmed) return;
-
-//     try {
-//       setRemovingParentId(parent.id);
-//       setParentsError("");
-
-//       await removeStudentParent(id, parent.id);
-
-//       setParents((currentParents) =>
-//         currentParents.filter((item) => item.id !== parent.id),
-//       );
-//     } catch (err) {
-//       console.error("Failed to remove parent:", err);
-
-//       setParentsError(
-//         err.response?.data?.detail || "Unable to remove parent/guardian.",
-//       );
-//     } finally {
-//       setRemovingParentId(null);
-//     }
-//   };
-
-//   // =====================================================
-//   // LOADING
-//   // =====================================================
-
-//   if (loading) {
-//     return (
-//       <div className="p-8 text-center text-sm text-slate-500">
-//         Loading student...
-//       </div>
-//     );
-//   }
-
-//   // =====================================================
-//   // ERROR
-//   // =====================================================
-
-//   if (error) {
-//     return (
-//       <div className="w-full">
-//         <button
-//           type="button"
-//           onClick={() => navigate("/admin/students")}
-//           className="mb-5 text-sm font-medium text-[var(--color-primary)] hover:underline"
-//         >
-//           ← Back to Students
-//         </button>
-
-//         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-//           {error}
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (!student) {
-//     return (
-//       <div className="p-8 text-center text-sm text-slate-500">
-//         Student not found.
-//       </div>
-//     );
-//   }
-
-//   // =====================================================
-//   // FULL NAME
-//   // =====================================================
-
-//   const fullName =
-//     student.full_name ||
-//     [student.first_name, student.middle_name, student.last_name]
-//       .filter(Boolean)
-//       .join(" ");
-
-//   return (
-//     <div className="w-full">
-//       {/* =================================================
-//           HEADER
-//       ================================================= */}
-
-//       <div className="mb-6 flex items-center justify-between">
-//         <div>
-//           <button
-//             type="button"
-//             onClick={() => navigate("/admin/students")}
-//             className="mb-2 text-sm font-medium text-[var(--color-primary)] hover:underline"
-//           >
-//             ← Back to Students
-//           </button>
-
-//           <h1 className="text-2xl font-bold text-[var(--color-text)]">
-//             Student Details
-//           </h1>
-
-//           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//             View complete information about this student.
-//           </p>
-//         </div>
-
-//         <button
-//           type="button"
-//           onClick={() => navigate(`/admin/students/${student.id}/edit`)}
-//           className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
-//         >
-//           Edit Student
-//         </button>
-//       </div>
-
-//       {/* =================================================
-//           STUDENT PROFILE
-//       ================================================= */}
-
-//       <div className="rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
-//         {/* Profile Header */}
-
-//         <div className="border-b border-slate-200 p-6 dark:border-slate-800">
-//           <div className="flex items-center gap-4">
-//             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary)] text-xl font-bold text-white">
-//               {fullName?.charAt(0)?.toUpperCase() || "S"}
-//             </div>
-
-//             <div>
-//               <h2 className="text-xl font-bold text-[var(--color-text)]">
-//                 {fullName || "Unnamed Student"}
-//               </h2>
-
-//               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//                 Admission No: {student.admission_number || "N/A"}
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Information */}
-
-//         <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-//           <InfoItem label="First Name" value={student.first_name} />
-
-//           <InfoItem label="Middle Name" value={student.middle_name} />
-
-//           <InfoItem label="Last Name" value={student.last_name} />
-
-//           <InfoItem label="Admission Number" value={student.admission_number} />
-
-//           <InfoItem label="Gender" value={student.gender} />
-
-//           <InfoItem label="Date of Birth" value={student.date_of_birth} />
-
-//           <InfoItem label="Status" value={student.status || "ACTIVE"} />
-
-//           <InfoItem label="Email" value={student.email} />
-
-//           <InfoItem label="Phone" value={student.phone_number} />
-
-//           <InfoItem label="Address" value={student.address} />
-
-//           <InfoItem label="Department" value={student.department} />
-
-//           <InfoItem label="Admission Date" value={student.admission_date} />
-
-//           <InfoItem label="Blood Group" value={student.blood_group} />
-
-//           <InfoItem label="Nationality" value={student.nationality} />
-
-//           <InfoItem label="State of Origin" value={student.state_of_origin} />
-
-//           <InfoItem label="Local Government" value={student.local_government} />
-
-//           <InfoItem label="Created At" value={student.created_at} />
-
-//           <InfoItem label="Updated At" value={student.updated_at} />
-//         </div>
-//       </div>
-
-//       {/* =================================================
-//           PARENTS / GUARDIANS
-//       ================================================= */}
-
-//       <div className="mt-6 rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
-//         {/* Section Header */}
-
-//         <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-slate-800">
-//           <div>
-//             <h2 className="text-lg font-bold text-[var(--color-text)]">
-//               Parents / Guardians
-//             </h2>
-
-//             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//               Manage the parents and guardians associated with this student.
-//             </p>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={openParentModal}
-//             className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
-//           >
-//             + Add Parent
-//           </button>
-//         </div>
-
-//         {/* Parent Error */}
-
-//         {parentsError && (
-//           <div className="m-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-//             {parentsError}
-//           </div>
-//         )}
-
-//         {/* Parents */}
-
-//         {parentsLoading ? (
-//           <div className="p-8 text-center text-sm text-slate-500">
-//             Loading parents/guardians...
-//           </div>
-//         ) : parents.length === 0 ? (
-//           <div className="p-8 text-center">
-//             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-2xl dark:bg-slate-800">
-//               👨‍👩‍👧
-//             </div>
-
-//             <p className="mt-4 text-sm font-semibold text-[var(--color-text)]">
-//               No parents or guardians added
-//             </p>
-
-//             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//               Add a parent or guardian for this student.
-//             </p>
-
-//             <button
-//               type="button"
-//               onClick={openParentModal}
-//               className="mt-4 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white"
-//             >
-//               Add Parent
-//             </button>
-//           </div>
-//         ) : (
-//           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-//             {parents.map((parent) => (
-//               <div key={parent.id} className="p-6">
-//                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-//                   <div className="flex gap-4">
-//                     {/* Avatar */}
-
-//                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-//                       {parent.full_name?.charAt(0)?.toUpperCase() || "P"}
-//                     </div>
-
-//                     {/* Parent Details */}
-
-//                     <div>
-//                       <h3 className="font-semibold text-[var(--color-text)]">
-//                         {parent.full_name}
-//                       </h3>
-
-//                       <p className="mt-1 text-sm font-medium text-[var(--color-primary)]">
-//                         {parent.relationship || "Guardian"}
-//                       </p>
-
-//                       <div className="mt-3 grid gap-x-8 gap-y-2 text-sm text-slate-600 dark:text-slate-400 md:grid-cols-2">
-//                         <p>
-//                           <span className="font-medium">Phone:</span>{" "}
-//                           {parent.phone_number || "—"}
-//                         </p>
-
-//                         <p>
-//                           <span className="font-medium">Email:</span>{" "}
-//                           {parent.email || "—"}
-//                         </p>
-
-//                         <p>
-//                           <span className="font-medium">Occupation:</span>{" "}
-//                           {parent.occupation || "—"}
-//                         </p>
-
-//                         <p>
-//                           <span className="font-medium">Emergency:</span>{" "}
-//                           {parent.emergency_contact ? "Yes" : "No"}
-//                         </p>
-
-//                         <p className="md:col-span-2">
-//                           <span className="font-medium">Address:</span>{" "}
-//                           {parent.address || "—"}
-//                         </p>
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   {/* Actions */}
-
-//                   <button
-//                     type="button"
-//                     disabled={removingParentId === parent.id}
-//                     onClick={() => handleRemoveParent(parent)}
-//                     className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/40 dark:hover:bg-red-950/30"
-//                   >
-//                     {removingParentId === parent.id ? "Removing..." : "Remove"}
-//                   </button>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         )}
-//       </div>
-
-//       {/* =================================================
-//           ADD PARENT MODAL
-//       ================================================= */}
-
-//       {showParentModal && (
-//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-//           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-[var(--color-card)] shadow-2xl">
-//             {/* Modal Header */}
-
-//             <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-slate-800">
-//               <div>
-//                 <h2 className="text-lg font-bold text-[var(--color-text)]">
-//                   Add Parent / Guardian
-//                 </h2>
-
-//                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-//                   Add a parent or guardian for {fullName}.
-//                 </p>
-//               </div>
-
-//               <button
-//                 type="button"
-//                 onClick={closeParentModal}
-//                 disabled={savingParent}
-//                 className="text-xl text-slate-400 hover:text-slate-600 disabled:opacity-50 dark:hover:text-slate-200"
-//               >
-//                 ×
-//               </button>
-//             </div>
-
-//             {/* Form */}
-
-//             <form onSubmit={handleAddParent} className="p-6">
-//               <div className="grid gap-5 md:grid-cols-2">
-//                 {/* Full Name */}
-
-//                 <FormField
-//                   label="Full Name"
-//                   name="full_name"
-//                   value={parentForm.full_name}
-//                   onChange={handleParentChange}
-//                   placeholder="Enter full name"
-//                   required
-//                 />
-
-//                 {/* Relationship */}
-
-//                 <div>
-//                   <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
-//                     Relationship
-//                   </label>
-
-//                   <select
-//                     name="relationship"
-//                     value={parentForm.relationship}
-//                     onChange={handleParentChange}
-//                     required
-//                     className="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] dark:border-slate-700"
-//                   >
-//                     <option value="">Select relationship</option>
-
-//                     <option value="Father">Father</option>
-
-//                     <option value="Mother">Mother</option>
-
-//                     <option value="Guardian">Guardian</option>
-
-//                     <option value="Uncle">Uncle</option>
-
-//                     <option value="Aunt">Aunt</option>
-
-//                     <option value="Grandfather">Grandfather</option>
-
-//                     <option value="Grandmother">Grandmother</option>
-
-//                     <option value="Other">Other</option>
-//                   </select>
-//                 </div>
-
-//                 {/* Phone */}
-
-//                 <FormField
-//                   label="Phone Number"
-//                   name="phone_number"
-//                   value={parentForm.phone_number}
-//                   onChange={handleParentChange}
-//                   placeholder="08012345678"
-//                   required
-//                 />
-
-//                 {/* Email */}
-
-//                 <FormField
-//                   label="Email"
-//                   name="email"
-//                   type="email"
-//                   value={parentForm.email}
-//                   onChange={handleParentChange}
-//                   placeholder="parent@example.com"
-//                 />
-
-//                 {/* Occupation */}
-
-//                 <FormField
-//                   label="Occupation"
-//                   name="occupation"
-//                   value={parentForm.occupation}
-//                   onChange={handleParentChange}
-//                   placeholder="e.g. Teacher, Engineer"
-//                 />
-
-//                 {/* Emergency */}
-
-//                 <div className="flex items-center">
-//                   <label className="flex cursor-pointer items-center gap-3">
-//                     <input
-//                       type="checkbox"
-//                       name="emergency_contact"
-//                       checked={parentForm.emergency_contact}
-//                       onChange={handleParentChange}
-//                       className="h-4 w-4 rounded border-slate-300"
-//                     />
-
-//                     <span className="text-sm font-medium text-[var(--color-text)]">
-//                       Emergency Contact
-//                     </span>
-//                   </label>
-//                 </div>
-
-//                 {/* Address */}
-
-//                 <div className="md:col-span-2">
-//                   <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
-//                     Address
-//                   </label>
-
-//                   <textarea
-//                     name="address"
-//                     value={parentForm.address}
-//                     onChange={handleParentChange}
-//                     rows={3}
-//                     placeholder="Enter home address"
-//                     className="w-full resize-none rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] dark:border-slate-700"
-//                   />
-//                 </div>
-//               </div>
-
-//               {/* Buttons */}
-
-//               <div className="mt-6 flex justify-end gap-3 border-t border-slate-200 pt-5 dark:border-slate-800">
-//                 <button
-//                   type="button"
-//                   onClick={closeParentModal}
-//                   disabled={savingParent}
-//                   className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-[var(--color-text)] transition hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
-//                 >
-//                   Cancel
-//                 </button>
-
-//                 <button
-//                   type="submit"
-//                   disabled={savingParent}
-//                   className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-//                 >
-//                   {savingParent ? "Saving..." : "Add Parent"}
-//                 </button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// // =====================================================
-// // INFO ITEM
-// // =====================================================
-
-// function InfoItem({ label, value }) {
-//   return (
-//     <div>
-//       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-//         {label}
-//       </p>
-
-//       <p className="mt-1 text-sm font-medium text-[var(--color-text)]">
-//         {value || "—"}
-//       </p>
-//     </div>
-//   );
-// }
-
-// // =====================================================
-// // FORM FIELD
-// // =====================================================
-
-// function FormField({
-//   label,
-//   name,
-//   value,
-//   onChange,
-//   placeholder,
-//   type = "text",
-//   required = false,
-// }) {
-//   return (
-//     <div>
-//       <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
-//         {label}
-//       </label>
-
-//       <input
-//         type={type}
-//         name={name}
-//         value={value}
-//         onChange={onChange}
-//         placeholder={placeholder}
-//         required={required}
-//         className="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] dark:border-slate-700"
-//       />
-//     </div>
-//   );
-// }
-
-// export default StudentDetails;
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -1052,25 +7,37 @@ import {
   addStudentParent,
   updateParentGuardian,
   removeStudentParent,
+  deleteStudent,
+  getStudentSubjects,
+  selectStudentOptionalSubject,
+  removeStudentOptionalSubject,
 } from "../../../services/studentsService";
+
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 function StudentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // ============================================================
+  // STUDENT
+  // ============================================================
+
   const [student, setStudent] = useState(null);
-  const [parents, setParents] = useState([]);
-
   const [loading, setLoading] = useState(true);
-  const [parentsLoading, setParentsLoading] = useState(true);
-
   const [error, setError] = useState("");
+
+  // ============================================================
+  // PARENTS
+  // ============================================================
+
+  const [parents, setParents] = useState([]);
+  const [parentsLoading, setParentsLoading] = useState(true);
   const [parentsError, setParentsError] = useState("");
 
   const [showParentModal, setShowParentModal] = useState(false);
   const [editingParent, setEditingParent] = useState(null);
-  const [savingParent, setSavingParent] = useState(false);
-  const [removingParentId, setRemovingParentId] = useState(null);
+  const [parentSaving, setParentSaving] = useState(false);
 
   const [parentForm, setParentForm] = useState({
     full_name: "",
@@ -1079,39 +46,91 @@ function StudentDetails() {
     email: "",
     address: "",
     occupation: "",
-    emergency_contact: false,
+    emergency_contact: "false",
+    profile_image: null,
   });
 
-  // =====================================================
+  // ============================================================
+  // DELETE STUDENT
+  // ============================================================
+
+  const [deletingStudent, setDeletingStudent] = useState(false);
+
+  // ============================================================
+  // SUBJECTS
+  // ============================================================
+
+  const [showSubjects, setShowSubjects] = useState(false);
+
+  const [subjects, setSubjects] = useState({
+    general_compulsory: [],
+    department_compulsory: [],
+    selected_optional: [],
+    available_optional: [],
+    optional_selection: {
+      status: "NOT_CONFIGURED",
+      is_enabled: false,
+      max_optional_subjects: 1,
+      selected_count: 0,
+      can_select: false,
+      can_change: false,
+      start_datetime: null,
+      end_datetime: null,
+    },
+  });
+
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [subjectsError, setSubjectsError] = useState("");
+
+  const [selectingSubjectId, setSelectingSubjectId] = useState(null);
+  const [removingSubjectId, setRemovingSubjectId] = useState(null);
+
+  // ============================================================
+  // IMAGE URL
+  // ============================================================
+
+  const getImageUrl = (image) => {
+    if (!image) {
+      return null;
+    }
+
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+      return image;
+    }
+
+    return `${API_BASE_URL}${image.startsWith("/") ? "" : "/"}${image}`;
+  };
+
+  // ============================================================
   // LOAD STUDENT
-  // =====================================================
+  // ============================================================
 
-  useEffect(() => {
-    const loadStudent = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  const loadStudent = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-        const data = await getStudent(id);
+      const data = await getStudent(id);
+      setStudent(data);
+    } catch (err) {
+      console.error("Failed to load student:", err);
 
-        setStudent(data);
-      } catch (err) {
-        console.error("Failed to load student:", err);
+      setError(
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to load student.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setError(
-          err.response?.data?.detail || "Unable to load student details.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStudent();
-  }, [id]);
-
-  // =====================================================
+  // ============================================================
   // LOAD PARENTS
-  // =====================================================
+  // ============================================================
 
   const loadParents = async () => {
     try {
@@ -1120,36 +139,181 @@ function StudentDetails() {
 
       const data = await getStudentParents(id);
 
-      setParents(Array.isArray(data) ? data : data?.results || []);
+      if (Array.isArray(data)) {
+        setParents(data);
+      } else if (Array.isArray(data?.results)) {
+        setParents(data.results);
+      } else {
+        setParents([]);
+      }
     } catch (err) {
-      console.error("Failed to load student parents:", err);
+      console.error("Failed to load parents:", err);
 
       setParentsError(
-        err.response?.data?.detail || "Unable to load parents/guardians.",
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to load parents/guardians.",
       );
     } finally {
       setParentsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      loadParents();
+  // ============================================================
+  // LOAD SUBJECTS
+  // ============================================================
+
+  const loadSubjects = async () => {
+    try {
+      setSubjectsLoading(true);
+      setSubjectsError("");
+
+      const data = await getStudentSubjects(id);
+
+      setSubjects({
+        general_compulsory: data?.general_compulsory || [],
+        department_compulsory: data?.department_compulsory || [],
+        selected_optional: data?.selected_optional || [],
+        available_optional: data?.available_optional || [],
+        optional_selection: data?.optional_selection || {
+          status: "NOT_CONFIGURED",
+          is_enabled: false,
+          max_optional_subjects: 1,
+          selected_count: 0,
+          can_select: false,
+          can_change: false,
+          start_datetime: null,
+          end_datetime: null,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to load student subjects:", err);
+
+      setSubjectsError(
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to load student subjects.",
+      );
+    } finally {
+      setSubjectsLoading(false);
     }
+  };
+
+  // ============================================================
+  // INITIAL LOAD
+  // ============================================================
+
+  useEffect(() => {
+    if (!id) return;
+
+    loadStudent();
+    loadParents();
+    loadSubjects();
   }, [id]);
 
-  // =====================================================
-  // PARENT FORM
-  // =====================================================
+  // ============================================================
+  // FULL NAME
+  // ============================================================
 
-  const handleParentChange = (event) => {
-    const { name, value, type, checked } = event.target;
+  const getFullName = () => {
+    if (!student) return "Student";
 
-    setParentForm((current) => ({
-      ...current,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    if (student.full_name) {
+      return student.full_name;
+    }
+
+    return [
+      student.first_name,
+      student.middle_name,
+      student.last_name,
+    ]
+      .filter(Boolean)
+      .join(" ");
   };
+
+  // ============================================================
+  // STATUS CLASS
+  // ============================================================
+
+  const getStatusClass = (status) => {
+    const normalizedStatus = String(status || "").toLowerCase();
+
+    if (
+      normalizedStatus === "active" ||
+      normalizedStatus === "enrolled"
+    ) {
+      return "bg-green-100 text-green-700";
+    }
+
+    if (
+      normalizedStatus === "inactive" ||
+      normalizedStatus === "suspended"
+    ) {
+      return "bg-red-100 text-red-700";
+    }
+
+    return "bg-gray-100 text-gray-700";
+  };
+
+  // ============================================================
+  // OPTIONAL SELECTION STATUS
+  // ============================================================
+
+  const getOptionalStatusClass = (status) => {
+    switch (status) {
+      case "OPEN":
+        return "bg-green-100 text-green-700";
+
+      case "NOT_STARTED":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "CLOSED":
+        return "bg-red-100 text-red-700";
+
+      case "DISABLED":
+        return "bg-gray-100 text-gray-700";
+
+      case "NOT_CONFIGURED":
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getOptionalStatusText = (status) => {
+    switch (status) {
+      case "OPEN":
+        return "Selection Open";
+
+      case "NOT_STARTED":
+        return "Selection Not Started";
+
+      case "CLOSED":
+        return "Selection Closed";
+
+      case "DISABLED":
+        return "Selection Disabled";
+
+      case "NOT_CONFIGURED":
+        return "Selection Not Configured";
+
+      default:
+        return status || "Unknown";
+    }
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return "—";
+
+    try {
+      return new Date(value).toLocaleString();
+    } catch {
+      return value;
+    }
+  };
+
+  // ============================================================
+  // PARENT FORM
+  // ============================================================
 
   const resetParentForm = () => {
     setParentForm({
@@ -1159,16 +323,18 @@ function StudentDetails() {
       email: "",
       address: "",
       occupation: "",
-      emergency_contact: false,
+      emergency_contact: "false",
+      profile_image: null,
     });
   };
-  const openParentModal = () => {
+
+  const openAddParentModal = () => {
     setEditingParent(null);
     resetParentForm();
     setShowParentModal(true);
   };
 
-  const openEditParent = (parent) => {
+  const openEditParentModal = (parent) => {
     setEditingParent(parent);
 
     setParentForm({
@@ -1178,34 +344,71 @@ function StudentDetails() {
       email: parent.email || "",
       address: parent.address || "",
       occupation: parent.occupation || "",
-      emergency_contact: parent.emergency_contact || false,
+      emergency_contact:
+        parent.emergency_contact === true
+          ? "true"
+          : "false",
+      profile_image: null,
     });
 
     setShowParentModal(true);
   };
+
   const closeParentModal = () => {
-    if (savingParent) return;
+    if (parentSaving) return;
 
     setShowParentModal(false);
     setEditingParent(null);
     resetParentForm();
   };
 
-  // =====================================================
-  // ADD PARENT
-  // =====================================================
+  const handleParentChange = (e) => {
+    const { name, value, files } = e.target;
 
-  const handleSaveParent = async (event) => {
-    event.preventDefault();
+    setParentForm((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
+
+  // ============================================================
+  // SAVE PARENT
+  // ============================================================
+
+  const handleSaveParent = async (e) => {
+    e.preventDefault();
 
     try {
-      setSavingParent(true);
-      setParentsError("");
+      setParentSaving(true);
+
+      const formData = new FormData();
+
+      formData.append("full_name", parentForm.full_name);
+      formData.append("relationship", parentForm.relationship);
+      formData.append("phone_number", parentForm.phone_number);
+      formData.append("email", parentForm.email);
+      formData.append("address", parentForm.address);
+      formData.append("occupation", parentForm.occupation);
+
+      formData.append(
+        "emergency_contact",
+        parentForm.emergency_contact === "true",
+      );
+
+      if (parentForm.profile_image) {
+        formData.append(
+          "profile_image",
+          parentForm.profile_image,
+        );
+      }
 
       if (editingParent) {
-        await updateParentGuardian(editingParent.id, parentForm);
+        await updateParentGuardian(
+          editingParent.id,
+          formData,
+        );
       } else {
-        await addStudentParent(id, parentForm);
+        await addStudentParent(id, formData);
       }
 
       await loadParents();
@@ -1214,406 +417,1043 @@ function StudentDetails() {
     } catch (err) {
       console.error("Failed to save parent:", err);
 
-      setParentsError(
-        err.response?.data?.detail || "Unable to save parent/guardian.",
+      alert(
+        JSON.stringify(
+          err?.response?.data ||
+            "Failed to save parent/guardian.",
+          null,
+          2,
+        ),
       );
     } finally {
-      setSavingParent(false);
+      setParentSaving(false);
     }
   };
 
-  // =====================================================
+  // ============================================================
   // REMOVE PARENT
-  // =====================================================
+  // ============================================================
 
   const handleRemoveParent = async (parent) => {
     const confirmed = window.confirm(
-      `Remove ${parent.full_name} from this student?`,
+      `Remove ${
+        parent.full_name || "this parent/guardian"
+      } from this student?`,
     );
 
     if (!confirmed) return;
 
     try {
-      setRemovingParentId(parent.id);
-      setParentsError("");
-
       await removeStudentParent(id, parent.id);
-
-      setParents((currentParents) =>
-        currentParents.filter((item) => item.id !== parent.id),
-      );
+      await loadParents();
     } catch (err) {
       console.error("Failed to remove parent:", err);
 
-      setParentsError(
-        err.response?.data?.detail || "Unable to remove parent/guardian.",
+      alert(
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to remove parent/guardian.",
       );
-    } finally {
-      setRemovingParentId(null);
     }
   };
 
-  // =====================================================
+  // ============================================================
+  // DELETE STUDENT
+  // ============================================================
+
+  const handleDeleteStudent = async () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${getFullName()}? This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingStudent(true);
+
+      await deleteStudent(id);
+
+      navigate("/admin/students");
+    } catch (err) {
+      console.error("Failed to delete student:", err);
+
+      alert(
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to delete student.",
+      );
+    } finally {
+      setDeletingStudent(false);
+    }
+  };
+
+  // ============================================================
+  // SELECT OPTIONAL SUBJECT
+  // ============================================================
+
+  const handleSelectOptionalSubject = async (subject) => {
+    const confirmed = window.confirm(
+      `Select ${subject.name} for ${getFullName()}?`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setSelectingSubjectId(subject.subject_id);
+
+      await selectStudentOptionalSubject(
+        id,
+        subject.subject_id,
+      );
+
+      await loadSubjects();
+    } catch (err) {
+      console.error(
+        "Failed to select optional subject:",
+        err,
+      );
+
+      alert(
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to select optional subject.",
+      );
+    } finally {
+      setSelectingSubjectId(null);
+    }
+  };
+
+  // ============================================================
+  // REMOVE OPTIONAL SUBJECT
+  // ============================================================
+
+  const handleRemoveOptionalSubject = async (subject) => {
+    const confirmed = window.confirm(
+      `Remove ${subject.name} from ${getFullName()}'s selected subjects?`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setRemovingSubjectId(subject.subject_id);
+
+      await removeStudentOptionalSubject(
+        id,
+        subject.subject_id,
+      );
+
+      await loadSubjects();
+    } catch (err) {
+      console.error(
+        "Failed to remove optional subject:",
+        err,
+      );
+
+      alert(
+        err?.response?.data?.detail ||
+          err?.response?.data?.message ||
+          "Failed to remove optional subject.",
+      );
+    } finally {
+      setRemovingSubjectId(null);
+    }
+  };
+
+  // ============================================================
   // LOADING
-  // =====================================================
+  // ============================================================
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-sm text-slate-500">
-        Loading student...
-      </div>
-    );
-  }
+      <div className="p-6">
+        <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto"></div>
 
-  // =====================================================
-  // ERROR
-  // =====================================================
-
-  if (error) {
-    return (
-      <div className="w-full">
-        <button
-          type="button"
-          onClick={() => navigate("/admin/students")}
-          className="mb-5 text-sm font-medium text-[var(--color-primary)] hover:underline"
-        >
-          ← Back to Students
-        </button>
-
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          {error}
+          <p className="mt-4 text-gray-600">
+            Loading student...
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!student) {
+  // ============================================================
+  // ERROR
+  // ============================================================
+
+  if (error || !student) {
     return (
-      <div className="p-8 text-center text-sm text-slate-500">
-        Student not found.
+      <div className="p-6">
+        <div className="bg-white rounded-xl shadow-sm border p-8">
+          <div className="text-center">
+            <div className="text-red-500 text-4xl mb-3">
+              ⚠
+            </div>
+
+            <h2 className="text-xl font-semibold text-gray-800">
+              Unable to load student
+            </h2>
+
+            <p className="text-gray-500 mt-2">
+              {error || "Student not found."}
+            </p>
+
+            <button
+              onClick={() =>
+                navigate("/admin/students")
+              }
+              className="mt-5 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Back to Students
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // =====================================================
-  // FULL NAME
-  // =====================================================
+  const studentImage = getImageUrl(
+    student.profile_image,
+  );
 
-  const fullName =
-    student.full_name ||
-    [student.first_name, student.middle_name, student.last_name]
-      .filter(Boolean)
-      .join(" ");
+  const optionalSelection =
+    subjects.optional_selection || {};
+
+  const maxOptionalSubjects =
+    Number(
+      optionalSelection.max_optional_subjects || 1,
+    );
+
+  const selectedOptionalCount =
+    Number(
+      optionalSelection.selected_count ??
+        subjects.selected_optional.length,
+    );
+
+  const selectionOpen =
+    optionalSelection.can_select === true;
+
+  // ============================================================
+  // RENDER
+  // ============================================================
 
   return (
-    <div className="w-full">
-      {/* =================================================
+    <div className="p-4 md:p-6 space-y-6">
+      {/* ======================================================
           HEADER
-      ================================================= */}
+      ====================================================== */}
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <button
-            type="button"
-            onClick={() => navigate("/admin/students")}
-            className="mb-2 text-sm font-medium text-[var(--color-primary)] hover:underline"
+            onClick={() =>
+              navigate("/admin/students")
+            }
+            className="text-sm text-blue-600 hover:text-blue-800 mb-2"
           >
             ← Back to Students
           </button>
 
-          <h1 className="text-2xl font-bold text-[var(--color-text)]">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
             Student Details
           </h1>
 
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            View complete information about this student.
+          <p className="text-gray-500 mt-1">
+            View student information, parents and
+            subjects.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => navigate(`/admin/students/${student.id}/edit`)}
-          className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
-        >
-          Edit Student
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() =>
+              navigate(`/admin/students/${id}/edit`)
+            }
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Edit Student
+          </button>
+
+          <button
+            onClick={handleDeleteStudent}
+            disabled={deletingStudent}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {deletingStudent
+              ? "Deleting..."
+              : "Delete Student"}
+          </button>
+        </div>
       </div>
 
-      {/* =================================================
+      {/* ======================================================
           STUDENT PROFILE
-      ================================================= */}
+      ====================================================== */}
 
-      <div className="rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
-        {/* Profile Header */}
-
-        <div className="border-b border-slate-200 p-6 dark:border-slate-800">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary)] text-xl font-bold text-white">
-              {fullName?.charAt(0)?.toUpperCase() || "S"}
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="p-6 border-b bg-gray-50">
+          <div className="flex flex-col md:flex-row md:items-center gap-5">
+            <div className="shrink-0">
+              {studentImage ? (
+                <img
+                  src={studentImage}
+                  alt={getFullName()}
+                  className="w-28 h-28 rounded-full object-cover border-4 border-white shadow"
+                />
+              ) : (
+                <div className="w-28 h-28 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-3xl font-bold border-4 border-white shadow">
+                  {getFullName()
+                    .charAt(0)
+                    .toUpperCase()}
+                </div>
+              )}
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-[var(--color-text)]">
-                {fullName || "Unnamed Student"}
+              <h2 className="text-2xl font-bold text-gray-800">
+                {getFullName()}
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Admission No: {student.admission_number || "N/A"}
+              <p className="text-gray-500 mt-1">
+                Admission No:{" "}
+                <span className="font-medium text-gray-700">
+                  {student.admission_number || "—"}
+                </span>
               </p>
+
+              <div className="mt-3">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(
+                    student.status,
+                  )}`}
+                >
+                  {student.status || "Unknown"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Information */}
+        {/* STUDENT INFORMATION */}
 
-        <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-          <InfoItem label="First Name" value={student.first_name} />
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-5">
+            Student Information
+          </h3>
 
-          <InfoItem label="Middle Name" value={student.middle_name} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <InfoItem
+              label="First Name"
+              value={student.first_name}
+            />
 
-          <InfoItem label="Last Name" value={student.last_name} />
+            <InfoItem
+              label="Middle Name"
+              value={student.middle_name}
+            />
 
-          <InfoItem label="Admission Number" value={student.admission_number} />
+            <InfoItem
+              label="Last Name"
+              value={student.last_name}
+            />
 
-          <InfoItem label="Department" value={student.department} />
+            <InfoItem
+              label="Admission Number"
+              value={student.admission_number}
+            />
 
-          <InfoItem label="Gender" value={student.gender} />
+            <InfoItem
+              label="Department"
+              value={
+                student.department_name ||
+                student.department?.name ||
+                student.department ||
+                "—"
+              }
+            />
 
-          <InfoItem label="Date of Birth" value={student.date_of_birth} />
+            <InfoItem
+              label="Gender"
+              value={student.gender}
+            />
 
-          <InfoItem label="Status" value={student.status || "ACTIVE"} />
+            <InfoItem
+              label="Date of Birth"
+              value={student.date_of_birth}
+            />
 
-          <InfoItem label="Email" value={student.email} />
+            <InfoItem
+              label="Status"
+              value={student.status}
+            />
 
-          <InfoItem label="Phone" value={student.phone_number} />
+            <InfoItem
+              label="Email"
+              value={student.email}
+            />
 
-          <InfoItem label="Address" value={student.address} />
+            <InfoItem
+              label="Phone"
+              value={student.phone_number}
+            />
 
-          <InfoItem label="Admission Date" value={student.admission_date} />
+            <InfoItem
+              label="Address"
+              value={student.address}
+            />
 
-          <InfoItem label="Blood Group" value={student.blood_group} />
+            <InfoItem
+              label="Admission Date"
+              value={student.admission_date}
+            />
 
-          <InfoItem label="Nationality" value={student.nationality} />
+            <InfoItem
+              label="Blood Group"
+              value={student.blood_group}
+            />
 
-          <InfoItem label="State of Origin" value={student.state_of_origin} />
+            <InfoItem
+              label="Nationality"
+              value={student.nationality}
+            />
 
-          <InfoItem label="Local Government" value={student.local_government} />
+            <InfoItem
+              label="State of Origin"
+              value={student.state_of_origin}
+            />
 
-          <InfoItem label="Created At" value={student.created_at} />
+            <InfoItem
+              label="Local Government"
+              value={student.local_government}
+            />
 
-          <InfoItem label="Updated At" value={student.updated_at} />
+            <InfoItem
+              label="Created At"
+              value={
+                student.created_at
+                  ? new Date(
+                      student.created_at,
+                    ).toLocaleString()
+                  : "—"
+              }
+            />
+
+            <InfoItem
+              label="Updated At"
+              value={
+                student.updated_at
+                  ? new Date(
+                      student.updated_at,
+                    ).toLocaleString()
+                  : "—"
+              }
+            />
+          </div>
         </div>
       </div>
 
-      {/* =================================================
+      {/* ======================================================
           PARENTS / GUARDIANS
-      ================================================= */}
+      ====================================================== */}
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
-        {/* Section Header */}
-
-        <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-slate-800">
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="p-5 border-b flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-[var(--color-text)]">
+            <h2 className="text-xl font-semibold text-gray-800">
               Parents / Guardians
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Manage the parents and guardians associated with this student.
+            <p className="text-sm text-gray-500 mt-1">
+              Manage the parents or guardians assigned
+              to this student.
             </p>
           </div>
 
           <button
-            type="button"
-            onClick={openParentModal}
-            className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
+            onClick={openAddParentModal}
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
           >
-            + Add Parent
+            + Add Parent / Guardian
           </button>
         </div>
 
-        {/* Parent Error */}
-
-        {parentsError && (
-          <div className="m-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-            {parentsError}
-          </div>
-        )}
-
-        {/* Parents */}
-
-        {parentsLoading ? (
-          <div className="p-8 text-center text-sm text-slate-500">
-            Loading parents/guardians...
-          </div>
-        ) : parents.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-2xl dark:bg-slate-800">
-              👨‍👩‍👧
+        <div className="p-5">
+          {parentsLoading ? (
+            <div className="text-center py-8 text-gray-500">
+              Loading parents/guardians...
             </div>
+          ) : parentsError ? (
+            <div className="bg-red-50 text-red-700 rounded-lg p-4">
+              {parentsError}
+            </div>
+          ) : parents.length === 0 ? (
+            <div className="text-center py-10 border-2 border-dashed rounded-lg">
+              <p className="text-gray-500">
+                No parent or guardian has been assigned
+                to this student.
+              </p>
 
-            <p className="mt-4 text-sm font-semibold text-[var(--color-text)]">
-              No parents or guardians added
-            </p>
+              <button
+                onClick={openAddParentModal}
+                className="mt-3 text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Add Parent / Guardian
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {parents.map((parent) => {
+                const parentImage = getImageUrl(
+                  parent.profile_image,
+                );
 
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Add a parent or guardian for this student.
-            </p>
+                return (
+                  <div
+                    key={parent.id}
+                    className="border rounded-xl p-5 hover:shadow-sm transition"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        {parentImage ? (
+                          <img
+                            src={parentImage}
+                            alt={
+                              parent.full_name ||
+                              "Parent"
+                            }
+                            className="w-16 h-16 rounded-full object-cover border"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-xl font-bold">
+                            {(
+                              parent.full_name || "P"
+                            )
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
+                        )}
 
-            <button
-              type="button"
-              onClick={openParentModal}
-              className="mt-4 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white"
-            >
-              Add Parent
-            </button>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {parents.map((parent) => (
-              <div key={parent.id} className="p-6">
-                <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="flex gap-4">
-                    {/* Avatar */}
+                        <div>
+                          <h3 className="font-semibold text-gray-800">
+                            {parent.full_name || "—"}
+                          </h3>
 
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                      {parent.full_name?.charAt(0)?.toUpperCase() || "P"}
+                          <p className="text-sm text-blue-600 mt-1">
+                            {parent.relationship ||
+                              "Guardian"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() =>
+                            openEditParentModal(
+                              parent,
+                            )
+                          }
+                          className="text-sm px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleRemoveParent(
+                              parent,
+                            )
+                          }
+                          className="text-sm px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Parent Details */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+                      <InfoItem
+                        label="Phone"
+                        value={parent.phone_number}
+                      />
 
-                    <div>
-                      <h3 className="font-semibold text-[var(--color-text)]">
-                        {parent.full_name}
-                      </h3>
+                      <InfoItem
+                        label="Email"
+                        value={parent.email}
+                      />
 
-                      <p className="mt-1 text-sm font-medium text-[var(--color-primary)]">
-                        {parent.relationship || "Guardian"}
-                      </p>
+                      <InfoItem
+                        label="Occupation"
+                        value={parent.occupation}
+                      />
 
-                      <div className="mt-3 grid gap-x-8 gap-y-2 text-sm text-slate-600 dark:text-slate-400 md:grid-cols-2">
-                        <p>
-                          <span className="font-medium">Phone:</span>{" "}
-                          {parent.phone_number || "—"}
-                        </p>
+                      <InfoItem
+                        label="Emergency Contact"
+                        value={
+                          parent.emergency_contact
+                            ? "Yes"
+                            : "No"
+                        }
+                      />
 
-                        <p>
-                          <span className="font-medium">Email:</span>{" "}
-                          {parent.email || "—"}
-                        </p>
-
-                        <p>
-                          <span className="font-medium">Occupation:</span>{" "}
-                          {parent.occupation || "—"}
-                        </p>
-
-                        <p>
-                          <span className="font-medium">Emergency:</span>{" "}
-                          {parent.emergency_contact ? "Yes" : "No"}
-                        </p>
-
-                        <p className="md:col-span-2">
-                          <span className="font-medium">Address:</span>{" "}
-                          {parent.address || "—"}
-                        </p>
+                      <div className="md:col-span-2">
+                        <InfoItem
+                          label="Address"
+                          value={parent.address}
+                        />
                       </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
-                  {/* Actions */}
+      {/* ======================================================
+          SUBJECTS - COLLAPSED BY DEFAULT
+      ====================================================== */}
 
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openEditParent(parent)}
-                      className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[var(--color-text)] transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-                    >
-                      Edit
-                    </button>
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        {/* SUBJECT HEADER / TOGGLE */}
 
-                    <button
-                      type="button"
-                      disabled={removingParentId === parent.id}
-                      onClick={() => handleRemoveParent(parent)}
-                      className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/40 dark:hover:bg-red-950/30"
-                    >
-                      {removingParentId === parent.id
-                        ? "Removing..."
-                        : "Remove"}
-                    </button>
+        <button
+          type="button"
+          onClick={() =>
+            setShowSubjects((previous) => !previous)
+          }
+          className="w-full p-5 flex items-center justify-between gap-4 text-left hover:bg-gray-50 transition"
+        >
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">📚</span>
+
+              <h2 className="text-xl font-semibold text-gray-800">
+                Subjects
+              </h2>
+            </div>
+
+            <p className="text-sm text-gray-500 mt-1 ml-9">
+              View this student's compulsory and
+              optional subjects.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            {!subjectsLoading &&
+              !subjectsError && (
+                <span className="hidden sm:inline-flex px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                  {subjects.general_compulsory.length +
+                    subjects.department_compulsory.length +
+                    subjects.selected_optional.length}{" "}
+                  Assigned
+                </span>
+              )}
+
+            <span className="text-gray-500 text-xl">
+              {showSubjects ? "▲" : "▼"}
+            </span>
+          </div>
+        </button>
+
+        {/* SUBJECT CONTENT */}
+
+        {showSubjects && (
+          <div className="border-t">
+            <div className="p-5">
+              {subjectsLoading ? (
+                <div className="text-center py-10 text-gray-500">
+                  Loading subjects...
+                </div>
+              ) : subjectsError ? (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">
+                  <p className="font-medium">
+                    Unable to load subjects
+                  </p>
+
+                  <p className="text-sm mt-1">
+                    {subjectsError}
+                  </p>
+
+                  <button
+                    onClick={loadSubjects}
+                    className="mt-3 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {/* ==================================================
+                      GENERAL COMPULSORY
+                  ================================================== */}
+
+                  <SubjectGroup
+                    title="General Compulsory Subjects"
+                    description="Compulsory subjects taken by all students in the class."
+                    subjects={
+                      subjects.general_compulsory
+                    }
+                    emptyMessage="No general compulsory subjects assigned."
+                    badge="Compulsory"
+                  />
+
+                  {/* ==================================================
+                      DEPARTMENT COMPULSORY
+                  ================================================== */}
+
+                  <SubjectGroup
+                    title={
+                      student.department_name
+                        ? `${student.department_name} Compulsory Subjects`
+                        : "Department Compulsory Subjects"
+                    }
+                    description="Compulsory subjects required for the student's department."
+                    subjects={
+                      subjects.department_compulsory
+                    }
+                    emptyMessage="No department compulsory subjects assigned."
+                    badge="Department"
+                  />
+
+                  {/* ==================================================
+                      OPTIONAL SUBJECTS
+                  ================================================== */}
+
+                  <div>
+                    <div className="mb-4">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            Optional Subjects
+                          </h3>
+
+                          <p className="text-sm text-gray-500 mt-1">
+                            Select the optional subjects
+                            allowed by school management.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getOptionalStatusClass(
+                              optionalSelection.status,
+                            )}`}
+                          >
+                            {getOptionalStatusText(
+                              optionalSelection.status,
+                            )}
+                          </span>
+
+                          {optionalSelection.is_enabled && (
+                            <span className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                              {selectedOptionalCount} /{" "}
+                              {maxOptionalSubjects}{" "}
+                              Selected
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* SELECTION RULES */}
+
+                      {optionalSelection.is_enabled && (
+                        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                                Selection Limit
+                              </p>
+
+                              <p className="text-sm font-semibold text-gray-800 mt-1">
+                                Up to{" "}
+                                {maxOptionalSubjects}{" "}
+                                optional subject
+                                {maxOptionalSubjects !==
+                                1
+                                  ? "s"
+                                  : ""}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                                Opens
+                              </p>
+
+                              <p className="text-sm font-medium text-gray-800 mt-1">
+                                {formatDateTime(
+                                  optionalSelection.start_datetime,
+                                )}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                                Closes
+                              </p>
+
+                              <p className="text-sm font-medium text-gray-800 mt-1">
+                                {formatDateTime(
+                                  optionalSelection.end_datetime,
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ==================================================
+                        SELECTED OPTIONAL
+                    ================================================== */}
+
+                    <div className="mb-6">
+                      <h4 className="text-base font-semibold text-gray-800 mb-3">
+                        Selected Optional Subjects
+                      </h4>
+
+                      {subjects.selected_optional
+                        .length === 0 ? (
+                        <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                          <p className="text-gray-500">
+                            This student has not selected
+                            any optional subject.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                          {subjects.selected_optional.map(
+                            (subject) => (
+                              <div
+                                key={
+                                  subject.class_subject_id
+                                }
+                                className="border border-green-200 bg-green-50 rounded-xl p-4"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <h4 className="font-semibold text-gray-800">
+                                      {subject.name}
+                                    </h4>
+
+                                    <p className="text-sm text-gray-500 mt-1">
+                                      Code:{" "}
+                                      {subject.code ||
+                                        "—"}
+                                    </p>
+
+                                    {subject.department_name && (
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Department:{" "}
+                                        {
+                                          subject.department_name
+                                        }
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <span className="shrink-0 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                                    Selected
+                                  </span>
+                                </div>
+
+                                {/* REMOVE BUTTON */}
+
+                                {optionalSelection.can_change && (
+                                  <button
+                                    onClick={() =>
+                                      handleRemoveOptionalSubject(
+                                        subject,
+                                      )
+                                    }
+                                    disabled={
+                                      removingSubjectId ===
+                                      subject.subject_id
+                                    }
+                                    className="mt-4 w-full px-3 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                                  >
+                                    {removingSubjectId ===
+                                    subject.subject_id
+                                      ? "Removing..."
+                                      : "Remove Subject"}
+                                  </button>
+                                )}
+
+                                {/* LOCKED */}
+
+                                {!optionalSelection.can_change && (
+                                  <div className="mt-4 px-3 py-2 rounded-lg bg-gray-100 text-gray-500 text-sm text-center">
+                                    🔒 Selection is locked
+                                  </div>
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ==================================================
+                        AVAILABLE OPTIONAL
+                    ================================================== */}
+
+                    {optionalSelection.status !==
+                      "CLOSED" && (
+                      <div>
+                        <h4 className="text-base font-semibold text-gray-800 mb-3">
+                          Available Optional Subjects
+                        </h4>
+
+                        {subjects.available_optional
+                          .length === 0 ? (
+                          <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                            <p className="text-gray-500">
+                              No additional optional
+                              subjects are available.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {subjects.available_optional.map(
+                              (subject) => {
+                                const limitReached =
+                                  selectedOptionalCount >=
+                                  maxOptionalSubjects;
+
+                                const cannotSelect =
+                                  !selectionOpen ||
+                                  limitReached;
+
+                                return (
+                                  <div
+                                    key={
+                                      subject.class_subject_id
+                                    }
+                                    className="border rounded-xl p-4 hover:shadow-sm transition"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <h4 className="font-semibold text-gray-800">
+                                          {subject.name}
+                                        </h4>
+
+                                        <p className="text-sm text-gray-500 mt-1">
+                                          Code:{" "}
+                                          {subject.code ||
+                                            "—"}
+                                        </p>
+
+                                        {subject.department_name && (
+                                          <p className="text-xs text-gray-500 mt-1">
+                                            Department:{" "}
+                                            {
+                                              subject.department_name
+                                            }
+                                          </p>
+                                        )}
+                                      </div>
+
+                                      <span className="shrink-0 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                                        Optional
+                                      </span>
+                                    </div>
+
+                                    {/* SELECT */}
+
+                                    <button
+                                      onClick={() =>
+                                        handleSelectOptionalSubject(
+                                          subject,
+                                        )
+                                      }
+                                      disabled={
+                                        selectingSubjectId ===
+                                          subject.subject_id ||
+                                        cannotSelect
+                                      }
+                                      className="mt-4 w-full px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                      {selectingSubjectId ===
+                                      subject.subject_id
+                                        ? "Selecting..."
+                                        : !selectionOpen
+                                          ? optionalSelection.status ===
+                                            "NOT_STARTED"
+                                            ? "Selection Not Started"
+                                            : optionalSelection.status ===
+                                                "DISABLED"
+                                              ? "Selection Disabled"
+                                              : "Selection Closed"
+                                          : limitReached
+                                            ? "Selection Limit Reached"
+                                            : "Select Subject"}
+                                    </button>
+                                  </div>
+                                );
+                              },
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* =================================================
-          ADD PARENT MODAL
-      ================================================= */}
+      {/* ======================================================
+          ADD / EDIT PARENT MODAL
+      ====================================================== */}
 
       {showParentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-[var(--color-card)] shadow-2xl">
-            {/* Modal Header */}
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* HEADER */}
 
-            <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-slate-800">
+            <div className="p-5 border-b flex items-center justify-between">
               <div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openEditParent(parent)}
-                    className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[var(--color-text)] transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={removingParentId === parent.id}
-                    onClick={() => handleRemoveParent(parent)}
-                    className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/40 dark:hover:bg-red-950/30"
-                  >
-                    {removingParentId === parent.id ? "Removing..." : "Remove"}
-                  </button>
-                </div>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <h2 className="text-xl font-semibold text-gray-800">
                   {editingParent
-                    ? `Update ${editingParent.full_name}'s information.`
-                    : `Add a parent or guardian for ${fullName}.`}
+                    ? "Edit Parent / Guardian"
+                    : "Add Parent / Guardian"}
+                </h2>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  {editingParent
+                    ? "Update parent or guardian information."
+                    : "Add a parent or guardian to this student."}
                 </p>
               </div>
 
               <button
-                type="button"
                 onClick={closeParentModal}
-                disabled={savingParent}
-                className="text-xl text-slate-400 hover:text-slate-600 disabled:opacity-50 dark:hover:text-slate-200"
+                className="text-gray-400 hover:text-gray-700 text-2xl"
               >
                 ×
               </button>
             </div>
 
-            {/* Form */}
+            {/* FORM */}
 
-            <form onSubmit={handleSaveParent} className="p-6">
-              <div className="grid gap-5 md:grid-cols-2">
-                {/* Full Name */}
-
+            <form
+              onSubmit={handleSaveParent}
+              className="p-5 space-y-5"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   label="Full Name"
                   name="full_name"
                   value={parentForm.full_name}
                   onChange={handleParentChange}
-                  placeholder="Enter full name"
                   required
                 />
 
-                {/* Relationship */}
-
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Relationship
                   </label>
 
@@ -1622,40 +1462,52 @@ function StudentDetails() {
                     value={parentForm.relationship}
                     onChange={handleParentChange}
                     required
-                    className="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] dark:border-slate-700"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Select relationship</option>
+                    <option value="">
+                      Select relationship
+                    </option>
 
-                    <option value="Father">Father</option>
+                    <option value="Father">
+                      Father
+                    </option>
 
-                    <option value="Mother">Mother</option>
+                    <option value="Mother">
+                      Mother
+                    </option>
 
-                    <option value="Guardian">Guardian</option>
+                    <option value="Guardian">
+                      Guardian
+                    </option>
 
-                    <option value="Uncle">Uncle</option>
+                    <option value="Uncle">
+                      Uncle
+                    </option>
 
-                    <option value="Aunt">Aunt</option>
+                    <option value="Aunt">
+                      Aunt
+                    </option>
 
-                    <option value="Grandfather">Grandfather</option>
+                    <option value="Brother">
+                      Brother
+                    </option>
 
-                    <option value="Grandmother">Grandmother</option>
+                    <option value="Sister">
+                      Sister
+                    </option>
 
-                    <option value="Other">Other</option>
+                    <option value="Other">
+                      Other
+                    </option>
                   </select>
                 </div>
-
-                {/* Phone */}
 
                 <FormField
                   label="Phone Number"
                   name="phone_number"
                   value={parentForm.phone_number}
                   onChange={handleParentChange}
-                  placeholder="08012345678"
-                  required
                 />
-
-                {/* Email */}
 
                 <FormField
                   label="Email"
@@ -1663,41 +1515,44 @@ function StudentDetails() {
                   type="email"
                   value={parentForm.email}
                   onChange={handleParentChange}
-                  placeholder="parent@example.com"
                 />
-
-                {/* Occupation */}
 
                 <FormField
                   label="Occupation"
                   name="occupation"
                   value={parentForm.occupation}
                   onChange={handleParentChange}
-                  placeholder="e.g. Teacher, Engineer"
                 />
 
-                {/* Emergency */}
-
-                <div className="flex items-center">
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
-                      name="emergency_contact"
-                      checked={parentForm.emergency_contact}
-                      onChange={handleParentChange}
-                      className="h-4 w-4 rounded border-slate-300"
-                    />
-
-                    <span className="text-sm font-medium text-[var(--color-text)]">
-                      Emergency Contact
-                    </span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Emergency Contact
                   </label>
+
+                  <select
+                    name="emergency_contact"
+                    value={
+                      parentForm.emergency_contact
+                    }
+                    onChange={handleParentChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">
+                      Select option
+                    </option>
+
+                    <option value="true">
+                      Yes
+                    </option>
+
+                    <option value="false">
+                      No
+                    </option>
+                  </select>
                 </div>
 
-                {/* Address */}
-
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Address
                   </label>
 
@@ -1705,31 +1560,48 @@ function StudentDetails() {
                     name="address"
                     value={parentForm.address}
                     onChange={handleParentChange}
-                    rows={3}
-                    placeholder="Enter home address"
-                    className="w-full resize-none rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] dark:border-slate-700"
+                    rows="3"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Profile Picture
+                  </label>
+
+                  <input
+                    type="file"
+                    name="profile_image"
+                    accept="image/*"
+                    onChange={handleParentChange}
+                    className="w-full border rounded-lg px-3 py-2"
                   />
                 </div>
               </div>
 
-              {/* Buttons */}
+              {/* BUTTONS */}
 
-              <div className="mt-6 flex justify-end gap-3 border-t border-slate-200 pt-5 dark:border-slate-800">
+              <div className="flex justify-end gap-3 pt-3 border-t">
                 <button
                   type="button"
                   onClick={closeParentModal}
-                  disabled={savingParent}
-                  className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-[var(--color-text)] transition hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
+                  disabled={parentSaving}
+                  className="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  disabled={savingParent}
-                  className="rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={parentSaving}
+                  className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {savingParent ? "Saving..." : "Add Parent"}
+                  {parentSaving
+                    ? "Saving..."
+                    : editingParent
+                      ? "Update Parent"
+                      : "Add Parent"}
                 </button>
               </div>
             </form>
@@ -1740,40 +1612,118 @@ function StudentDetails() {
   );
 }
 
-// =====================================================
+// ============================================================
 // INFO ITEM
-// =====================================================
+// ============================================================
 
 function InfoItem({ label, value }) {
+  const displayValue =
+    value === null ||
+    value === undefined ||
+    value === ""
+      ? "—"
+      : value;
+
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
         {label}
       </p>
 
-      <p className="mt-1 text-sm font-medium text-[var(--color-text)]">
-        {value || "—"}
+      <p className="mt-1 text-sm font-medium text-gray-800 break-words">
+        {displayValue}
       </p>
     </div>
   );
 }
 
-// =====================================================
+// ============================================================
+// SUBJECT GROUP
+// ============================================================
+
+function SubjectGroup({
+  title,
+  description,
+  subjects,
+  emptyMessage,
+  badge,
+}) {
+  return (
+    <div>
+      <div className="mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-800">
+            {title}
+          </h3>
+
+          <span className="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+            {badge}
+          </span>
+        </div>
+
+        <p className="text-sm text-gray-500 mt-1">
+          {description}
+        </p>
+      </div>
+
+      {subjects.length === 0 ? (
+        <div className="border-2 border-dashed rounded-lg p-6 text-center">
+          <p className="text-gray-500">
+            {emptyMessage}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {subjects.map((subject) => (
+            <div
+              key={subject.class_subject_id}
+              className="border rounded-xl p-4 bg-gray-50"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h4 className="font-semibold text-gray-800">
+                    {subject.name}
+                  </h4>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    Code: {subject.code || "—"}
+                  </p>
+
+                  {subject.department_name && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Department:{" "}
+                      {subject.department_name}
+                    </p>
+                  )}
+                </div>
+
+                <span className="shrink-0 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                  {badge}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
 // FORM FIELD
-// =====================================================
+// ============================================================
 
 function FormField({
   label,
   name,
   value,
   onChange,
-  placeholder,
   type = "text",
   required = false,
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-[var(--color-text)]">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </label>
 
@@ -1782,9 +1732,8 @@ function FormField({
         name={name}
         value={value}
         onChange={onChange}
-        placeholder={placeholder}
         required={required}
-        className="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] dark:border-slate-700"
+        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   );

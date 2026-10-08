@@ -1,544 +1,95 @@
-// import { useEffect, useMemo, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { getParents } from "../../../services/studentsService";
-
-// const AllParents = () => {
-//   const navigate = useNavigate();
-//   const [parents, setParents] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-//   const [search, setSearch] = useState("");
-//   const [expandedParent, setExpandedParent] = useState(null);
-
-//   const loadParents = async () => {
-//     try {
-//       setLoading(true);
-//       setError("");
-
-//       const data = await getParents();
-
-//       setParents(Array.isArray(data) ? data : data?.results || []);
-//     } catch (err) {
-//       console.error("Failed to load parents:", err);
-
-//       setError(
-//         err.response?.data?.detail ||
-//           "Unable to load parents/guardians. Please try again.",
-//       );
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     loadParents();
-//   }, []);
-
-//   const filteredParents = useMemo(() => {
-//     const query = search.trim().toLowerCase();
-
-//     if (!query) {
-//       return parents;
-//     }
-
-//     return parents.filter((parent) => {
-//       const parentMatches =
-//         parent.full_name?.toLowerCase().includes(query) ||
-//         parent.phone_number?.toLowerCase().includes(query) ||
-//         parent.email?.toLowerCase().includes(query) ||
-//         parent.relationship?.toLowerCase().includes(query) ||
-//         parent.occupation?.toLowerCase().includes(query);
-
-//       const studentMatches = parent.students?.some(
-//         (student) =>
-//           student.full_name?.toLowerCase().includes(query) ||
-//           student.admission_number?.toLowerCase().includes(query),
-//       );
-
-//       return parentMatches || studentMatches;
-//     });
-//   }, [parents, search]);
-
-//   const activeParents = parents.filter(
-//     (parent) => parent.is_active !== false,
-//   ).length;
-
-//   const emergencyParents = parents.filter(
-//     (parent) => parent.emergency_contact === true,
-//   ).length;
-
-//   const toggleStudents = (parentId) => {
-//     setExpandedParent((current) =>
-//       current === parentId ? null : parentId,
-//     );
-//   };
-
-//   return (
-//     <div className="space-y-6">
-//       {/* =====================================================
-//           HEADER
-//       ===================================================== */}
-//       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-//         <div>
-//           <h1 className="text-2xl font-bold text-gray-900">
-//             Parents & Guardians
-//           </h1>
-
-//           <p className="mt-1 text-sm text-gray-500">
-//             View and manage parents, guardians, and their assigned students.
-//           </p>
-//         </div>
-
-//         <button
-//           type="button"
-//           onClick={loadParents}
-//           disabled={loading}
-//           className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-//         >
-//           {loading ? "Refreshing..." : "Refresh"}
-//         </button>
-//       </div>
-
-//       {/* =====================================================
-//           STATISTICS
-//       ===================================================== */}
-//       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-//         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-//           <p className="text-sm font-medium text-gray-500">
-//             Total Parents
-//           </p>
-
-//           <p className="mt-2 text-3xl font-bold text-gray-900">
-//             {parents.length}
-//           </p>
-//         </div>
-
-//         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-//           <p className="text-sm font-medium text-gray-500">
-//             Active Parents
-//           </p>
-
-//           <p className="mt-2 text-3xl font-bold text-gray-900">
-//             {activeParents}
-//           </p>
-//         </div>
-
-//         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-//           <p className="text-sm font-medium text-gray-500">
-//             Emergency Contacts
-//           </p>
-
-//           <p className="mt-2 text-3xl font-bold text-gray-900">
-//             {emergencyParents}
-//           </p>
-//         </div>
-//       </div>
-
-//       {/* =====================================================
-//           SEARCH
-//       ===================================================== */}
-//       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-//         <input
-//           type="text"
-//           value={search}
-//           onChange={(e) => setSearch(e.target.value)}
-//           placeholder="Search parent, phone, email, student name or admission number..."
-//           className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
-//         />
-//       </div>
-
-//       {/* =====================================================
-//           ERROR
-//       ===================================================== */}
-//       {error && (
-//         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-//           {error}
-
-//           <button
-//             type="button"
-//             onClick={loadParents}
-//             className="ml-3 font-semibold underline"
-//           >
-//             Try again
-//           </button>
-//         </div>
-//       )}
-
-//       {/* =====================================================
-//           TABLE
-//       ===================================================== */}
-//       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-//         {loading ? (
-//           <div className="flex min-h-[250px] items-center justify-center">
-//             <p className="text-sm text-gray-500">
-//               Loading parents and guardians...
-//             </p>
-//           </div>
-//         ) : filteredParents.length === 0 ? (
-//           <div className="flex min-h-[250px] flex-col items-center justify-center px-6 text-center">
-//             <div className="mb-3 text-4xl">👨‍👩‍👧</div>
-
-//             <h3 className="text-lg font-semibold text-gray-900">
-//               {search ? "No parents found" : "No parents yet"}
-//             </h3>
-
-//             <p className="mt-1 text-sm text-gray-500">
-//               {search
-//                 ? "Try changing your search terms."
-//                 : "Parents added from student records will appear here."}
-//             </p>
-//           </div>
-//         ) : (
-//           <>
-//             {/* =================================================
-//                 DESKTOP
-//             ================================================= */}
-//             <div className="hidden overflow-x-auto md:block">
-//               <table className="min-w-full divide-y divide-gray-200">
-//                 <thead className="bg-gray-50">
-//                   <tr>
-//                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-//                       Parent / Guardian
-//                     </th>
-
-//                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-//                       Relationship
-//                     </th>
-
-//                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-//                       Students
-//                     </th>
-
-//                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-//                       Contact
-//                     </th>
-
-//                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-//                       Status
-//                     </th>
-//                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-//   Actions
-// </th>
-//                   </tr>
-//                 </thead>
-
-//                 <tbody className="divide-y divide-gray-200">
-//                   {filteredParents.map((parent) => {
-//                     const students = parent.students || [];
-//                     const studentCount =
-//                       parent.student_count ?? students.length;
-
-//                     const isExpanded =
-//                       expandedParent === parent.id;
-
-//                     return (
-//                      <tr
-//                             key={parent.id}
-//                             className="transition hover:bg-gray-50"
-//                           >
-//                         {/* Parent */}
-//                         <td className="px-6 py-5">
-//                           <div className="flex items-center gap-3">
-//                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-700">
-//                               {parent.full_name
-//                                 ?.charAt(0)
-//                                 ?.toUpperCase() || "P"}
-//                             </div>
-
-//                             <div>
-//                               <p className="font-semibold text-gray-900">
-//                                 {parent.full_name || "—"}
-//                               </p>
-
-//                               {parent.occupation && (
-//                                 <p className="text-xs text-gray-500">
-//                                   {parent.occupation}
-//                                 </p>
-//                               )}
-//                             </div>
-//                           </div>
-//                         </td>
-
-//                         {/* Relationship */}
-//                         <td className="px-6 py-5">
-//                           <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-//                             {parent.relationship || "—"}
-//                           </span>
-//                         </td>
-
-//                         {/* Students */}
-//                         <td className="px-6 py-5">
-//                           <div className="min-w-[280px]">
-//                             <div className="flex items-center justify-between gap-3">
-//                               <span className="text-sm font-semibold text-gray-900">
-//                                 {studentCount}{" "}
-//                                 {studentCount === 1
-//                                   ? "Student"
-//                                   : "Students"}
-//                               </span>
-
-//                               {studentCount > 0 && (
-//                                 <button
-//                                   type="button"
-//                                   onClick={() =>
-//                                     toggleStudents(parent.id)
-//                                   }
-//                                   className="text-xs font-semibold text-gray-600 underline hover:text-gray-900"
-//                                 >
-//                                   {isExpanded ? "Hide" : "View"}
-//                                 </button>
-//                               )}
-//                             </div>
-
-//                             {isExpanded && students.length > 0 && (
-//                               <div className="mt-3 space-y-2">
-//                                 {students.map((student) => (
-//                                   <div
-//                                     key={student.id}
-//                                     className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
-//                                   >
-//                                     <p className="text-sm font-medium text-gray-900">
-//                                       {student.full_name}
-//                                     </p>
-
-//                                     <p className="text-xs text-gray-500">
-//                                       Admission No:{" "}
-//                                       <span className="font-medium text-gray-700">
-//                                         {student.admission_number || "—"}
-//                                       </span>
-//                                     </p>
-//                                   </div>
-//                                 ))}
-//                               </div>
-//                             )}
-//                           </div>
-//                         </td>
-
-//                         {/* Contact */}
-//                         <td className="px-6 py-5">
-//                           <div className="space-y-1 text-sm">
-//                             <p className="text-gray-700">
-//                               {parent.phone_number || "—"}
-//                             </p>
-
-//                             <p className="max-w-[220px] truncate text-xs text-gray-500">
-//                               {parent.email || "—"}
-//                             </p>
-//                           </div>
-//                         </td>
-
-//                         {/* Status */}
-//                         <td className="px-6 py-5">
-//                           <div className="flex flex-col gap-2">
-//                             <span
-//                               className={`inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium ${
-//                                 parent.is_active === false
-//                                   ? "bg-red-100 text-red-700"
-//                                   : "bg-green-100 text-green-700"
-//                               }`}
-//                             >
-//                               {parent.is_active === false
-//                                 ? "Inactive"
-//                                 : "Active"}
-//                             </span>
-
-//                             {parent.emergency_contact && (
-//                               <span className="text-xs font-medium text-orange-600">
-//                                 Emergency Contact
-//                               </span>
-//                             )}
-//                           </div>
-
-//                           {/* Actions */}
-//                     {/* Actions */}
-// <td className="px-6 py-5 align-top">
-//   <button
-//     type="button"
-//     onClick={() => navigate(`/admin/parents/${parent.id}`)}
-//     className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-//   >
-//     View
-//   </button>
-// </td> 
-//                         </td>
-//                       </tr>
-//                     );
-//                   })}
-//                 </tbody>
-//               </table>
-//             </div>
-
-//             {/* =================================================
-//                 MOBILE
-//             ================================================= */}
-//             <div className="divide-y divide-gray-200 md:hidden">
-//               {filteredParents.map((parent) => {
-//                 const students = parent.students || [];
-//                 const studentCount =
-//                   parent.student_count ?? students.length;
-
-//                 const isExpanded =
-//                   expandedParent === parent.id;
-
-//                 return (
-//                   <div key={parent.id} className="p-4">
-//                     {/* Parent Header */}
-//                     <div className="flex items-start justify-between gap-3">
-//                       <div className="flex items-center gap-3">
-//                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-700">
-//                           {parent.full_name
-//                             ?.charAt(0)
-//                             ?.toUpperCase() || "P"}
-//                         </div>
-
-//                         <div>
-//                           <h3 className="font-semibold text-gray-900">
-//                             {parent.full_name || "—"}
-//                           </h3>
-
-//                           <p className="text-xs text-gray-500">
-//                             {parent.relationship ||
-//                               "Parent / Guardian"}
-//                           </p>
-//                         </div>
-//                       </div>
-
-//                       <span
-//                         className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-//                           parent.is_active === false
-//                             ? "bg-red-100 text-red-700"
-//                             : "bg-green-100 text-green-700"
-//                         }`}
-//                       >
-//                         {parent.is_active === false
-//                           ? "Inactive"
-//                           : "Active"}
-//                       </span>
-//                     </div>
-
-//                     {/* Contact */}
-//                     <div className="mt-4 space-y-1 text-sm">
-//                       <p>
-//                         <span className="font-medium text-gray-500">
-//                           Phone:
-//                         </span>{" "}
-//                         {parent.phone_number || "—"}
-//                       </p>
-
-//                       <p>
-//                         <span className="font-medium text-gray-500">
-//                           Email:
-//                         </span>{" "}
-//                         {parent.email || "—"}
-//                       </p>
-
-//                       <p>
-//                         <span className="font-medium text-gray-500">
-//                           Occupation:
-//                         </span>{" "}
-//                         {parent.occupation || "—"}
-//                       </p>
-//                     </div>
-
-//                     {/* Students */}
-//                     <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
-//                       <div className="flex items-center justify-between">
-//                         <div>
-//                           <p className="text-xs font-medium text-gray-500">
-//                             Assigned Students
-//                           </p>
-
-//                           <p className="mt-1 text-sm font-semibold text-gray-900">
-//                             {studentCount}{" "}
-//                             {studentCount === 1
-//                               ? "Student"
-//                               : "Students"}
-//                           </p>
-//                         </div>
-
-//                         {studentCount > 0 && (
-//                           <button
-//                             type="button"
-//                             onClick={() =>
-//                               toggleStudents(parent.id)
-//                             }
-//                             className="text-xs font-semibold text-gray-700 underline"
-//                           >
-//                             {isExpanded ? "Hide" : "View"}
-//                           </button>
-//                         )}
-//                       </div>
-
-//                       {isExpanded && students.length > 0 && (
-//                         <div className="mt-3 space-y-2">
-//                           {students.map((student) => (
-//                             <div
-//                               key={student.id}
-//                               className="rounded-lg border border-gray-200 bg-white px-3 py-2"
-//                             >
-//                               <p className="text-sm font-medium text-gray-900">
-//                                 {student.full_name}
-//                               </p>
-
-//                               <p className="text-xs text-gray-500">
-//                                 Admission No:{" "}
-//                                 <span className="font-medium text-gray-700">
-//                                   {student.admission_number || "—"}
-//                                 </span>
-//                               </p>
-//                             </div>
-//                           ))}
-//                         </div>
-//                       )}
-//                     </div>
-//                     <button
-//                       type="button"
-//                       onClick={() => navigate(`/admin/parents/${parent.id}`)}
-//                       className="mt-4 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-//                     >
-//                       View Parent Details
-//                     </button>
-
-//                     {parent.emergency_contact && (
-//                       <p className="mt-3 text-xs font-semibold text-orange-600">
-//                         Emergency Contact
-//                       </p>
-//                     )}
-//                   </div>
-//                 );
-//               })}
-//             </div>
-//           </>
-//         )}
-//       </div>
-
-//       {/* =====================================================
-//           RESULT COUNT
-//       ===================================================== */}
-//       {!loading && filteredParents.length > 0 && (
-//         <p className="text-sm text-gray-500">
-//           Showing {filteredParents.length} of {parents.length} parent
-//           {parents.length === 1 ? "" : "s"}.
-//         </p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default AllParents;
-
-
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { getParents } from "../../../services/studentsService";
 
-const AllParents = () => {
+const STATUS_ORDER = {
+  ACTIVE: 1,
+  GRADUATED: 2,
+  TRANSFERRED: 3,
+  SUSPENDED: 4,
+  WITHDRAWN: 5,
+};
+
+const STATUS_LABELS = {
+  ACTIVE: "Active",
+  GRADUATED: "Graduated",
+  TRANSFERRED: "Transferred",
+  SUSPENDED: "Suspended",
+  WITHDRAWN: "Withdrawn",
+};
+
+function getInitials(name = "") {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) return "?";
+
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0) +
+    parts[parts.length - 1].charAt(0)
+  ).toUpperCase();
+}
+
+function getStatusClass(status) {
+  switch (status) {
+    case "ACTIVE":
+      return "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400";
+
+    case "GRADUATED":
+      return "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400";
+
+    case "TRANSFERRED":
+      return "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400";
+
+    case "SUSPENDED":
+      return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400";
+
+    case "WITHDRAWN":
+      return "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400";
+
+    default:
+      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
+  }
+}
+
+function getImageUrl(image) {
+  if (!image) return null;
+
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
+    return image;
+  }
+
+  const baseUrl =
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://127.0.0.1:8000";
+
+  return `${baseUrl
+    .replace(/\/api\/?$/, "")
+    .replace(/\/$/, "")}${
+    image.startsWith("/") ? image : `/${image}`
+  }`;
+}
+
+export default function AllParents({
+  basePath = "/admin/parents",
+}) {
   const navigate = useNavigate();
 
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    loadParents();
+  }, []);
 
   const loadParents = async () => {
     try {
@@ -547,138 +98,162 @@ const AllParents = () => {
 
       const data = await getParents();
 
-      setParents(
-        Array.isArray(data) ? data : data?.results || [],
-      );
+      const parentList = Array.isArray(data)
+        ? data
+        : data?.results || [];
+
+      setParents(parentList);
     } catch (err) {
       console.error("Failed to load parents:", err);
 
       setError(
-        err.response?.data?.detail ||
-          "Unable to load parents/guardians. Please try again.",
+        err?.response?.data?.detail ||
+          "Failed to load parents."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadParents();
-  }, []);
-
-  // =====================================================
-  // SEARCH
-  // =====================================================
-
   const filteredParents = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return parents;
+    let result = [...parents];
+
+    if (query) {
+      result = result.filter((parent) => {
+        const studentText = (parent.students || [])
+          .map((student) =>
+            [
+              student.full_name,
+              student.admission_number,
+              student.status,
+            ]
+              .filter(Boolean)
+              .join(" ")
+          )
+          .join(" ");
+
+        const searchableText = [
+          parent.full_name,
+          parent.relationship,
+          parent.phone_number,
+          parent.email,
+          parent.occupation,
+          studentText,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(query);
+      });
     }
 
-    return parents.filter((parent) => {
-      const parentMatches =
-        parent.full_name?.toLowerCase().includes(query) ||
-        parent.phone_number?.toLowerCase().includes(query) ||
-        parent.email?.toLowerCase().includes(query) ||
-        parent.relationship?.toLowerCase().includes(query) ||
-        parent.occupation?.toLowerCase().includes(query);
+    result.sort((a, b) => {
+      const aStatus =
+        a.students?.[0]?.status || "WITHDRAWN";
 
-      const studentMatches = parent.students?.some(
-        (student) =>
-          student.full_name?.toLowerCase().includes(query) ||
-          student.admission_number
-            ?.toLowerCase()
-            .includes(query),
+      const bStatus =
+        b.students?.[0]?.status || "WITHDRAWN";
+
+      return (
+        (STATUS_ORDER[aStatus] || 99) -
+        (STATUS_ORDER[bStatus] || 99)
       );
-
-      return parentMatches || studentMatches;
     });
+
+    return result;
   }, [parents, search]);
 
-  // =====================================================
-  // STATISTICS
-  // =====================================================
+  const stats = useMemo(() => {
+    const totalParents = parents.length;
 
-  const activeParents = parents.filter(
-    (parent) => parent.is_active !== false,
-  ).length;
+    const parentsWithActiveStudents = parents.filter(
+      (parent) =>
+        (parent.students || []).some(
+          (student) => student.status === "ACTIVE"
+        )
+    ).length;
 
-  const emergencyParents = parents.filter(
-    (parent) => parent.emergency_contact === true,
-  ).length;
+    const emergencyContacts = parents.filter(
+      (parent) => parent.emergency_contact
+    ).length;
 
-  // =====================================================
-  // RENDER
-  // =====================================================
+    return {
+      totalParents,
+      parentsWithActiveStudents,
+      emergencyContacts,
+    };
+  }, [parents]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center bg-[var(--color-background)] text-[var(--color-text)]">
+        <div className="text-sm text-slate-500 dark:text-slate-400">
+          Loading parents...
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen space-y-6 bg-[var(--color-background)] p-4 text-[var(--color-text)] md:p-6">
       {/* =====================================================
           HEADER
       ===================================================== */}
-
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Parents & Guardians
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">
+            All Parents
           </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
-            View and manage parents, guardians, and their
-            assigned students.
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Manage parents and guardians of students.
           </p>
         </div>
-
-        <button
-          type="button"
-          onClick={loadParents}
-          disabled={loading}
-          className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading ? "Refreshing..." : "Refresh"}
-        </button>
       </div>
+
+      {/* =====================================================
+          ERROR
+      ===================================================== */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
       {/* =====================================================
           STATISTICS
       ===================================================== */}
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Total Parents */}
-
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">
+        <div className="rounded-2xl border border-slate-200 bg-[var(--color-card)] p-5 shadow-sm dark:border-slate-700">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Total Parents
           </p>
 
-          <p className="mt-2 text-3xl font-bold text-gray-900">
-            {parents.length}
+          <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">
+            {stats.totalParents}
           </p>
         </div>
 
-        {/* Active Parents */}
-
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">
-            Active Parents
+        <div className="rounded-2xl border border-slate-200 bg-[var(--color-card)] p-5 shadow-sm dark:border-slate-700">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Parents With Active Students
           </p>
 
-          <p className="mt-2 text-3xl font-bold text-gray-900">
-            {activeParents}
+          <p className="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">
+            {stats.parentsWithActiveStudents}
           </p>
         </div>
 
-        {/* Emergency Contacts */}
-
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">
+        <div className="rounded-2xl border border-slate-200 bg-[var(--color-card)] p-5 shadow-sm dark:border-slate-700">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Emergency Contacts
           </p>
 
-          <p className="mt-2 text-3xl font-bold text-gray-900">
-            {emergencyParents}
+          <p className="mt-2 text-2xl font-bold text-[var(--color-primary)]">
+            {stats.emergencyContacts}
           </p>
         </div>
       </div>
@@ -686,459 +261,337 @@ const AllParents = () => {
       {/* =====================================================
           SEARCH
       ===================================================== */}
-
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-[var(--color-card)] p-4 shadow-sm dark:border-slate-700">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search parent, phone, email, student name or admission number..."
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
+          placeholder="Search parent, phone, email, student or admission number..."
+          className="w-full rounded-xl border border-slate-200 bg-[var(--color-background)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 dark:border-slate-700"
         />
       </div>
 
       {/* =====================================================
-          ERROR
+          DESKTOP TABLE
       ===================================================== */}
+      <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-700 md:block">
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="border-b border-slate-200 bg-[var(--color-background)] dark:border-slate-700">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Parent / Guardian
+                </th>
 
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Relationship
+                </th>
 
-          <button
-            type="button"
-            onClick={loadParents}
-            className="ml-3 font-semibold underline"
-          >
-            Try again
-          </button>
-        </div>
-      )}
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Student
+                </th>
 
-      {/* =====================================================
-          PARENTS TABLE
-      ===================================================== */}
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Admission No.
+                </th>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        {loading ? (
-          <div className="flex min-h-[250px] items-center justify-center">
-            <p className="text-sm text-gray-500">
-              Loading parents and guardians...
-            </p>
-          </div>
-        ) : filteredParents.length === 0 ? (
-          <div className="flex min-h-[250px] flex-col items-center justify-center px-6 text-center">
-            <div className="mb-3 text-4xl">
-              👨‍👩‍👧
-            </div>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Contact
+                </th>
 
-            <h3 className="text-lg font-semibold text-gray-900">
-              {search
-                ? "No parents found"
-                : "No parents yet"}
-            </h3>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Student Status
+                </th>
 
-            <p className="mt-1 text-sm text-gray-500">
-              {search
-                ? "Try changing your search terms."
-                : "Parents added from student records will appear here."}
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* =================================================
-                DESKTOP TABLE
-            ================================================= */}
+                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Action
+                </th>
+              </tr>
+            </thead>
 
-            <div className="hidden overflow-x-auto md:block">
-              <table className="min-w-full divide-y divide-gray-200">
-                {/* TABLE HEADER */}
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+              {filteredParents.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
+                  >
+                    No parents found.
+                  </td>
+                </tr>
+              ) : (
+                filteredParents.map((parent) => {
+                  const student = parent.students?.[0];
 
-                <thead className="bg-gray-50">
-                  <tr>
-                    {/* Parent / Guardian */}
+                  const profileImage = getImageUrl(
+                    parent.profile_image
+                  );
 
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Parent / Guardian
-                    </th>
+                  const status =
+                    student?.status || "WITHDRAWN";
 
-                    {/* Relationship */}
+                  return (
+                    <tr
+                      key={parent.id}
+                      className="transition hover:bg-[var(--color-background)]"
+                    >
+                      {/* Parent */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          {profileImage ? (
+                            <img
+                              src={profileImage}
+                              alt={parent.full_name}
+                              className="h-11 w-11 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-700"
+                              onError={(e) => {
+                                e.currentTarget.style.display =
+                                  "none";
 
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Relationship
-                    </th>
+                                if (
+                                  e.currentTarget
+                                    .nextElementSibling
+                                ) {
+                                  e.currentTarget.nextElementSibling.style.display =
+                                    "flex";
+                                }
+                              }}
+                            />
+                          ) : null}
 
-                    {/* Student */}
-
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Student
-                    </th>
-
-                    {/* Admission Number */}
-
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Admission No.
-                    </th>
-
-                    {/* Contact */}
-
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Contact
-                    </th>
-
-                    {/* Status */}
-
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Status
-                    </th>
-
-                    {/* Action */}
-
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-
-                {/* TABLE BODY */}
-
-                <tbody className="divide-y divide-gray-200">
-                  {filteredParents.map((parent) => {
-                    const students = parent.students || [];
-
-                    /*
-                     * Normally a parent may have one or more
-                     * students. We display the first student in
-                     * the main row.
-                     *
-                     * If there are multiple students, the
-                     * additional students are shown underneath.
-                     */
-
-                    const firstStudent = students[0];
-
-                    const remainingStudents =
-                      students.slice(1);
-
-                    return (
-                      <tr
-                        key={parent.id}
-                        className="transition hover:bg-gray-50"
-                      >
-                        {/* =================================================
-                            PARENT / GUARDIAN
-                        ================================================= */}
-
-                        <td className="px-6 py-5 align-middle">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-700">
-                              {parent.full_name
-                                ?.charAt(0)
-                                ?.toUpperCase() || "P"}
-                            </div>
-
-                            <div>
-                              <p className="font-semibold text-gray-900">
-                                {parent.full_name || "—"}
-                              </p>
-
-                              {parent.occupation && (
-                                <p className="text-xs text-gray-500">
-                                  {parent.occupation}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* =================================================
-                            RELATIONSHIP
-                        ================================================= */}
-
-                        <td className="px-6 py-5 align-middle">
-                          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-                            {parent.relationship || "—"}
-                          </span>
-                        </td>
-
-                        {/* =================================================
-                            STUDENT
-                        ================================================= */}
-
-                        <td className="px-6 py-5 align-middle">
-                          {firstStudent ? (
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {firstStudent.full_name || "—"}
-                              </p>
-
-                              {remainingStudents.length >
-                                0 && (
-                                <p className="mt-1 text-xs font-medium text-gray-500">
-                                  +{" "}
-                                  {
-                                    remainingStudents.length
-                                  }{" "}
-                                  more{" "}
-                                  {remainingStudents.length ===
-                                  1
-                                    ? "student"
-                                    : "students"}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-sm text-gray-400">
-                              No student
-                            </span>
-                          )}
-                        </td>
-
-                        {/* =================================================
-                            ADMISSION NUMBER
-                        ================================================= */}
-
-                        <td className="px-6 py-5 align-middle">
-                          {firstStudent ? (
-                            <div>
-                              <p className="text-sm font-medium text-gray-700">
-                                {firstStudent.admission_number ||
-                                  "—"}
-                              </p>
-
-                              {remainingStudents.length >
-                                0 && (
-                                <p className="mt-1 text-xs text-gray-400">
-                                  +{" "}
-                                  {
-                                    remainingStudents.length
-                                  }{" "}
-                                  more
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-sm text-gray-400">
-                              —
-                            </span>
-                          )}
-                        </td>
-
-                        {/* =================================================
-                            CONTACT
-                        ================================================= */}
-
-                        <td className="px-6 py-5 align-middle">
-                          <div className="space-y-1 text-sm">
-                            <p className="text-gray-700">
-                              {parent.phone_number || "—"}
-                            </p>
-
-                            <p className="max-w-[220px] truncate text-xs text-gray-500">
-                              {parent.email || "—"}
-                            </p>
-                          </div>
-                        </td>
-
-                        {/* =================================================
-                            STATUS
-                        ================================================= */}
-
-                        <td className="px-6 py-5 align-middle">
-                          <div className="flex flex-col gap-2">
-                            <span
-                              className={`inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium ${
-                                parent.is_active === false
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-green-100 text-green-700"
-                              }`}
-                            >
-                              {parent.is_active === false
-                                ? "Inactive"
-                                : "Active"}
-                            </span>
-
-                            {parent.emergency_contact && (
-                              <span className="text-xs font-medium text-orange-600">
-                                Emergency Contact
-                              </span>
+                          <div
+                            className={`h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-sm font-bold text-[var(--color-primary)] ${
+                              profileImage
+                                ? "hidden"
+                                : "flex"
+                            }`}
+                          >
+                            {getInitials(
+                              parent.full_name
                             )}
                           </div>
-                        </td>
 
-                        {/* =================================================
-                            ACTION
-                        ================================================= */}
+                          <div>
+                            <p className="font-semibold text-[var(--color-text)]">
+                              {parent.full_name}
+                            </p>
 
-                        <td className="px-6 py-5 align-middle">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(
-                                `/admin/parents/${parent.id}`,
-                              )
-                            }
-                            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* =================================================
-                MOBILE VIEW
-            ================================================= */}
-
-            <div className="divide-y divide-gray-200 md:hidden">
-              {filteredParents.map((parent) => {
-                const students = parent.students || [];
-
-                return (
-                  <div
-                    key={parent.id}
-                    className="p-4"
-                  >
-                    {/* Parent Header */}
-
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-700">
-                          {parent.full_name
-                            ?.charAt(0)
-                            ?.toUpperCase() || "P"}
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {parent.email || "No email"}
+                            </p>
+                          </div>
                         </div>
+                      </td>
 
-                        <div>
-                          <h3 className="font-semibold text-gray-900">
-                            {parent.full_name || "—"}
-                          </h3>
+                      {/* Relationship */}
+                      <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                        {parent.relationship || "-"}
+                      </td>
 
-                          <p className="text-xs text-gray-500">
-                            {parent.relationship ||
-                              "Parent / Guardian"}
-                          </p>
-                        </div>
-                      </div>
+                      {/* Student */}
+                      <td className="px-6 py-4">
+                        {student ? (
+                          <div>
+                            <p className="font-medium text-[var(--color-text)]">
+                              {student.full_name}
+                            </p>
 
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                          parent.is_active === false
-                            ? "bg-red-100 text-red-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {parent.is_active === false
-                          ? "Inactive"
-                          : "Active"}
-                      </span>
-                    </div>
+                            {parent.student_count > 1 && (
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                +{parent.student_count - 1} more
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-slate-400">
+                            No student
+                          </span>
+                        )}
+                      </td>
 
-                    {/* Student Information */}
+                      {/* Admission */}
+                      <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                        {student?.admission_number || "-"}
+                      </td>
 
-                    <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
-                        Student
-                      </p>
-
-                      {students.length === 0 ? (
-                        <p className="mt-1 text-sm text-gray-500">
-                          No student assigned
+                      {/* Contact */}
+                      <td className="px-6 py-4">
+                        <p className="text-sm text-slate-600 dark:text-slate-300">
+                          {parent.phone_number || "-"}
                         </p>
-                      ) : (
-                        <div className="mt-2 space-y-3">
-                          {students.map((student) => (
-                            <div
-                              key={student.id}
-                              className="rounded-lg border border-gray-200 bg-white p-3"
-                            >
-                              <p className="text-sm font-semibold text-gray-900">
-                                {student.full_name || "—"}
-                              </p>
 
-                              <p className="mt-1 text-xs text-gray-500">
-                                Admission No:{" "}
-                                <span className="font-medium text-gray-700">
-                                  {student.admission_number ||
-                                    "—"}
-                                </span>
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                        {parent.emergency_contact && (
+                          <span className="mt-1 inline-block rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-950/40 dark:text-red-400">
+                            Emergency
+                          </span>
+                        )}
+                      </td>
 
-                    {/* Contact */}
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClass(
+                            status
+                          )}`}
+                        >
+                          {STATUS_LABELS[status] || status}
+                        </span>
+                      </td>
 
-                    <div className="mt-4 space-y-1 text-sm">
-                      <p>
-                        <span className="font-medium text-gray-500">
-                          Phone:
-                        </span>{" "}
-                        {parent.phone_number || "—"}
-                      </p>
-
-                      <p>
-                        <span className="font-medium text-gray-500">
-                          Email:
-                        </span>{" "}
-                        {parent.email || "—"}
-                      </p>
-
-                      <p>
-                        <span className="font-medium text-gray-500">
-                          Occupation:
-                        </span>{" "}
-                        {parent.occupation || "—"}
-                      </p>
-                    </div>
-
-                    {/* Emergency Contact */}
-
-                    {parent.emergency_contact && (
-                      <p className="mt-3 text-xs font-semibold text-orange-600">
-                        Emergency Contact
-                      </p>
-                    )}
-
-                    {/* Action */}
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigate(
-                          `/admin/parents/${parent.id}`,
-                        )
-                      }
-                      className="mt-4 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-                    >
-                      View Parent Details
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+                      {/* Action */}
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(
+                              `${basePath}/${parent.id}`
+                            )
+                          }
+                          className="rounded-xl border border-slate-200 bg-[var(--color-card)] px-3 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] dark:border-slate-700"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* =====================================================
-          RESULT COUNT
+          MOBILE CARDS
       ===================================================== */}
+      <div className="space-y-4 md:hidden">
+        {filteredParents.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-[var(--color-card)] p-8 text-center text-sm text-slate-500 shadow-sm dark:border-slate-700 dark:text-slate-400">
+            No parents found.
+          </div>
+        ) : (
+          filteredParents.map((parent) => {
+            const student = parent.students?.[0];
 
-      {!loading && filteredParents.length > 0 && (
-        <p className="text-sm text-gray-500">
-          Showing {filteredParents.length} of {parents.length}{" "}
-          parent{parents.length === 1 ? "" : "s"}.
-        </p>
-      )}
+            const profileImage = getImageUrl(
+              parent.profile_image
+            );
+
+            const status =
+              student?.status || "WITHDRAWN";
+
+            return (
+              <div
+                key={parent.id}
+                className="rounded-2xl border border-slate-200 bg-[var(--color-card)] p-4 shadow-sm dark:border-slate-700"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    {profileImage ? (
+                      <img
+                        src={profileImage}
+                        alt={parent.full_name}
+                        className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-700"
+                        onError={(e) => {
+                          e.currentTarget.style.display =
+                            "none";
+
+                          if (
+                            e.currentTarget
+                              .nextElementSibling
+                          ) {
+                            e.currentTarget.nextElementSibling.style.display =
+                              "flex";
+                          }
+                        }}
+                      />
+                    ) : null}
+
+                    <div
+                      className={`h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-sm font-bold text-[var(--color-primary)] ${
+                        profileImage ? "hidden" : "flex"
+                      }`}
+                    >
+                      {getInitials(parent.full_name)}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-[var(--color-text)]">
+                        {parent.full_name}
+                      </p>
+
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {parent.relationship || "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusClass(
+                      status
+                    )}`}
+                  >
+                    {STATUS_LABELS[status] || status}
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 dark:border-slate-700">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      Student
+                    </span>
+
+                    <span className="text-right text-sm font-medium text-[var(--color-text)]">
+                      {student?.full_name || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-4">
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      Admission No.
+                    </span>
+
+                    <span className="text-right text-sm text-slate-600 dark:text-slate-300">
+                      {student?.admission_number || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-4">
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      Phone
+                    </span>
+
+                    <span className="text-right text-sm text-slate-600 dark:text-slate-300">
+                      {parent.phone_number || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-4">
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      Email
+                    </span>
+
+                    <span className="max-w-[65%] break-all text-right text-sm text-slate-600 dark:text-slate-300">
+                      {parent.email || "-"}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      `${basePath}/${parent.id}`
+                    )
+                  }
+                  className="mt-4 w-full rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                >
+                  View Parent
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
     </div>
   );
-};
-
-export default AllParents;
+}

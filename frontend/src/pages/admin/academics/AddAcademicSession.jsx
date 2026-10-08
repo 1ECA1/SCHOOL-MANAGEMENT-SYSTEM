@@ -23,6 +23,10 @@ const AddAcademicSession = () => {
   const [loadingSchools, setLoadingSchools] = useState(true);
   const [error, setError] = useState("");
 
+  // ============================================================
+  // LOAD SCHOOLS
+  // ============================================================
+
   useEffect(() => {
     const loadSchools = async () => {
       try {
@@ -32,14 +36,9 @@ const AddAcademicSession = () => {
 
         setSchools(data);
       } catch (err) {
-        console.error(
-          "Failed to load schools:",
-          err,
-        );
+        console.error("Failed to load schools:", err);
 
-        setError(
-          "Failed to load schools.",
-        );
+        setError("Failed to load schools.");
       } finally {
         setLoadingSchools(false);
       }
@@ -48,17 +47,22 @@ const AddAcademicSession = () => {
     loadSchools();
   }, []);
 
+  // ============================================================
+  // HANDLE INPUT CHANGE
+  // ============================================================
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
+
+  // ============================================================
+  // SUBMIT
+  // ============================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,9 +90,7 @@ const AddAcademicSession = () => {
     }
 
     if (formData.end_date <= formData.start_date) {
-      setError(
-        "End date must be after the start date.",
-      );
+      setError("End date must be after the start date.");
       return;
     }
 
@@ -106,10 +108,7 @@ const AddAcademicSession = () => {
 
       navigate("/admin/academic/sessions");
     } catch (err) {
-      console.error(
-        "Failed to create academic session:",
-        err,
-      );
+      console.error("Failed to create academic session:", err);
 
       const message =
         err?.response?.data?.name?.[0] ||
@@ -122,44 +121,61 @@ const AddAcademicSession = () => {
     }
   };
 
+  // ============================================================
+  // UI
+  // ============================================================
+
   return (
-    <div className="p-6">
+    <div className="min-h-full bg-[var(--color-background)] text-[var(--color-text)] p-6">
+      {/* ======================================================
+          PAGE HEADER
+      ====================================================== */}
+
       <div className="mb-6">
         <button
           type="button"
-          onClick={() =>
-            navigate("/admin/academic/sessions")
-          }
-          className="mb-4 text-sm font-medium text-blue-600 hover:text-blue-700"
+          onClick={() => navigate("/admin/academic/sessions")}
+          className="mb-4 text-sm font-medium text-[var(--color-primary)] transition hover:opacity-80"
         >
           ← Back to Academic Sessions
         </button>
 
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">
           Add Academic Session
         </h1>
 
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-[var(--color-text)]/60">
           Create a new academic session for a school.
         </p>
       </div>
 
+      {/* ======================================================
+          ERROR
+      ====================================================== */}
+
       {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mb-6 max-w-3xl rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400">
           {error}
         </div>
       )}
 
+      {/* ======================================================
+          FORM
+      ====================================================== */}
+
       <form
         onSubmit={handleSubmit}
-        className="max-w-3xl rounded-xl bg-white p-6 shadow"
+        className="max-w-3xl rounded-xl border border-[var(--color-text)]/10 bg-[var(--color-card)] p-6 shadow-sm"
       >
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* School */}
+          {/* ==================================================
+              SCHOOL
+          ================================================== */}
+
           <div className="md:col-span-2">
             <label
               htmlFor="school"
-              className="mb-2 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-sm font-medium text-[var(--color-text)]"
             >
               School
             </label>
@@ -170,7 +186,7 @@ const AddAcademicSession = () => {
               value={formData.school}
               onChange={handleChange}
               disabled={loadingSchools}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">
                 {loadingSchools
@@ -179,21 +195,21 @@ const AddAcademicSession = () => {
               </option>
 
               {schools.map((school) => (
-                <option
-                  key={school.id}
-                  value={school.id}
-                >
+                <option key={school.id} value={school.id}>
                   {school.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Session Name */}
+          {/* ==================================================
+              SESSION NAME
+          ================================================== */}
+
           <div className="md:col-span-2">
             <label
               htmlFor="name"
-              className="mb-2 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-sm font-medium text-[var(--color-text)]"
             >
               Academic Session Name
             </label>
@@ -206,19 +222,22 @@ const AddAcademicSession = () => {
               onChange={handleChange}
               placeholder="Example: 2026/2027"
               maxLength={50}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text)]/40 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-[var(--color-text)]/50">
               Example: 2026/2027
             </p>
           </div>
 
-          {/* Start Date */}
+          {/* ==================================================
+              START DATE
+          ================================================== */}
+
           <div>
             <label
               htmlFor="start_date"
-              className="mb-2 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-sm font-medium text-[var(--color-text)]"
             >
               Start Date
             </label>
@@ -229,15 +248,18 @@ const AddAcademicSession = () => {
               type="date"
               value={formData.start_date}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
           </div>
 
-          {/* End Date */}
+          {/* ==================================================
+              END DATE
+          ================================================== */}
+
           <div>
             <label
               htmlFor="end_date"
-              className="mb-2 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-sm font-medium text-[var(--color-text)]"
             >
               End Date
             </label>
@@ -248,11 +270,14 @@ const AddAcademicSession = () => {
               type="date"
               value={formData.end_date}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
             />
           </div>
 
-          {/* Current */}
+          {/* ==================================================
+              CURRENT SESSION
+          ================================================== */}
+
           <div className="md:col-span-2">
             <label className="flex cursor-pointer items-center gap-3">
               <input
@@ -260,22 +285,25 @@ const AddAcademicSession = () => {
                 name="is_current"
                 checked={formData.is_current}
                 onChange={handleChange}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 cursor-pointer rounded accent-[var(--color-primary)]"
               />
 
               <span>
-                <span className="block text-sm font-medium text-gray-700">
+                <span className="block text-sm font-medium text-[var(--color-text)]">
                   Current Academic Session
                 </span>
 
-                <span className="block text-xs text-gray-500">
+                <span className="block text-xs text-[var(--color-text)]/50">
                   Mark this session as the current session.
                 </span>
               </span>
             </label>
           </div>
 
-          {/* Active */}
+          {/* ==================================================
+              ACTIVE
+          ================================================== */}
+
           <div className="md:col-span-2">
             <label className="flex cursor-pointer items-center gap-3">
               <input
@@ -283,15 +311,15 @@ const AddAcademicSession = () => {
                 name="is_active"
                 checked={formData.is_active}
                 onChange={handleChange}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 cursor-pointer rounded accent-[var(--color-primary)]"
               />
 
               <span>
-                <span className="block text-sm font-medium text-gray-700">
+                <span className="block text-sm font-medium text-[var(--color-text)]">
                   Active
                 </span>
 
-                <span className="block text-xs text-gray-500">
+                <span className="block text-xs text-[var(--color-text)]/50">
                   Keep this academic session active.
                 </span>
               </span>
@@ -299,14 +327,15 @@ const AddAcademicSession = () => {
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="mt-8 flex justify-end gap-3 border-t border-gray-100 pt-6">
+        {/* ======================================================
+            BUTTONS
+        ====================================================== */}
+
+        <div className="mt-8 flex flex-col justify-end gap-3 border-t border-[var(--color-text)]/10 pt-6 sm:flex-row">
           <button
             type="button"
-            onClick={() =>
-              navigate("/admin/academic/sessions")
-            }
-            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            onClick={() => navigate("/admin/academic/sessions")}
+            className="rounded-lg border border-[var(--color-text)]/15 bg-[var(--color-card)] px-5 py-2.5 text-sm font-medium text-[var(--color-text)] transition hover:bg-[var(--color-background)]"
           >
             Cancel
           </button>
@@ -314,11 +343,9 @@ const AddAcademicSession = () => {
           <button
             type="submit"
             disabled={loading || loadingSchools}
-            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading
-              ? "Creating..."
-              : "Create Session"}
+            {loading ? "Creating..." : "Create Session"}
           </button>
         </div>
       </form>

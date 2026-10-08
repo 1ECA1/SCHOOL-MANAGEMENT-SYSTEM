@@ -1,6 +1,9 @@
 from django.urls import path
 
 from .views import (
+    AccountantProfileView,
+    AccountantCreateView,
+
     FeeCategoryListCreateView,
     FeeCategoryDetailView,
 
@@ -12,9 +15,15 @@ from .views import (
 
     PaymentListCreateView,
     PaymentDetailView,
+    PaymentInitiateView,
+    PaymentReceiptView,
+
+    PaystackVerifyView,
+    PaystackWebhookView,
 
     ScholarshipListCreateView,
     ScholarshipDetailView,
+    ScholarshipApplyView,
 
     FinanceSummaryView,
     StudentFinancialStatementView,
@@ -26,14 +35,35 @@ from .views import (
     ExpenseDetailView,
     ExpenseSummaryView,
     FinanceDashboardView,
+
+    FinancialSummaryReportView,
+    IncomeReportView,
+    ExpenseReportView,
+    StudentFinancialReportView,
 )
 
 
 urlpatterns = [
 
-    # =========================
-    # Fee Categories
-    # =========================
+    # =====================================================
+    # ACCOUNTANT
+    # =====================================================
+
+    path(
+        "accountants/",
+        AccountantCreateView.as_view(),
+        name="accountant-create",
+    ),
+
+    path(
+        "profile/",
+        AccountantProfileView.as_view(),
+        name="accountant-profile",
+    ),
+
+    # =====================================================
+    # FEE CATEGORIES
+    # =====================================================
 
     path(
         "fee-categories/",
@@ -47,10 +77,9 @@ urlpatterns = [
         name="fee-category-detail",
     ),
 
-
-    # =========================
-    # Fee Structures
-    # =========================
+    # =====================================================
+    # FEE STRUCTURES
+    # =====================================================
 
     path(
         "fee-structures/",
@@ -64,10 +93,9 @@ urlpatterns = [
         name="fee-structure-detail",
     ),
 
-
-    # =========================
-    # Student Invoices
-    # =========================
+    # =====================================================
+    # STUDENT INVOICES
+    # =====================================================
 
     path(
         "invoices/",
@@ -81,10 +109,15 @@ urlpatterns = [
         name="invoice-detail",
     ),
 
+    # =====================================================
+    # PAYMENTS
+    # =====================================================
 
-    # =========================
-    # Payments
-    # =========================
+    path(
+        "payments/initiate/",
+        PaymentInitiateView.as_view(),
+        name="payment-initiate",
+    ),
 
     path(
         "payments/",
@@ -98,10 +131,31 @@ urlpatterns = [
         name="payment-detail",
     ),
 
+    path(
+    "payments/<int:pk>/receipt/",
+    PaymentReceiptView.as_view(),
+    name="payment-receipt",
+),
 
-    # =========================
-    # Scholarships
-    # =========================
+    # =====================================================
+    # PAYSTACK
+    # =====================================================
+
+    path(
+        "payments/paystack/verify/<str:reference>/",
+        PaystackVerifyView.as_view(),
+        name="paystack-verify",
+    ),
+
+    path(
+        "payments/paystack/webhook/",
+        PaystackWebhookView.as_view(),
+        name="paystack-webhook",
+    ),
+
+    # =====================================================
+    # SCHOLARSHIPS
+    # =====================================================
 
     path(
         "scholarships/",
@@ -115,10 +169,15 @@ urlpatterns = [
         name="scholarship-detail",
     ),
 
+    path(
+        "scholarships/<int:pk>/apply/",
+        ScholarshipApplyView.as_view(),
+        name="scholarship-apply",
+    ),
 
-    # =========================
-    # Finance Summary
-    # =========================
+    # =====================================================
+    # FINANCE SUMMARY
+    # =====================================================
 
     path(
         "summary/",
@@ -138,21 +197,42 @@ urlpatterns = [
         name="generate-invoices",
     ),
 
-# =========================
-# Finance Dashboard
-# =========================
+    # =====================================================
+    # FINANCE DASHBOARD
+    # =====================================================
 
-path(
-    "dashboard/",
-    FinanceDashboardView.as_view(),
-    name="finance-dashboard",
-),
+    path(
+        "dashboard/",
+        FinanceDashboardView.as_view(),
+        name="finance-dashboard",
+    ),
 
 
+    path(
+        "reports/financial-summary/",
+        FinancialSummaryReportView.as_view(),
+        name="financial-summary-report",
+    ),
 
-    # =========================
-    # Expense Categories
-    # =========================
+    path(
+        "reports/income/",
+        IncomeReportView.as_view(),
+        name="income-report",
+    ),
+    path(
+        "reports/expenses/",
+        ExpenseReportView.as_view(),
+        name="expense-report",
+    ),
+
+    path(
+        "reports/students/",
+        StudentFinancialReportView.as_view(),
+        name="student-financial-report",
+    ),
+    # =====================================================
+    # EXPENSE CATEGORIES
+    # =====================================================
 
     path(
         "expense-categories/",
@@ -166,10 +246,9 @@ path(
         name="expense-category-detail",
     ),
 
-
-    # =========================
-    # Expenses
-    # =========================
+    # =====================================================
+    # EXPENSES
+    # =====================================================
 
     path(
         "expenses/",
@@ -177,7 +256,8 @@ path(
         name="expense-list-create",
     ),
 
-    # IMPORTANT: summary must come BEFORE <int:pk>
+    # IMPORTANT:
+    # Keep summary before <int:pk>
     path(
         "expenses/summary/",
         ExpenseSummaryView.as_view(),

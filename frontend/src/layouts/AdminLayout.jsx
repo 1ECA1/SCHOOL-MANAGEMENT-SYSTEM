@@ -23,18 +23,17 @@
 // }
 
 // export default AdminLayout;
-
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/navigation/Sidebar";
 import Topbar from "../components/navigation/Topbar";
+import { adminRoutes } from "../routes/adminRoutes";
 
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)]">
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <button
           type="button"
@@ -44,12 +43,18 @@ function AdminLayout() {
         />
       )}
 
-      {/* Sidebar */}
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        routes={adminRoutes}
+        basePath="/admin"
+      />
 
-      {/* Main Area */}
       <div className="min-h-screen md:ml-64">
-        <Topbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <Topbar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
 
         <main className="p-4 sm:p-5 lg:p-7">
           <Outlet />
@@ -60,7 +65,6 @@ function AdminLayout() {
 }
 
 export default AdminLayout;
-
 // // src/layouts/AdminLayout.jsx
 // import React from "react";
 // import { Outlet } from "react-router-dom";

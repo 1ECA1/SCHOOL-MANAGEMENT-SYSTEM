@@ -71,24 +71,49 @@
   --color-text: #f8fafc;
 } */
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --color-background: #f8fafc; /* slate-50 */
-  --color-sidebar: #111827; /* gray-900 */
-  --color-primary: #1d4ed8; /* blue-700 ← changed */
-  --color-secondary: #06b6d4; /* cyan-500 (kept – pairs perfectly with blue) */
+  --color-background: #f8fafc; 
+  --color-sidebar: #111827; 
+  --color-primary: #1d4ed8; 
+  --color-secondary: #06b6d4; 
   --color-card: #ffffff;
-  --color-text: #111827; /* gray-900 */
+  --color-text: #111827; 
 }
 
 .dark {
   --color-background: #0b1120;
-  --color-sidebar: #020617; /* slate-950 */
-  --color-primary: #3b82f6; /* blue-500 ← lighter for dark mode contrast */
-  --color-secondary: #22d3ee; /* cyan-400 (kept) */
+  --color-sidebar: #020617; 
+  --color-primary: #3b82f6; 
+  --color-secondary: #22d3ee; 
   --color-card: #111827;
-  --color-text: #f8fafc; /* slate-50 */
+  --color-text: #f8fafc; 
+} */
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: #f8fafc;
+  --color-sidebar: #111827;
+  --color-primary: #1d4ed8;
+  --color-secondary: #06b6d4;
+  --color-card: #ffffff;
+  --color-text: #111827;
+}
+
+:root {
+  /* leave empty, or remove entirely if nothing else needs it */
+}
+
+.dark {
+  --color-background: #0b1120;
+  --color-sidebar: #020617;
+  --color-primary: #3b82f6;
+  --color-secondary: #22d3ee;
+  --color-card: #111827;
+  --color-text: #f8fafc;
 }
 
 html,
@@ -119,5 +144,71 @@ body {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+
+
+
+/* =====================================================
+   ATTENDANCE REPORT PRINT
+===================================================== */
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  /* Hide normal application navigation */
+  nav,
+  aside,
+  header {
+    display: none !important;
+  }
+
+  /* Hide elements marked as print-hidden */
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Remove normal page spacing */
+  #root {
+    width: 100% !important;
+  }
+
+  /* Make the report use the full page */
+  #attendance-report {
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Keep report tables readable */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th,
+  td {
+    border-bottom: 1px solid #ddd !important;
+  }
+
+  /* Avoid awkward page breaks */
+  tr {
+    page-break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
   }
 }
