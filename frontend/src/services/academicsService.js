@@ -407,13 +407,50 @@ export const deleteSession = async (id) => {
 // =====================================================
 
 export const getTerms = async (schoolId = null) => {
-  const url = schoolId
-    ? `/academics/terms/?school=${schoolId}`
-    : "/academics/terms/";
+const url = schoolId
+? `/academics/terms/?school=${schoolId}`
+: "/academics/terms/";
 
-  const { data } = await api.get(url);
-  return data;
+const response = await api.get(url);
+
+console.log("========== GET TERMS DEBUG ==========");
+console.log(
+"REQUEST URL:",
+`${response.config?.baseURL || ""}${response.config?.url || url}`
+);
+console.log("STATUS:", response.status);
+console.log("RESPONSE DATA:", response.data);
+
+const data = response.data;
+const terms = Array.isArray(data)
+? data
+: Array.isArray(data?.results)
+? data.results
+: [];
+
+console.log("TERM COUNT:", terms.length);
+console.log(
+"TERM IDs:",
+terms.map((term) => ({
+id: term.id,
+name: term.name,
+academic_session: term.academic_session,
+}))
+);
+console.log("======================================");
+
+return data;
 };
+
+
+// export const getTerms = async (schoolId = null) => {
+//   const url = schoolId
+//     ? `/academics/terms/?school=${schoolId}`
+//     : "/academics/terms/";
+
+//   const { data } = await api.get(url);
+//   return data;
+// };
 
 export const getTerm = async (id) => {
   const { data } = await api.get(`/academics/terms/${id}/`);

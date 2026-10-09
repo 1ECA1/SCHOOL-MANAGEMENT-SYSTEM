@@ -386,7 +386,7 @@ class AcademicSessionViewSet(
         # EXISTING AUTHENTICATED LOGIC
         # =========================================================
         if user.role == "SUPER_ADMIN":
-            
+
             school_id = self.request.query_params.get("school")
 
             if school_id:
@@ -581,20 +581,26 @@ class TermViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
 
-        # Public admission form
+        # --------------------------------------------------------
+        # PUBLIC / UNAUTHENTICATED REQUESTS
+        # --------------------------------------------------------
         if not user.is_authenticated:
+            session_id = self.request.query_params.get(
+                "academic_session"
+            )
             school_id = self.request.query_params.get("school")
-            session_id = self.request.query_params.get("academic_session")
 
             if session_id:
                 try:
                     session_id = int(session_id)
                 except (TypeError, ValueError):
                     raise ValidationError({
-                        "academic_session": "Academic session must be a valid ID."
+                        "academic_session": (
+                            "Academic session must be a valid ID."
+                        )
                     })
 
-                return queryset.filter(
+                queryset = queryset.filter(
                     academic_session_id=session_id
                 )
 
@@ -606,30 +612,44 @@ class TermViewSet(viewsets.ModelViewSet):
                         "school": "School must be a valid school ID."
                     })
 
-                return queryset.filter(
+                queryset = queryset.filter(
                     academic_session__school_id=school_id
                 )
 
             return queryset
 
-
+        # --------------------------------------------------------
+        # SUPER ADMIN
+        # --------------------------------------------------------
         if user.role == "SUPER_ADMIN":
-
+            session_id = self.request.query_params.get(
+                "academic_session"
+            )
             school_id = self.request.query_params.get("school")
+
+            if session_id:
+                try:
+                    session_id = int(session_id)
+                except (TypeError, ValueError):
+                    raise ValidationError({
+                        "academic_session": (
+                            "Academic session must be a valid ID."
+                        )
+                    })
+
+                queryset = queryset.filter(
+                    academic_session_id=session_id
+                )
 
             if school_id:
                 try:
                     school_id = int(school_id)
                 except (TypeError, ValueError):
-                    raise ValidationError(
-                        {
-                            "school": (
-                                "School must be a valid school ID."
-                            )
-                        }
-                    )
+                    raise ValidationError({
+                        "school": "School must be a valid school ID."
+                    })
 
-                return queryset.filter(
+                queryset = queryset.filter(
                     academic_session__school_id=school_id
                 )
 
@@ -647,9 +667,29 @@ class TermViewSet(viewsets.ModelViewSet):
             if not user.school_id:
                 return queryset.none()
 
-            return queryset.filter(
+            queryset = queryset.filter(
                 academic_session__school_id=user.school_id
             )
+
+            session_id = self.request.query_params.get(
+                "academic_session"
+            )
+
+            if session_id:
+                try:
+                    session_id = int(session_id)
+                except (TypeError, ValueError):
+                    raise ValidationError({
+                        "academic_session": (
+                            "Academic session must be a valid ID."
+                        )
+                    })
+
+                queryset = queryset.filter(
+                    academic_session_id=session_id
+                )
+
+            return queryset
 
         # --------------------------------------------------------
         # ACCOUNTANT
@@ -661,20 +701,38 @@ class TermViewSet(viewsets.ModelViewSet):
                 None,
             )
 
-            if not accountant_profile:
+            if (
+                not accountant_profile
+                or not accountant_profile.is_active
+                or not accountant_profile.school_id
+            ):
                 return queryset.none()
 
-            if not accountant_profile.is_active:
-                return queryset.none()
-
-            if not accountant_profile.school_id:
-                return queryset.none()
-
-            return queryset.filter(
+            queryset = queryset.filter(
                 academic_session__school_id=(
                     accountant_profile.school_id
                 )
             )
+
+            session_id = self.request.query_params.get(
+                "academic_session"
+            )
+
+            if session_id:
+                try:
+                    session_id = int(session_id)
+                except (TypeError, ValueError):
+                    raise ValidationError({
+                        "academic_session": (
+                            "Academic session must be a valid ID."
+                        )
+                    })
+
+                queryset = queryset.filter(
+                    academic_session_id=session_id
+                )
+
+            return queryset
 
         # --------------------------------------------------------
         # TEACHER
@@ -686,23 +744,44 @@ class TermViewSet(viewsets.ModelViewSet):
                 None,
             )
 
-            if not teacher_profile:
+            if (
+                not teacher_profile
+                or not teacher_profile.school_id
+            ):
                 return queryset.none()
 
-            if not teacher_profile.school_id:
-                return queryset.none()
-
-            return queryset.filter(
+            queryset = queryset.filter(
                 academic_session__school_id=(
                     teacher_profile.school_id
                 )
             )
+
+            session_id = self.request.query_params.get(
+                "academic_session"
+            )
+
+            if session_id:
+                try:
+                    session_id = int(session_id)
+                except (TypeError, ValueError):
+                    raise ValidationError({
+                        "academic_session": (
+                            "Academic session must be a valid ID."
+                        )
+                    })
+
+                queryset = queryset.filter(
+                    academic_session_id=session_id
+                )
+
+            return queryset
 
         # --------------------------------------------------------
         # ALL OTHER ROLES
         # --------------------------------------------------------
         return queryset.none()
 
+  
     def _validate_school_access(
         self,
         academic_session,

@@ -33,6 +33,10 @@ import Department from "../pages/schoolAdmin/academics/Department";
 import Session from "../pages/schoolAdmin/academics/Session";
 
 import Terms from "../pages/schoolAdmin/academics/Terms";
+import TermForm from "../pages/schoolAdmin/academics/TermForm";
+import TermDetails from "../pages/schoolAdmin/academics/TermDetails";
+
+
 import ClassSubjects from "../pages/schoolAdmin/academics/ClassSubjects";
 import AddClassSubject from "../pages/schoolAdmin/academics/AddClassSubject";
 import EditClassSubject from "../pages/schoolAdmin/academics/EditClassSubject";
@@ -335,21 +339,21 @@ export const schoolAdminRoutes = [
   },
 
   {
-    path: "academics/terms",
-    element: <Terms />,
-  },
-  {
-    path: "academics/terms/add",
-    element: <Terms />,
-  },
-  {
-    path: "academics/terms/:id",
-    element: <Terms />,
-  },
-  {
-    path: "academics/terms/:id/edit",
-    element: <Terms />,
-  },
+  path: "academics/terms",
+  element: <Terms />,
+},
+{
+  path: "academics/terms/add",
+  element: <TermForm />,
+},
+{
+  path: "academics/terms/:id",
+  element: <TermDetails />,
+},
+{
+  path: "academics/terms/:id/edit",
+  element: <TermForm />,
+},
 
   {
     path: "academics/class-subjects",
