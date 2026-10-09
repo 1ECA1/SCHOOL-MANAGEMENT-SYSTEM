@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -10,91 +11,42 @@ const routes = [
     label: "Dashboard",
     icon: "▦",
   },
-
   {
     path: "/school-admin/people",
     label: "People",
     icon: "👥",
     children: [
-      {
-        path: "/school-admin/people/students",
-        label: "Students",
-      },
-      {
-        path: "/school-admin/people/teachers",
-        label: "Teachers",
-      },
-      {
-        path: "/school-admin/people/parents",
-        label: "Parents / Guardians",
-      },
-      {
-        path: "/school-admin/people/principals",
-        label: "Principals",
-      },
-      {
-        path: "/school-admin/people/other-staff",
-        label: "Other Staff",
-      },
+      { path: "/school-admin/people/students", label: "Students" },
+      { path: "/school-admin/people/teachers", label: "Teachers" },
+      { path: "/school-admin/people/parents", label: "Parents / Guardians" },
+      { path: "/school-admin/people/principals", label: "Principals" },
+      { path: "/school-admin/people/other-staff", label: "Other Staff" },
     ],
   },
-
   {
     path: "/school-admin/academics",
     label: "Academics",
     icon: "🎓",
     children: [
-      {
-        path: "/school-admin/academics/classes",
-        label: "Classes",
-      },
-      {
-        path: "/school-admin/academics/subjects",
-        label: "Subjects",
-      },
-      {
-        path: "/school-admin/academics/departments",
-        label: "Departments",
-      },
-      {
-        path: "/school-admin/academics/sessions",
-        label: "Sessions",
-      },
-      {
-        path: "/school-admin/academics/terms",
-        label: "Terms",
-      },
-      {
-        path: "/school-admin/academics/class-subjects",
-        label: "Class Subjects",
-      },
+      { path: "/school-admin/academics/classes", label: "Classes" },
+      { path: "/school-admin/academics/subjects", label: "Subjects" },
+      { path: "/school-admin/academics/departments", label: "Departments" },
+      { path: "/school-admin/academics/sessions", label: "Sessions" },
+      { path: "/school-admin/academics/terms", label: "Terms" },
+      { path: "/school-admin/academics/class-subjects", label: "Class Subjects" },
     ],
   },
-
   {
     path: "/school-admin/student-management",
     label: "Student Management",
     icon: "🎓",
     children: [
-      {
-        path: "/school-admin/student-management/enrollment",
-        label: "Enrollment",
-      },
-      {
-        path: "/school-admin/student-management/promotion",
-        label: "Promotion",
-      },
-      {
-        path: "/school-admin/student-management/graduation",
-        label: "Graduation",
-      },
-      {
-        path: "/school-admin/student-management/student-accounts",
-        label: "Student Accounts",
-      },
+      { path: "/school-admin/student-management/enrollment", label: "Enrollment" },
+      { path: "/school-admin/student-management/promotion", label: "Promotion" },
+      { path: "/school-admin/student-management/graduation", label: "Graduation" },
+      { path: "/school-admin/student-management/student-accounts", label: "Student Accounts" },
     ],
   },
-
   {
     path: "/school-admin/attendance",
     label: "Attendance",
@@ -105,101 +57,56 @@ const routes = [
         label: "Attendance",
         end: true,
       },
-      {
-        path: "/school-admin/attendance/reports",
-        label: "Reports",
-      },
+      { path: "/school-admin/attendance/reports", label: "Reports" },
     ],
   },
-
   {
     path: "/school-admin/assignments",
     label: "Assignments",
     icon: "📝",
   },
-
   {
     path: "/school-admin/examinations-results",
     label: "Examinations & Results",
     icon: "📊",
     children: [
-      {
-        path: "/school-admin/examinations-results/exams",
-        label: "Exams",
-      },
-      {
-        path: "/school-admin/examinations-results/results",
-        label: "Results",
-      },
-      {
-        path: "/school-admin/examinations-results/result-approval",
-        label: "Result Approval",
-      },
-      {
-        path: "/school-admin/examinations-results/report-cards",
-        label: "Report Cards",
-      },
+      { path: "/school-admin/examinations-results/exams", label: "Exams" },
+      { path: "/school-admin/examinations-results/results", label: "Results" },
+      { path: "/school-admin/examinations-results/result-approval", label: "Result Approval" },
+      { path: "/school-admin/examinations-results/report-cards", label: "Report Cards" },
     ],
   },
-
   {
     path: "/school-admin/finance",
     label: "Finance",
     icon: "💰",
     children: [
-      {
-        path: "/school-admin/finance/fees",
-        label: "Fees",
-      },
-      {
-        path: "/school-admin/finance/payments",
-        label: "Payments",
-      },
-      {
-        path: "/school-admin/finance/outstanding-balances",
-        label: "Outstanding Balances",
-      },
-      {
-        path: "/school-admin/finance/reports",
-        label: "Financial Reports",
-      },
+      { path: "/school-admin/finance/fees", label: "Fees" },
+      { path: "/school-admin/finance/payments", label: "Payments" },
+      { path: "/school-admin/finance/outstanding-balances", label: "Outstanding Balances" },
+      { path: "/school-admin/finance/reports", label: "Financial Reports" },
     ],
   },
-
   {
     path: "/school-admin/notifications",
     label: "Notifications",
     icon: "🔔",
   },
-
   {
     path: "/school-admin/audit",
     label: "Audit",
     icon: "📈",
   },
-
   {
     path: "/school-admin/settings",
     label: "Settings",
     icon: "⚙",
     bottom: true,
     children: [
-      {
-        path: "/school-admin/settings/school-information",
-        label: "School Information",
-      },
-      {
-        path: "/school-admin/settings/academic-settings",
-        label: "Academic Settings",
-      },
-      {
-        path: "/school-admin/settings/grading-settings",
-        label: "Grading Settings",
-      },
-      {
-        path: "/school-admin/settings/user-permissions",
-        label: "User Permissions",
-      },
+      { path: "/school-admin/settings/school-information", label: "School Information" },
+      { path: "/school-admin/settings/academic-settings", label: "Academic Settings" },
+      { path: "/school-admin/settings/grading-settings", label: "Grading Settings" },
+      { path: "/school-admin/settings/user-permissions", label: "User Permissions" },
     ],
   },
 ];
@@ -211,15 +118,13 @@ const isSectionActive = (route, pathname) => {
 
   return (
     pathname === route.path ||
-    pathname.startsWith(route.path + "/")
+    pathname.startsWith(`${route.path}/`)
   );
 };
 
 const loadExpanded = () => {
   try {
-    return JSON.parse(
-      sessionStorage.getItem(STORAGE_KEY)
-    ) || {};
+    return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {};
   } catch {
     return {};
   }
@@ -232,24 +137,13 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
 
   const [expanded, setExpanded] = useState(loadExpanded);
 
-  // =====================================================
-  // SAVE EXPANDED SECTIONS
-  // =====================================================
-
   useEffect(() => {
     try {
-      sessionStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(expanded)
-      );
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
     } catch {
-      /* Ignore storage errors */
+      // Ignore storage errors.
     }
   }, [expanded]);
-
-  // =====================================================
-  // AUTO-OPEN CURRENT SECTION
-  // =====================================================
 
   useEffect(() => {
     const activeRoute = routes.find(
@@ -262,17 +156,10 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
       setExpanded((prev) =>
         prev[activeRoute.path]
           ? prev
-          : {
-              ...prev,
-              [activeRoute.path]: true,
-            }
+          : { ...prev, [activeRoute.path]: true }
       );
     }
   }, [location.pathname]);
-
-  // =====================================================
-  // TOGGLE SECTION
-  // =====================================================
 
   const toggleSection = (path) => {
     setExpanded((prev) => ({
@@ -281,19 +168,11 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
     }));
   };
 
-  // =====================================================
-  // MOBILE CLOSE
-  // =====================================================
-
   const closeOnMobile = () => {
     if (window.innerWidth < 1024) {
       setOpen(false);
     }
   };
-
-  // =====================================================
-  // LOGOUT
-  // =====================================================
 
   const handleLogout = async () => {
     try {
@@ -302,53 +181,40 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
       console.error("Logout error:", error);
     } finally {
       setOpen(false);
-      navigate("/login", {
-        replace: true,
-      });
+      navigate("/login", { replace: true });
     }
   };
 
   return (
     <>
-      {/* =====================================================
-          MOBILE OVERLAY
-      ===================================================== */}
-
       {open && (
         <div
           className="fixed inset-0 z-30 bg-black/40 lg:hidden"
           onClick={() => setOpen(false)}
+          aria-hidden="true"
         />
       )}
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
-
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-[var(--color-sidebar)] shadow-lg transition-transform duration-300 lg:translate-x-0 ${
-          open
-            ? "translate-x-0"
-            : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen h-[100dvh] w-64 flex-col overflow-hidden bg-[var(--color-sidebar)] shadow-lg transition-transform duration-300 lg:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+        aria-label="School Admin navigation"
       >
-
-        {/* =====================================================
-            HEADER
-        ===================================================== */}
-
-        <div className="flex h-16 shrink-0 items-center border-b border-white/10 px-5">
+        {/* HEADER: remains visible */}
+        <div className="flex h-16 min-h-16 shrink-0 items-center border-b border-white/10 px-5">
           <div>
             <h1 className="text-lg font-bold text-white">
               EduManageERP
             </h1>
-
             <p className="text-xs text-gray-400">
               School Admin
             </p>
           </div>
-
-          {/* MOBILE CLOSE BUTTON */}
 
           <button
             type="button"
@@ -360,12 +226,11 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
           </button>
         </div>
 
-        {/* =====================================================
-            NAVIGATION
-        ===================================================== */}
-
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-
+        {/* NAVIGATION: scrolls independently */}
+        <nav
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-4"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             School Admin
           </div>
@@ -386,15 +251,11 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
           </div>
         </nav>
 
-        {/* =====================================================
-            SETTINGS + LOGOUT
-            FIXED AT BOTTOM
-        ===================================================== */}
-
-        <div className="shrink-0 border-t border-white/10 bg-[var(--color-sidebar)] px-3 py-4">
-
-          {/* SETTINGS */}
-
+        {/* BOTTOM ACTIONS: visible and independently scrollable if needed */}
+        <div
+          className="max-h-[45%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/10 bg-[var(--color-sidebar)] px-3 pt-3 pb-3"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           {routes
             .filter((route) => route.bottom)
             .map((route) => (
@@ -408,32 +269,21 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
               />
             ))}
 
-          {/* =================================================
-              LOGOUT BUTTON
-          ================================================= */}
-
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-300 transition hover:bg-red-500/10 hover:text-red-400"
+            className="mt-2 flex min-h-11 w-full shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-300 transition hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
           >
-            <span className="w-6 text-center">
+            <span className="w-6 text-center" aria-hidden="true">
               ↪
             </span>
-
-            <span>
-              Logout
-            </span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
     </>
   );
 };
-
-// =========================================================
-// SIDEBAR ITEM
-// =========================================================
 
 const SidebarItem = ({
   route,
@@ -446,17 +296,8 @@ const SidebarItem = ({
     Array.isArray(route.children) &&
     route.children.length > 0;
 
-  const active = isSectionActive(
-    route,
-    pathname
-  );
-
-  const isExpanded =
-    !!expanded[route.path];
-
-  // =====================================================
-  // ITEM WITHOUT CHILDREN
-  // =====================================================
+  const active = isSectionActive(route, pathname);
+  const isExpanded = !!expanded[route.path];
 
   if (!hasChildren) {
     return (
@@ -472,28 +313,19 @@ const SidebarItem = ({
           }`
         }
       >
-        <span className="w-6 text-center">
+        <span className="w-6 shrink-0 text-center">
           {route.icon}
         </span>
-
-        <span>
-          {route.label}
-        </span>
+        <span className="min-w-0">{route.label}</span>
       </NavLink>
     );
   }
-
-  // =====================================================
-  // ITEM WITH DROPDOWN
-  // =====================================================
 
   return (
     <div>
       <button
         type="button"
-        onClick={() =>
-          toggleSection(route.path)
-        }
+        onClick={() => toggleSection(route.path)}
         aria-expanded={isExpanded}
         className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition ${
           active
@@ -501,18 +333,19 @@ const SidebarItem = ({
             : "text-gray-300 hover:bg-white/10 hover:text-white"
         }`}
       >
-        <span className="w-6 text-center">
+        <span className="w-6 shrink-0 text-center">
           {route.icon}
         </span>
-
-        <span className="flex-1">
-          {route.label}
+        <span className="min-w-0 flex-1">{route.label}</span>
+        <span
+          className={`text-xs transition-transform ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+          aria-hidden="true"
+        >
+          ▾
         </span>
       </button>
-
-      {/* =================================================
-          CHILDREN
-      ================================================= */}
 
       {isExpanded && (
         <div className="ml-6 mt-1 space-y-1 border-l border-white/10 pl-3">
