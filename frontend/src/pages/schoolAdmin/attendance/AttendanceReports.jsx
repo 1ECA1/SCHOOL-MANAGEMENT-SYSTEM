@@ -2268,156 +2268,143 @@ export default function AttendanceReports() {
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-[1100px] w-full">
-              <thead className="bg-gray-50">
-                <tr className="border-b border-gray-200 text-left">
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Student
-                  </th>
+          
+<div className="overflow-x-auto">
+  <table className="w-full table-fixed md:table-auto">
+    <thead className="bg-gray-50">
+      <tr className="border-b border-gray-200 text-left">
+        <th className="w-[65%] px-3 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:w-auto md:px-4">
+          Name
+        </th>
 
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    School Opened
-                  </th>
+        <th className="w-[35%] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 md:w-auto md:px-4">
+          Attendance
+        </th>
 
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Total Days
-                  </th>
+        <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          School Opened
+        </th>
 
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Present
-                  </th>
+        <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Total Days
+        </th>
 
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Absent
-                  </th>
+        <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Present
+        </th>
 
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Late
-                  </th>
+        <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Absent
+        </th>
 
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Excused
-                  </th>
+        <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Late
+        </th>
 
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Attendance
-                  </th>
-                </tr>
-              </thead>
+        <th className="hidden px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Excused
+        </th>
+      </tr>
+    </thead>
 
-              <tbody className="divide-y divide-gray-100">
-                {filteredReports.map(
-                  (report) => {
-                    if (!report.success) {
-                      return (
-                        <tr
-                          key={
-                            report.student_id
-                          }
-                          className="bg-red-50/40"
-                        >
-                          <td className="px-4 py-4">
-                            <div className="font-medium text-gray-900">
-                              {
-                                report.student_name
-                              }
-                            </div>
+    <tbody className="divide-y divide-gray-100">
+      {filteredReports.map((report) => {
+        if (!report.success) {
+          return (
+            <tr
+              key={report.student_id}
+              className="bg-red-50/40"
+            >
+              <td className="break-words px-3 py-4 md:px-4">
+                <div className="text-sm font-medium text-gray-900">
+                  {report.student_name}
+                </div>
 
-                            {report.admission_number && (
-                              <div className="text-xs text-gray-500">
-                                {
-                                  report.admission_number
-                                }
-                              </div>
-                            )}
-                          </td>
-
-                          <td
-                            colSpan={7}
-                            className="px-4 py-4 text-sm text-red-600"
-                          >
-                            Unable to load attendance
-                            summary:{" "}
-                            {
-                              report.error
-                            }
-                          </td>
-                        </tr>
-                      );
-                    }
-
-                    return (
-                      <tr
-                        key={
-                          report.student_id
-                        }
-                        className="transition hover:bg-gray-50"
-                      >
-                        <td className="px-4 py-4">
-                          <div className="font-medium text-gray-900">
-                            {
-                              report.student_name
-                            }
-                          </div>
-
-                          {report.admission_number && (
-                            <div className="mt-0.5 text-xs text-gray-500">
-                              {
-                                report.admission_number
-                              }
-                            </div>
-                          )}
-                        </td>
-
-                        <td className="px-4 py-4 text-center text-sm font-medium text-gray-700">
-                          {report.times_school_opened ??
-                            0}
-                        </td>
-
-                        <td className="px-4 py-4 text-center text-sm text-gray-700">
-                          {report.total_days ??
-                            0}
-                        </td>
-
-                        <td className="px-4 py-4 text-center text-sm font-semibold text-emerald-600">
-                          {report.present_days ??
-                            0}
-                        </td>
-
-                        <td className="px-4 py-4 text-center text-sm font-semibold text-red-600">
-                          {report.absent_days ??
-                            0}
-                        </td>
-
-                        <td className="px-4 py-4 text-center text-sm font-semibold text-amber-600">
-                          {report.late_days ??
-                            0}
-                        </td>
-
-                        <td className="px-4 py-4 text-center text-sm font-semibold text-blue-600">
-                          {report.excused_days ??
-                            0}
-                        </td>
-
-                        <td className="px-4 py-4 text-right">
-                          <span
-                            className={`text-base font-bold ${getPercentageClass(
-                              report.attendance_percentage,
-                            )}`}
-                          >
-                            {formatPercentage(
-                              report.attendance_percentage,
-                            )}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  },
+                {report.admission_number && (
+                  <div className="mt-0.5 break-all text-xs text-gray-500">
+                    {report.admission_number}
+                  </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </td>
+
+              <td className="px-3 py-4 text-right text-xs text-red-600 md:hidden">
+                Failed
+              </td>
+
+              <td
+                colSpan={7}
+                className="hidden px-4 py-4 text-sm text-red-600 md:table-cell"
+              >
+                Unable to load attendance summary:{" "}
+                {report.error}
+              </td>
+            </tr>
+          );
+        }
+
+        return (
+          <tr
+            key={report.student_id}
+            className="transition hover:bg-gray-50"
+          >
+            {/* Name: visible on mobile and desktop */}
+            <td className="break-words px-3 py-4 md:px-4">
+              <div className="break-words text-sm font-medium text-gray-900">
+                {report.student_name}
+              </div>
+
+              {report.admission_number && (
+                <div className="mt-0.5 break-all text-xs text-gray-500">
+                  {report.admission_number}
+                </div>
+              )}
+            </td>
+
+            {/* Attendance: visible on mobile and desktop */}
+            <td className="px-3 py-4 text-right md:px-4">
+              <span
+                className={`text-sm font-bold md:text-base ${getPercentageClass(
+                  report.attendance_percentage,
+                )}`}
+              >
+                {formatPercentage(
+                  report.attendance_percentage,
+                )}
+              </span>
+            </td>
+
+            {/* Remaining columns: desktop only */}
+            <td className="hidden px-4 py-4 text-center text-sm font-medium text-gray-700 md:table-cell">
+              {report.times_school_opened ?? 0}
+            </td>
+
+            <td className="hidden px-4 py-4 text-center text-sm text-gray-700 md:table-cell">
+              {report.total_days ?? 0}
+            </td>
+
+            <td className="hidden px-4 py-4 text-center text-sm font-semibold text-emerald-600 md:table-cell">
+              {report.present_days ?? 0}
+            </td>
+
+            <td className="hidden px-4 py-4 text-center text-sm font-semibold text-red-600 md:table-cell">
+              {report.absent_days ?? 0}
+            </td>
+
+            <td className="hidden px-4 py-4 text-center text-sm font-semibold text-amber-600 md:table-cell">
+              {report.late_days ?? 0}
+            </td>
+
+            <td className="hidden px-4 py-4 text-center text-sm font-semibold text-blue-600 md:table-cell">
+              {report.excused_days ?? 0}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
+
         )}
       </div>
     </div>

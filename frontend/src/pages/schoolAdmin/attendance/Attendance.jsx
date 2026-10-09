@@ -1196,150 +1196,175 @@ export default function Attendance() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-[1100px] w-full">
-              <thead className="bg-gray-50">
-                <tr className="border-b border-gray-200 text-left">
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Student
-                  </th>
+           
+<div className="overflow-x-auto">
+  <table className="w-full table-fixed md:table-auto">
+    <thead className="bg-gray-50">
+      <tr className="border-b border-gray-200 text-left">
+        <th className="w-[52%] px-3 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:w-auto md:px-4">
+          Student
+        </th>
 
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Class
-                  </th>
+        <th className="w-[23%] px-2 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:w-auto md:px-4">
+          <span className="md:hidden">Status</span>
+          <span className="hidden md:inline">Class</span>
+        </th>
 
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Subject
-                  </th>
+        <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Subject
+        </th>
 
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Session / Term
-                  </th>
+        <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Session / Term
+        </th>
 
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Date
-                  </th>
+        <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Date
+        </th>
 
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Status
-                  </th>
+        <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Status
+        </th>
 
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Check In
-                  </th>
+        <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
+          Check In
+        </th>
 
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
+        <th className="w-[25%] px-2 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 md:w-auto md:px-4">
+          Actions
+        </th>
+      </tr>
+    </thead>
 
-              <tbody className="divide-y divide-gray-100">
-                {filteredAttendance.map((record) => {
-                  const student =
-                    record.student_name ||
-                    getStudentName(
-                      students.find(
-                        (item) =>
-                          String(item.id) ===
-                          String(record.student),
-                      ),
-                    ) ||
-                    `Student #${record.student}`;
+    <tbody className="divide-y divide-gray-100">
+      {filteredAttendance.map((record) => {
+        const student =
+          record.student_name ||
+          getStudentName(
+            students.find(
+              (item) =>
+                String(item.id) === String(record.student),
+            ),
+          ) ||
+          `Student #${record.student}`;
 
-                  const className =
-                    record.class_name ||
-                    record.class_level_name ||
-                    getClassName(record) ||
-                    "—";
+        const className =
+          record.class_name ||
+          record.class_level_name ||
+          getClassName(record) ||
+          "—";
 
-                  const subjectName =
-                    getSubjectName(record);
+        return (
+          <tr
+            key={record.id}
+            className="transition hover:bg-gray-50"
+          >
+            {/* Student */}
+            <td className="break-words px-3 py-4 md:px-4">
+              <div className="break-words text-sm font-medium text-gray-900">
+                {student}
+              </div>
 
-                  return (
-                    <tr
-                      key={record.id}
-                      className="transition hover:bg-gray-50"
-                    >
-                      <td className="px-4 py-4">
-                        <div className="font-medium text-gray-900">
-                          {student}
-                        </div>
+              {(record.admission_number ||
+                record.student_admission_number) && (
+                <div className="mt-0.5 break-all text-xs text-gray-500">
+                  {record.admission_number ||
+                    record.student_admission_number}
+                </div>
+              )}
 
-                        {(record.admission_number ||
-                          record.student_admission_number) && (
-                          <div className="mt-0.5 text-xs text-gray-500">
-                            {record.admission_number ||
-                              record.student_admission_number}
-                          </div>
-                        )}
-                      </td>
+              {/* Additional class details on desktop */}
+              <div className="mt-1 hidden text-xs text-gray-500 md:block">
+                {className}
+              </div>
+            </td>
 
-                      <td className="px-4 py-4 text-sm text-gray-700">
-                        {className}
-                      </td>
+            {/* Mobile: Status | Desktop: Class */}
+            <td className="px-2 py-4 md:px-4">
+              <span className="md:hidden">
+                <span
+                  className={`inline-flex whitespace-nowrap rounded-full border px-2 py-1 text-xs font-semibold ${getStatusClasses(
+                    record.status,
+                  )}`}
+                >
+                  {getStatusLabel(record)}
+                </span>
+              </span>
 
-                      <td className="px-4 py-4 text-sm text-gray-700">
-                        {subjectName}
-                      </td>
+              <span className="hidden text-sm text-gray-700 md:inline">
+                {className}
+              </span>
+            </td>
 
-                      <td className="px-4 py-4">
-                        <div className="text-sm text-gray-800">
-                          {getSessionName(record)}
-                        </div>
+            {/* Subject: desktop only */}
+            <td className="hidden px-4 py-4 text-sm text-gray-700 md:table-cell">
+              {getSubjectName(record)}
+            </td>
 
-                        <div className="text-xs text-gray-500">
-                          {getTermName(record)}
-                        </div>
-                      </td>
+            {/* Session / Term: desktop only */}
+            <td className="hidden px-4 py-4 md:table-cell">
+              <div className="text-sm text-gray-800">
+                {getSessionName(record)}
+              </div>
 
-                      <td className="px-4 py-4 text-sm text-gray-700">
-                        {formatDate(record.date)}
-                      </td>
+              <div className="text-xs text-gray-500">
+                {getTermName(record)}
+              </div>
+            </td>
 
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(
-                            record.status,
-                          )}`}
-                        >
-                          {getStatusLabel(record)}
-                        </span>
-                      </td>
+            {/* Date: desktop only */}
+            <td className="hidden px-4 py-4 text-sm text-gray-700 md:table-cell">
+              {formatDate(record.date)}
+            </td>
 
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {formatTime(record.check_in_time)}
-                      </td>
+            {/* Status: desktop only */}
+            <td className="hidden px-4 py-4 md:table-cell">
+              <span
+                className={`inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(
+                  record.status,
+                )}`}
+              >
+                {getStatusLabel(record)}
+              </span>
+            </td>
 
-                      <td className="px-4 py-4">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              openEditModal(record)
-                            }
-                            className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                            title="Edit"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </button>
+            {/* Check In: desktop only */}
+            <td className="hidden px-4 py-4 text-sm text-gray-600 md:table-cell">
+              {formatTime(record.check_in_time)}
+            </td>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDelete(record)
-                            }
-                            className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            {/* Actions */}
+            <td className="px-2 py-4 md:px-4">
+              <div className="flex items-center justify-end gap-1.5 md:gap-2">
+                <button
+                  type="button"
+                  onClick={() => openEditModal(record)}
+                  className="rounded-lg border border-gray-200 p-2 text-gray-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                  title="Edit attendance"
+                  aria-label={`Edit attendance for ${student}`}
+                >
+                  <Edit3 className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDelete(record)}
+                  className="rounded-lg border border-gray-200 p-2 text-gray-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                  title="Delete attendance"
+                  aria-label={`Delete attendance for ${student}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
+
           </div>
         )}
       </div>

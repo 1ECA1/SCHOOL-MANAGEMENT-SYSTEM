@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -97,7 +98,9 @@ const Students = () => {
       const currentEnrollment =
         studentEnrollments.find(
           (enrollment) => enrollment.is_current === true
-        ) || studentEnrollments[0] || null;
+        ) ||
+        studentEnrollments[0] ||
+        null;
 
       return {
         ...student,
@@ -137,25 +140,16 @@ const Students = () => {
       .filter((student) => {
         if (genderFilter === "ALL") return true;
 
-        return (
-          student.gender?.toUpperCase() ===
-          genderFilter
-        );
+        return student.gender?.toUpperCase() === genderFilter;
       })
       .filter((student) => {
         if (statusFilter === "ALL") return true;
 
-        return (
-          student.status?.toUpperCase() ===
-          statusFilter
-        );
+        return student.status?.toUpperCase() === statusFilter;
       })
       .sort((a, b) => {
-        const statusA =
-          STATUS_ORDER[a.status?.toUpperCase()] || 99;
-
-        const statusB =
-          STATUS_ORDER[b.status?.toUpperCase()] || 99;
+        const statusA = STATUS_ORDER[a.status?.toUpperCase()] || 99;
+        const statusB = STATUS_ORDER[b.status?.toUpperCase()] || 99;
 
         if (statusA !== statusB) {
           return statusA - statusB;
@@ -179,12 +173,7 @@ const Students = () => {
 
         return nameA.localeCompare(nameB);
       });
-  }, [
-    studentsWithEnrollment,
-    search,
-    genderFilter,
-    statusFilter,
-  ]);
+  }, [studentsWithEnrollment, search, genderFilter, statusFilter]);
 
   // =====================================================
   // PAGINATION
@@ -195,8 +184,7 @@ const Students = () => {
   );
 
   const paginatedStudents = useMemo(() => {
-    const start =
-      (currentPage - 1) * STUDENTS_PER_PAGE;
+    const start = (currentPage - 1) * STUDENTS_PER_PAGE;
 
     return filteredStudents.slice(
       start,
@@ -209,10 +197,7 @@ const Students = () => {
   }, [search, genderFilter, statusFilter]);
 
   useEffect(() => {
-    if (
-      totalPages > 0 &&
-      currentPage > totalPages
-    ) {
+    if (totalPages > 0 && currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
@@ -440,9 +425,7 @@ const Students = () => {
             <input
               type="text"
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Name or admission number..."
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             />
@@ -457,9 +440,7 @@ const Students = () => {
 
             <select
               value={genderFilter}
-              onChange={(e) =>
-                setGenderFilter(e.target.value)
-              }
+              onChange={(e) => setGenderFilter(e.target.value)}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             >
               <option value="ALL">All Genders</option>
@@ -477,17 +458,13 @@ const Students = () => {
 
             <select
               value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value)
-              }
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
               <option value="GRADUATED">Graduated</option>
-              <option value="TRANSFERRED">
-                Transferred
-              </option>
+              <option value="TRANSFERRED">Transferred</option>
               <option value="SUSPENDED">Suspended</option>
               <option value="WITHDRAWN">Withdrawn</option>
             </select>
@@ -515,31 +492,31 @@ const Students = () => {
       ===================================================== */}
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-[var(--color-card)] shadow-sm dark:border-gray-800">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full table-fixed divide-y divide-gray-200 text-left dark:divide-gray-800 md:table-auto">
             <thead className="bg-gray-50 dark:bg-gray-900/60">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th className="w-[75%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 sm:px-4 md:w-auto">
                   Student
                 </th>
 
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th className="hidden whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 md:table-cell">
                   Admission No.
                 </th>
 
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th className="hidden whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 md:table-cell">
                   Gender
                 </th>
 
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th className="hidden whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 md:table-cell">
                   Class
                 </th>
 
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th className="hidden whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 md:table-cell">
                   Status
                 </th>
 
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <th className="w-[25%] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 sm:px-4 md:w-auto">
                   Actions
                 </th>
               </tr>
@@ -549,7 +526,7 @@ const Students = () => {
               {paginatedStudents.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan={6}
                     className="px-4 py-12 text-center"
                   >
                     <p className="text-sm font-medium text-[var(--color-text)]">
@@ -569,26 +546,20 @@ const Students = () => {
                   >
                     {/* STUDENT */}
 
-                    <td className="whitespace-nowrap px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-sm font-semibold text-[var(--color-primary)]">
-                          {(
-                            student.first_name?.[0] ||
-                            ""
-                          ).toUpperCase()}
-                          {(
-                            student.last_name?.[0] ||
-                            ""
-                          ).toUpperCase()}
+                    <td className="px-3 py-4 sm:px-4">
+                      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-xs font-semibold text-[var(--color-primary)] sm:h-10 sm:w-10 sm:text-sm">
+                          {(student.first_name?.[0] || "").toUpperCase()}
+                          {(student.last_name?.[0] || "").toUpperCase()}
                         </div>
 
-                        <div>
-                          <p className="font-medium text-[var(--color-text)]">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium leading-5 text-[var(--color-text)] sm:text-sm">
                             {getStudentName(student)}
                           </p>
 
                           {student.email && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="hidden truncate text-xs text-gray-500 dark:text-gray-400 md:block">
                               {student.email}
                             </p>
                           )}
@@ -596,34 +567,36 @@ const Students = () => {
                       </div>
                     </td>
 
-                    {/* ADMISSION NUMBER */}
+                    {/* ADMISSION NUMBER: DESKTOP ONLY */}
 
-                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                    <td className="hidden whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300 md:table-cell">
                       {student.admission_number || "—"}
                     </td>
 
-                    {/* GENDER */}
+                    {/* GENDER: DESKTOP ONLY */}
 
-                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                    <td className="hidden whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300 md:table-cell">
                       {student.gender || "—"}
                     </td>
 
-                    {/* CLASS */}
+                    {/* CLASS: DESKTOP ONLY */}
 
-                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
+                    <td className="hidden whitespace-nowrap px-4 py-4 text-sm text-gray-600 dark:text-gray-300 md:table-cell">
                       {getClassName(student)}
                     </td>
 
-                    {/* STATUS */}
+                    {/* STATUS: DESKTOP ONLY */}
 
-                    <td className="whitespace-nowrap px-4 py-4">
+                    <td className="hidden whitespace-nowrap px-4 py-4 md:table-cell">
                       {getStatusBadge(student.status)}
                     </td>
 
                     {/* ACTIONS */}
 
-                    <td className="whitespace-nowrap px-4 py-4">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-3 py-4 sm:px-4">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2">
+                        {/* VIEW: VISIBLE ON ALL SCREEN SIZES */}
+
                         <button
                           type="button"
                           onClick={() =>
@@ -631,10 +604,12 @@ const Students = () => {
                               `/school-admin/people/students/${student.id}`
                             )
                           }
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
+                          className="rounded-lg px-2 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 sm:px-2.5"
                         >
                           View
                         </button>
+
+                        {/* EDIT: DESKTOP ONLY */}
 
                         <button
                           type="button"
@@ -643,31 +618,32 @@ const Students = () => {
                               `/school-admin/people/students/${student.id}/edit`
                             )
                           }
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                          className="hidden rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 md:inline-flex"
                         >
                           Edit
                         </button>
+
+                        {/* STATUS: DESKTOP ONLY */}
 
                         <button
                           type="button"
                           onClick={() =>
                             setStatusModal({
                               ...student,
-                              status:
-                                student.status || "ACTIVE",
+                              status: student.status || "ACTIVE",
                             })
                           }
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/10"
+                          className="hidden rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/10 md:inline-flex"
                         >
                           Status
                         </button>
 
+                        {/* DELETE: DESKTOP ONLY */}
+
                         <button
                           type="button"
-                          onClick={() =>
-                            setDeleteModal(student)
-                          }
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                          onClick={() => setDeleteModal(student)}
+                          className="hidden rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 md:inline-flex"
                         >
                           Delete
                         </button>
@@ -690,14 +666,12 @@ const Students = () => {
               Page {currentPage} of {totalPages}
             </p>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 disabled={currentPage === 1}
                 onClick={() =>
-                  setCurrentPage((page) =>
-                    Math.max(1, page - 1)
-                  )
+                  setCurrentPage((page) => Math.max(1, page - 1))
                 }
                 className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-300"
               >
@@ -711,9 +685,7 @@ const Students = () => {
                 <button
                   key={page}
                   type="button"
-                  onClick={() =>
-                    setCurrentPage(page)
-                  }
+                  onClick={() => setCurrentPage(page)}
                   className={`h-8 min-w-8 rounded-lg px-2 text-sm font-medium ${
                     page === currentPage
                       ? "bg-[var(--color-primary)] text-white"
@@ -726,9 +698,7 @@ const Students = () => {
 
               <button
                 type="button"
-                disabled={
-                  currentPage === totalPages
-                }
+                disabled={currentPage === totalPages}
                 onClick={() =>
                   setCurrentPage((page) =>
                     Math.min(totalPages, page + 1)
@@ -774,27 +744,17 @@ const Students = () => {
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               >
                 <option value="ACTIVE">Active</option>
-                <option value="GRADUATED">
-                  Graduated
-                </option>
-                <option value="TRANSFERRED">
-                  Transferred
-                </option>
-                <option value="SUSPENDED">
-                  Suspended
-                </option>
-                <option value="WITHDRAWN">
-                  Withdrawn
-                </option>
+                <option value="GRADUATED">Graduated</option>
+                <option value="TRANSFERRED">Transferred</option>
+                <option value="SUSPENDED">Suspended</option>
+                <option value="WITHDRAWN">Withdrawn</option>
               </select>
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() =>
-                  setStatusModal(null)
-                }
+                onClick={() => setStatusModal(null)}
                 disabled={savingStatus}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
               >
@@ -807,9 +767,7 @@ const Students = () => {
                 disabled={savingStatus}
                 className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
-                {savingStatus
-                  ? "Saving..."
-                  : "Save Status"}
+                {savingStatus ? "Saving..." : "Save Status"}
               </button>
             </div>
           </div>
@@ -842,9 +800,7 @@ const Students = () => {
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() =>
-                  setDeleteModal(null)
-                }
+                onClick={() => setDeleteModal(null)}
                 disabled={deleting}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
               >
@@ -857,9 +813,7 @@ const Students = () => {
                 disabled={deleting}
                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
-                {deleting
-                  ? "Deleting..."
-                  : "Delete Student"}
+                {deleting ? "Deleting..." : "Delete Student"}
               </button>
             </div>
           </div>

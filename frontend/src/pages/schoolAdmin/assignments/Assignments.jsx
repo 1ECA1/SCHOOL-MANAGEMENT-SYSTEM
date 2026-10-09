@@ -834,158 +834,148 @@ export default function Assignments() {
             />
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="min-w-[1000px] w-full">
+            
+<div className="overflow-x-auto">
+  <table className="w-full table-fixed md:table-auto">
+    <thead>
+      <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <th className="px-3 py-3 md:px-5">
+          Assignment
+        </th>
 
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      <th className="px-5 py-3">
-                        Assignment
-                      </th>
+        <th className="hidden px-5 py-3 md:table-cell">
+          Class
+        </th>
 
-                      <th className="px-5 py-3">
-                        Class
-                      </th>
+        <th className="hidden px-5 py-3 md:table-cell">
+          Subject
+        </th>
 
-                      <th className="px-5 py-3">
-                        Subject
-                      </th>
+        <th className="hidden px-5 py-3 md:table-cell">
+          Teacher
+        </th>
 
-                      <th className="px-5 py-3">
-                        Teacher
-                      </th>
+        <th className="hidden px-5 py-3 md:table-cell">
+          Due Date
+        </th>
 
-                      <th className="px-5 py-3">
-                        Due Date
-                      </th>
+        <th className="hidden px-5 py-3 md:table-cell">
+          Status
+        </th>
 
-                      <th className="px-5 py-3">
-                        Status
-                      </th>
+        <th className="px-3 py-3 text-right md:px-5">
+          Action
+        </th>
+      </tr>
+    </thead>
 
-                      <th className="px-5 py-3 text-right">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody className="divide-y divide-slate-100">
-
-                    {displayedAssignments.map(
-                      (assignment) => (
-                        <tr
-                          key={assignment.id}
-                          className="transition hover:bg-slate-50"
-                        >
-
-                          {/* Assignment */}
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-start gap-3">
-
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                                <FileText className="h-5 w-5" />
-                              </div>
-
-                              <div className="min-w-0">
-                                <p className="truncate font-semibold text-slate-900">
-                                  {assignment.title ||
-                                    "Untitled Assignment"}
-                                </p>
-
-                                <p className="mt-0.5 text-xs text-slate-500">
-                                  Assigned{" "}
-                                  {formatDate(
-                                    assignment.assigned_date
-                                  )}
-                                </p>
-                              </div>
-
-                            </div>
-                          </td>
-
-                          {/* Class */}
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2 text-sm text-slate-700">
-                              <GraduationCap className="h-4 w-4 text-slate-400" />
-                              {getClassName(
-                                assignment
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Subject */}
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2 text-sm text-slate-700">
-                              <BookOpen className="h-4 w-4 text-slate-400" />
-                              {getSubjectName(
-                                assignment
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Teacher */}
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2 text-sm text-slate-700">
-                              <Users className="h-4 w-4 text-slate-400" />
-                              {getTeacherName(
-                                assignment
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Due */}
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                              <CalendarDays className="h-4 w-4 text-slate-400" />
-                              {formatDate(
-                                assignment.due_date
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Status */}
-
-                          <td className="px-5 py-4">
-                            <span
-                              className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(
-                                assignment.status
-                              )}`}
-                            >
-                              {getStatusLabel(
-                                assignment.status
-                              )}
-                            </span>
-                          </td>
-
-                          {/* Action */}
-
-                          <td className="px-5 py-4 text-right">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                navigate(
-                                  `/school-admin/assignments/${assignment.id}`
-                                )
-                              }
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View
-                            </button>
-                          </td>
-
-                        </tr>
-                      )
-                    )}
-
-                  </tbody>
-                </table>
+    <tbody className="divide-y divide-slate-100">
+      {displayedAssignments.map((assignment) => (
+        <tr
+          key={assignment.id}
+          className="transition hover:bg-slate-50"
+        >
+          {/* Assignment — visible on mobile and desktop */}
+          <td className="px-3 py-4 md:px-5">
+            <div className="flex min-w-0 items-start gap-2 md:gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 md:h-10 md:w-10">
+                <FileText className="h-5 w-5" />
               </div>
+
+              <div className="min-w-0">
+                <p className="break-words text-sm font-semibold text-slate-900">
+                  {assignment.title || "Untitled Assignment"}
+                </p>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Assigned {formatDate(assignment.assigned_date)}
+                </p>
+
+                {/* Extra assignment information on mobile */}
+                <div className="mt-2 space-y-1 md:hidden">
+                  <p className="text-xs text-slate-600">
+                    Class: {getClassName(assignment)}
+                  </p>
+
+                  <p className="text-xs text-slate-600">
+                    Subject: {getSubjectName(assignment)}
+                  </p>
+
+                  <span
+                    className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${getStatusClasses(
+                      assignment.status
+                    )}`}
+                  >
+                    {getStatusLabel(assignment.status)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          {/* Class — desktop only */}
+          <td className="hidden px-5 py-4 md:table-cell">
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <GraduationCap className="h-4 w-4 text-slate-400" />
+              {getClassName(assignment)}
+            </div>
+          </td>
+
+          {/* Subject — desktop only */}
+          <td className="hidden px-5 py-4 md:table-cell">
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <BookOpen className="h-4 w-4 text-slate-400" />
+              {getSubjectName(assignment)}
+            </div>
+          </td>
+
+          {/* Teacher — desktop only */}
+          <td className="hidden px-5 py-4 md:table-cell">
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <Users className="h-4 w-4 text-slate-400" />
+              {getTeacherName(assignment)}
+            </div>
+          </td>
+
+          {/* Due Date — desktop only */}
+          <td className="hidden px-5 py-4 md:table-cell">
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <CalendarDays className="h-4 w-4 text-slate-400" />
+              {formatDate(assignment.due_date)}
+            </div>
+          </td>
+
+          {/* Status — desktop only */}
+          <td className="hidden px-5 py-4 md:table-cell">
+            <span
+              className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(
+                assignment.status
+              )}`}
+            >
+              {getStatusLabel(assignment.status)}
+            </span>
+          </td>
+
+          {/* Action — visible on mobile and desktop */}
+          <td className="px-2 py-4 text-right md:px-5">
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/school-admin/assignments/${assignment.id}`)
+              }
+              className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 md:gap-1.5 md:px-3"
+            >
+              <Eye className="h-4 w-4" />
+              <span>View</span>
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+
 
               {/* ==================================================
                   PAGINATION

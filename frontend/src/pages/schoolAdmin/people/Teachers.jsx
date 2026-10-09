@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../services/api";
@@ -11,26 +12,11 @@ const STATUS_ORDER = {
 };
 
 const STATUS_OPTIONS = [
-  {
-    value: "ACTIVE",
-    label: "Active",
-  },
-  {
-    value: "ON_LEAVE",
-    label: "On Leave",
-  },
-  {
-    value: "SUSPENDED",
-    label: "Suspended",
-  },
-  {
-    value: "RESIGNED",
-    label: "Resigned",
-  },
-  {
-    value: "RETIRED",
-    label: "Retired",
-  },
+  { value: "ACTIVE", label: "Active" },
+  { value: "ON_LEAVE", label: "On Leave" },
+  { value: "SUSPENDED", label: "Suspended" },
+  { value: "RESIGNED", label: "Resigned" },
+  { value: "RETIRED", label: "Retired" },
 ];
 
 const Teachers = () => {
@@ -39,16 +25,8 @@ const Teachers = () => {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
 
-  // =====================================================
-  // DELETE STATE
-  // =====================================================
-
   const [deleteTeacher, setDeleteTeacher] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
-  // =====================================================
-  // STATUS STATE
-  // =====================================================
 
   const [statusTeacher, setStatusTeacher] = useState(null);
   const [newStatus, setNewStatus] = useState("");
@@ -58,10 +36,6 @@ const Teachers = () => {
   // LOAD TEACHERS
   // =====================================================
 
-  useEffect(() => {
-    fetchTeachers();
-  }, []);
-
   const fetchTeachers = async () => {
     try {
       setLoading(true);
@@ -69,7 +43,6 @@ const Teachers = () => {
 
       const { data } = await api.get("/teachers/");
 
-      // Support normal array and paginated response
       const teacherData = Array.isArray(data)
         ? data
         : data?.results || [];
@@ -81,12 +54,16 @@ const Teachers = () => {
       setError(
         error.response?.data?.detail ||
           error.response?.data?.message ||
-          "Failed to fetch teachers.",
+          "Failed to fetch teachers."
       );
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
 
   // =====================================================
   // SEARCH + STATUS SORTING
@@ -97,31 +74,21 @@ const Teachers = () => {
 
     const filtered = teachers.filter((teacher) => {
       return (
-        teacher.full_name
-          ?.toLowerCase()
-          .includes(searchText) ||
-        teacher.employee_id
-          ?.toLowerCase()
-          .includes(searchText) ||
-        teacher.email
-          ?.toLowerCase()
-          .includes(searchText) ||
-        teacher.department_name
-          ?.toLowerCase()
-          .includes(searchText) ||
-        teacher.phone_number
-          ?.toLowerCase()
-          .includes(searchText)
+        teacher.full_name?.toLowerCase().includes(searchText) ||
+        teacher.employee_id?.toLowerCase().includes(searchText) ||
+        teacher.email?.toLowerCase().includes(searchText) ||
+        teacher.department_name?.toLowerCase().includes(searchText) ||
+        teacher.phone_number?.toLowerCase().includes(searchText)
       );
     });
 
     return [...filtered].sort((a, b) => {
       const statusA = String(
-        a.employment_status || "ACTIVE",
+        a.employment_status || "ACTIVE"
       ).toUpperCase();
 
       const statusB = String(
-        b.employment_status || "ACTIVE",
+        b.employment_status || "ACTIVE"
       ).toUpperCase();
 
       const orderA = STATUS_ORDER[statusA] ?? 99;
@@ -132,7 +99,7 @@ const Teachers = () => {
       }
 
       return String(a.full_name || "").localeCompare(
-        String(b.full_name || ""),
+        String(b.full_name || "")
       );
     });
   }, [teachers, search]);
@@ -168,36 +135,28 @@ const Teachers = () => {
   // =====================================================
 
   const handleDeleteTeacher = async () => {
-    if (!deleteTeacher) {
-      return;
-    }
+    if (!deleteTeacher) return;
 
     try {
       setDeleting(true);
       setError("");
 
-      await api.delete(
-        `/teachers/${deleteTeacher.id}/`,
-      );
+      await api.delete(`/teachers/${deleteTeacher.id}/`);
 
       setTeachers((currentTeachers) =>
         currentTeachers.filter(
-          (teacher) =>
-            teacher.id !== deleteTeacher.id,
-        ),
+          (teacher) => teacher.id !== deleteTeacher.id
+        )
       );
 
       setDeleteTeacher(null);
     } catch (error) {
-      console.error(
-        "Error deleting teacher:",
-        error,
-      );
+      console.error("Error deleting teacher:", error);
 
       setError(
         error.response?.data?.detail ||
           error.response?.data?.message ||
-          "Failed to delete teacher.",
+          "Failed to delete teacher."
       );
     } finally {
       setDeleting(false);
@@ -210,11 +169,7 @@ const Teachers = () => {
 
   const openStatusModal = (teacher) => {
     setStatusTeacher(teacher);
-
-    setNewStatus(
-      teacher.employment_status || "ACTIVE",
-    );
-
+    setNewStatus(teacher.employment_status || "ACTIVE");
     setError("");
   };
 
@@ -223,9 +178,7 @@ const Teachers = () => {
   // =====================================================
 
   const handleChangeStatus = async () => {
-    if (!statusTeacher || !newStatus) {
-      return;
-    }
+    if (!statusTeacher || !newStatus) return;
 
     try {
       setChangingStatus(true);
@@ -235,7 +188,7 @@ const Teachers = () => {
         `/teachers/${statusTeacher.id}/`,
         {
           employment_status: newStatus,
-        },
+        }
       );
 
       setTeachers((currentTeachers) =>
@@ -246,24 +199,20 @@ const Teachers = () => {
                 ...data,
                 employment_status: newStatus,
               }
-            : teacher,
-        ),
+            : teacher
+        )
       );
 
       setStatusTeacher(null);
       setNewStatus("");
     } catch (error) {
-      console.error(
-        "Error changing teacher status:",
-        error,
-      );
+      console.error("Error changing teacher status:", error);
 
       setError(
         error.response?.data?.detail ||
-          error.response?.data
-            ?.employment_status?.[0] ||
+          error.response?.data?.employment_status?.[0] ||
           error.response?.data?.message ||
-          "Failed to change teacher status.",
+          "Failed to change teacher status."
       );
     } finally {
       setChangingStatus(false);
@@ -275,9 +224,7 @@ const Teachers = () => {
   // =====================================================
 
   const getProfileImageUrl = (image) => {
-    if (!image) {
-      return null;
-    }
+    if (!image) return null;
 
     if (
       image.startsWith("http://") ||
@@ -286,7 +233,10 @@ const Teachers = () => {
       return image;
     }
 
-    return `${import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000"}${image}`;
+    return `${
+      import.meta.env.VITE_BACKEND_URL ||
+      "http://127.0.0.1:8000"
+    }${image}`;
   };
 
   // =====================================================
@@ -294,10 +244,8 @@ const Teachers = () => {
   // =====================================================
 
   return (
-    <div className="w-full">
-      {/* =================================================
-          HEADER
-      ================================================= */}
+    <div className="w-full min-w-0">
+      {/* HEADER */}
 
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -318,45 +266,38 @@ const Teachers = () => {
         </Link>
       </div>
 
-      {/* =================================================
-          SEARCH
-      ================================================= */}
+      {/* SEARCH */}
 
       <div className="mb-6">
         <input
           type="text"
           placeholder="Search by name, employee ID, email, phone or department..."
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
+          onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-lg border border-slate-200 bg-[var(--color-card)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] dark:border-slate-700"
         />
       </div>
 
-      {/* =================================================
-          ERROR
-      ================================================= */}
+      {/* ERROR */}
 
       {error && (
-        <div className="mb-5 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-          <span>{error}</span>
+        <div className="mb-5 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
+          <span className="min-w-0 break-words">{error}</span>
 
           <button
             type="button"
             onClick={() => setError("")}
-            className="ml-4 font-bold text-red-500 hover:text-red-700"
+            className="shrink-0 font-bold text-red-500 hover:text-red-700"
+            aria-label="Dismiss error"
           >
             ×
           </button>
         </div>
       )}
 
-      {/* =================================================
-          TEACHERS TABLE
-      ================================================= */}
+      {/* TEACHERS TABLE */}
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-[var(--color-card)] shadow-sm dark:border-slate-800">
         {loading ? (
           <div className="p-10 text-center text-sm text-slate-500 dark:text-slate-400">
             Loading teachers...
@@ -366,209 +307,171 @@ const Teachers = () => {
             No teachers found.
           </div>
         ) : (
-          <table className="min-w-full">
-            <thead className="bg-slate-50 dark:bg-slate-900/50">
-              <tr>
-                <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
-                  Teacher
-                </th>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full table-fixed md:table-auto">
+              <thead className="bg-slate-50 dark:bg-slate-900/50">
+                <tr>
+                  <th className="w-[75%] px-3 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 sm:px-5 sm:text-sm md:w-auto">
+                    Teacher
+                  </th>
 
-                <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
-                  Employee ID
-                </th>
+                  <th className="hidden whitespace-nowrap px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300 md:table-cell">
+                    Employee ID
+                  </th>
 
-                <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
-                  Department
-                </th>
+                  <th className="hidden whitespace-nowrap px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300 md:table-cell">
+                    Department
+                  </th>
 
-                <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
-                  Contact
-                </th>
+                  <th className="hidden whitespace-nowrap px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300 md:table-cell">
+                    Contact
+                  </th>
 
-                <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
-                  Status
-                </th>
+                  <th className="hidden whitespace-nowrap px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300 md:table-cell">
+                    Status
+                  </th>
 
-                <th className="px-5 py-4 text-left text-sm font-semibold text-slate-600 dark:text-slate-300">
-                  Actions
-                </th>
-              </tr>
-            </thead>
+                  <th className="w-[25%] px-3 py-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 sm:px-5 sm:text-sm md:w-auto">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {filteredTeachers.map((teacher) => {
-                const status =
-                  teacher.employment_status ||
-                  "ACTIVE";
-
-                const imageUrl =
-                  getProfileImageUrl(
-                    teacher.profile_image,
+              <tbody>
+                {filteredTeachers.map((teacher) => {
+                  const status = teacher.employment_status || "ACTIVE";
+                  const imageUrl = getProfileImageUrl(
+                    teacher.profile_image
                   );
 
-                return (
-                  <tr
-                    key={teacher.id}
-                    className="border-t border-slate-100 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900/40"
-                  >
-                    {/* =================================================
-                        TEACHER
-                    ================================================= */}
+                  return (
+                    <tr
+                      key={teacher.id}
+                      className="border-t border-slate-100 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900/40"
+                    >
+                      {/* TEACHER */}
 
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        {imageUrl ? (
-                          <img
-                            src={imageUrl}
-                            alt={
-                              teacher.full_name ||
-                              "Teacher"
-                            }
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold text-white">
-                            {teacher.first_name?.charAt(
-                              0,
-                            )}
-                            {teacher.last_name?.charAt(
-                              0,
-                            )}
+                      <td className="px-3 py-4 sm:px-5">
+                        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                          {imageUrl ? (
+                            <img
+                              src={imageUrl}
+                              alt={teacher.full_name || "Teacher"}
+                              className="h-8 w-8 shrink-0 rounded-full object-cover sm:h-10 sm:w-10"
+                            />
+                          ) : (
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-xs font-semibold text-white sm:h-10 sm:w-10 sm:text-sm">
+                              {teacher.first_name?.charAt(0)}
+                              {teacher.last_name?.charAt(0)}
+                            </div>
+                          )}
+
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-semibold leading-5 text-[var(--color-text)] sm:text-sm">
+                              {teacher.full_name}
+                            </p>
+
+                            <p className="hidden truncate text-sm text-slate-500 dark:text-slate-400 md:block">
+                              {teacher.email || "No email"}
+                            </p>
                           </div>
-                        )}
-
-                        <div>
-                          <p className="font-semibold text-[var(--color-text)]">
-                            {teacher.full_name}
-                          </p>
-
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {teacher.email ||
-                              "No email"}
-                          </p>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* =================================================
-                        EMPLOYEE ID
-                    ================================================= */}
+                      {/* EMPLOYEE ID: DESKTOP ONLY */}
 
-                    <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
-                      {teacher.employee_id ||
-                        "Not available"}
-                    </td>
+                      <td className="hidden whitespace-nowrap px-5 py-4 text-sm text-slate-600 dark:text-slate-300 md:table-cell">
+                        {teacher.employee_id || "Not available"}
+                      </td>
 
-                    {/* =================================================
-                        DEPARTMENT
-                    ================================================= */}
+                      {/* DEPARTMENT: DESKTOP ONLY */}
 
-                    <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
-                      {teacher.department_name ||
-                        "Not assigned"}
-                    </td>
+                      <td className="hidden whitespace-nowrap px-5 py-4 text-sm text-slate-600 dark:text-slate-300 md:table-cell">
+                        {teacher.department_name || "Not assigned"}
+                      </td>
 
-                    {/* =================================================
-                        CONTACT
-                    ================================================= */}
+                      {/* CONTACT: DESKTOP ONLY */}
 
-                    <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
-                      {teacher.phone_number ||
-                        "Not available"}
-                    </td>
+                      <td className="hidden whitespace-nowrap px-5 py-4 text-sm text-slate-600 dark:text-slate-300 md:table-cell">
+                        {teacher.phone_number || "Not available"}
+                      </td>
 
-                    {/* =================================================
-                        STATUS
-                    ================================================= */}
+                      {/* STATUS: DESKTOP ONLY */}
 
-                    <td className="px-5 py-4">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openStatusModal(
-                            teacher,
-                          )
-                        }
-                        className={`rounded-full px-3 py-1 text-xs font-semibold transition hover:opacity-80 ${getStatusStyle(
-                          status,
-                        )}`}
-                        title="Change teacher status"
-                      >
-                        {status.replace(
-                          "_",
-                          " ",
-                        )}
-                      </button>
-                    </td>
-
-                    {/* =================================================
-                        ACTIONS
-                    ================================================= */}
-
-                    <td className="px-5 py-4">
-                      <div className="flex flex-wrap gap-2">
-                        {/* VIEW */}
-
-                        <Link
-                          to={`/school-admin/people/teachers/${teacher.id}`}
-                          className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                        >
-                          View
-                        </Link>
-
-                        {/* EDIT */}
-
-                        <Link
-                          to={`/school-admin/people/teachers/${teacher.id}/edit`}
-                          className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50"
-                        >
-                          Edit
-                        </Link>
-
-                        {/* SUBJECTS */}
-
-                        <Link
-                          to={`/school-admin/people/teachers/${teacher.id}/subjects`}
-                          className="rounded-lg bg-purple-50 px-3 py-2 text-sm font-medium text-purple-600 hover:bg-purple-100 dark:bg-purple-950/30 dark:text-purple-400 dark:hover:bg-purple-950/50"
-                        >
-                          Subjects
-                        </Link>
-
-                        {/* CLASS */}
-
-                        <Link
-                          to={`/school-admin/people/teachers/${teacher.id}/class`}
-                          className="rounded-lg bg-green-50 px-3 py-2 text-sm font-medium text-green-600 hover:bg-green-100 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
-                        >
-                          Class
-                        </Link>
-
-                        {/* DELETE */}
-
+                      <td className="hidden whitespace-nowrap px-5 py-4 md:table-cell">
                         <button
                           type="button"
-                          onClick={() =>
-                            setDeleteTeacher(
-                              teacher,
-                            )
-                          }
-                          className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                          onClick={() => openStatusModal(teacher)}
+                          className={`rounded-full px-3 py-1 text-xs font-semibold transition hover:opacity-80 ${getStatusStyle(
+                            status
+                          )}`}
+                          title="Change teacher status"
                         >
-                          Delete
+                          {status.replace("_", " ")}
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+
+                      {/* ACTIONS */}
+
+                      <td className="px-3 py-4 sm:px-5">
+                        <div className="flex items-center justify-end gap-1 sm:gap-2">
+                          {/* VIEW: ALL SCREEN SIZES */}
+
+                          <Link
+                            to={`/school-admin/people/teachers/${teacher.id}`}
+                            className="rounded-lg px-2 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 sm:px-3 sm:py-2 sm:text-sm"
+                          >
+                            View
+                          </Link>
+
+                          {/* EDIT: DESKTOP ONLY */}
+
+                          <Link
+                            to={`/school-admin/people/teachers/${teacher.id}/edit`}
+                            className="hidden rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 md:inline-flex"
+                          >
+                            Edit
+                          </Link>
+
+                          {/* SUBJECTS: DESKTOP ONLY */}
+
+                          <Link
+                            to={`/school-admin/people/teachers/${teacher.id}/subjects`}
+                            className="hidden rounded-lg bg-purple-50 px-3 py-2 text-sm font-medium text-purple-600 hover:bg-purple-100 dark:bg-purple-950/30 dark:text-purple-400 dark:hover:bg-purple-950/50 md:inline-flex"
+                          >
+                            Subjects
+                          </Link>
+
+                          {/* CLASS: DESKTOP ONLY */}
+
+                          <Link
+                            to={`/school-admin/people/teachers/${teacher.id}/class`}
+                            className="hidden rounded-lg bg-green-50 px-3 py-2 text-sm font-medium text-green-600 hover:bg-green-100 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50 md:inline-flex"
+                          >
+                            Class
+                          </Link>
+
+                          {/* DELETE: DESKTOP ONLY */}
+
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTeacher(teacher)}
+                            className="hidden rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50 md:inline-flex"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* =================================================
-          COUNT
-      ================================================= */}
+      {/* COUNT */}
 
       {!loading && (
         <div className="mt-4 text-sm text-slate-500 dark:text-slate-400">
@@ -576,9 +479,7 @@ const Teachers = () => {
         </div>
       )}
 
-      {/* =================================================
-          DELETE MODAL
-      ================================================= */}
+      {/* DELETE MODAL */}
 
       {deleteTeacher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -598,9 +499,7 @@ const Teachers = () => {
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() =>
-                  setDeleteTeacher(null)
-                }
+                onClick={() => setDeleteTeacher(null)}
                 disabled={deleting}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
@@ -613,18 +512,14 @@ const Teachers = () => {
                 disabled={deleting}
                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {deleting
-                  ? "Deleting..."
-                  : "Delete Teacher"}
+                {deleting ? "Deleting..." : "Delete Teacher"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* =================================================
-          STATUS MODAL
-      ================================================= */}
+      {/* STATUS MODAL */}
 
       {statusTeacher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -647,16 +542,11 @@ const Teachers = () => {
 
             <select
               value={newStatus}
-              onChange={(e) =>
-                setNewStatus(e.target.value)
-              }
+              onChange={(e) => setNewStatus(e.target.value)}
               className="mb-6 w-full rounded-lg border border-slate-200 bg-[var(--color-background)] px-4 py-3 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] dark:border-slate-700"
             >
               {STATUS_OPTIONS.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                >
+                <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
@@ -681,9 +571,7 @@ const Teachers = () => {
                 disabled={changingStatus}
                 className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {changingStatus
-                  ? "Saving..."
-                  : "Save Status"}
+                {changingStatus ? "Saving..." : "Save Status"}
               </button>
             </div>
           </div>

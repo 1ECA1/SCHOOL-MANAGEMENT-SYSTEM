@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import {
   Search,
@@ -12,7 +13,6 @@ import {
 
 import api from "../../../services/api";
 
-
 // ============================================================
 // API ENDPOINTS
 // ============================================================
@@ -25,28 +25,19 @@ const ENDPOINTS = {
   continueTerm: "/students/enrollments/continue-term/",
 };
 
-
 // ============================================================
 // HELPERS
 // ============================================================
 
 function getItems(data) {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (Array.isArray(data?.results)) {
-    return data.results;
-  }
-
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
   return [];
 }
-
 
 function getId(item) {
   return item?.id ?? item?.pk;
 }
-
 
 function getSessionName(session) {
   return (
@@ -56,7 +47,6 @@ function getSessionName(session) {
     `Session ${getId(session)}`
   );
 }
-
 
 function getTermName(term) {
   return (
@@ -68,7 +58,6 @@ function getTermName(term) {
   );
 }
 
-
 function getClassName(classLevel) {
   return (
     classLevel?.name ||
@@ -77,27 +66,17 @@ function getClassName(classLevel) {
   );
 }
 
-
 function isCurrentSession(session) {
-  return (
-    session?.is_current === true ||
-    session?.current === true
-  );
+  return session?.is_current === true || session?.current === true;
 }
-
 
 function isCurrentTerm(term) {
-  return (
-    term?.is_current === true ||
-    term?.current === true
-  );
+  return term?.is_current === true || term?.current === true;
 }
-
 
 function isActiveTerm(term) {
   return term?.is_active === true || term?.active === true;
 }
-
 
 // ============================================================
 // FILTER SELECT
@@ -152,7 +131,6 @@ function FilterSelect({
   );
 }
 
-
 // ============================================================
 // MESSAGE BOX
 // ============================================================
@@ -182,40 +160,27 @@ function MessageBox({ type = "error", children }) {
   );
 }
 
-
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 
 export default function Enrollment() {
-  // ----------------------------------------------------------
   // DATA
-  // ----------------------------------------------------------
-
   const [sessions, setSessions] = useState([]);
   const [terms, setTerms] = useState([]);
   const [classes, setClasses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
 
-  // ----------------------------------------------------------
   // FILTERS
-  // ----------------------------------------------------------
-
   const [selectedSession, setSelectedSession] = useState("");
   const [selectedTerm, setSelectedTerm] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [search, setSearch] = useState("");
 
-  // ----------------------------------------------------------
   // SELECTION
-  // ----------------------------------------------------------
-
   const [selectedStudents, setSelectedStudents] = useState([]);
 
-  // ----------------------------------------------------------
   // UI STATE
-  // ----------------------------------------------------------
-
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [loadingTerms, setLoadingTerms] = useState(false);
   const [loadingClasses, setLoadingClasses] = useState(true);
@@ -236,10 +201,7 @@ export default function Enrollment() {
       setLoadingSessions(true);
       setError("");
 
-      const response = await api.get(
-        ENDPOINTS.sessions
-      );
-
+      const response = await api.get(ENDPOINTS.sessions);
       const items = getItems(response.data);
 
       setSessions(items);
@@ -249,18 +211,12 @@ export default function Enrollment() {
         return;
       }
 
-      // Current session first
       const currentSession =
         items.find(isCurrentSession) || items[0];
 
-      setSelectedSession(
-        String(getId(currentSession))
-      );
+      setSelectedSession(String(getId(currentSession)));
     } catch (err) {
-      console.error(
-        "Failed to load academic sessions:",
-        err
-      );
+      console.error("Failed to load academic sessions:", err);
 
       setError(
         err?.response?.data?.detail ||
@@ -271,7 +227,6 @@ export default function Enrollment() {
     }
   };
 
-
   // ==========================================================
   // LOAD CLASSES
   // ==========================================================
@@ -280,16 +235,10 @@ export default function Enrollment() {
     try {
       setLoadingClasses(true);
 
-      const response = await api.get(
-        ENDPOINTS.classes
-      );
-
+      const response = await api.get(ENDPOINTS.classes);
       setClasses(getItems(response.data));
     } catch (err) {
-      console.error(
-        "Failed to load classes:",
-        err
-      );
+      console.error("Failed to load classes:", err);
 
       setError(
         err?.response?.data?.detail ||
@@ -299,7 +248,6 @@ export default function Enrollment() {
       setLoadingClasses(false);
     }
   };
-
 
   // ==========================================================
   // LOAD TERMS
@@ -315,17 +263,13 @@ export default function Enrollment() {
     try {
       setLoadingTerms(true);
 
-      const response = await api.get(
-        ENDPOINTS.terms,
-        {
-          params: {
-            academic_session: sessionId,
-          },
-        }
-      );
+      const response = await api.get(ENDPOINTS.terms, {
+        params: {
+          academic_session: sessionId,
+        },
+      });
 
       const items = getItems(response.data);
-
       setTerms(items);
 
       if (items.length === 0) {
@@ -333,22 +277,14 @@ export default function Enrollment() {
         return;
       }
 
-      // Prefer explicitly current term.
-      // Otherwise prefer active term.
-      // Finally fall back to first returned term.
       const currentTerm =
         items.find(isCurrentTerm) ||
         items.find(isActiveTerm) ||
         items[0];
 
-      setSelectedTerm(
-        String(getId(currentTerm))
-      );
+      setSelectedTerm(String(getId(currentTerm)));
     } catch (err) {
-      console.error(
-        "Failed to load terms:",
-        err
-      );
+      console.error("Failed to load terms:", err);
 
       setTerms([]);
       setSelectedTerm("");
@@ -361,7 +297,6 @@ export default function Enrollment() {
       setLoadingTerms(false);
     }
   };
-
 
   // ==========================================================
   // LOAD ENROLLMENTS
@@ -386,21 +321,14 @@ export default function Enrollment() {
         params.class_level = selectedClass;
       }
 
-      const response = await api.get(
-        ENDPOINTS.enrollments,
-        { params }
-      );
+      const response = await api.get(ENDPOINTS.enrollments, {
+        params,
+      });
 
-      setEnrollments(
-        getItems(response.data)
-      );
-
+      setEnrollments(getItems(response.data));
       setSelectedStudents([]);
     } catch (err) {
-      console.error(
-        "Failed to load student enrollments:",
-        err
-      );
+      console.error("Failed to load student enrollments:", err);
 
       setEnrollments([]);
 
@@ -413,7 +341,6 @@ export default function Enrollment() {
     }
   };
 
-
   // ==========================================================
   // INITIAL LOAD
   // ==========================================================
@@ -423,7 +350,6 @@ export default function Enrollment() {
     loadClasses();
   }, []);
 
-
   // ==========================================================
   // LOAD TERMS WHEN SESSION CHANGES
   // ==========================================================
@@ -431,24 +357,23 @@ export default function Enrollment() {
   useEffect(() => {
     if (selectedSession) {
       loadTerms(selectedSession);
+    } else {
+      setTerms([]);
+      setSelectedTerm("");
     }
   }, [selectedSession]);
 
-
   // ==========================================================
-  // LOAD ENROLLMENTS WHEN FILTER CHANGES
+  // LOAD ENROLLMENTS WHEN FILTERS CHANGE
   // ==========================================================
 
   useEffect(() => {
     if (selectedSession && selectedTerm) {
       loadEnrollments();
+    } else {
+      setEnrollments([]);
     }
-  }, [
-    selectedSession,
-    selectedTerm,
-    selectedClass,
-  ]);
-
+  }, [selectedSession, selectedTerm, selectedClass]);
 
   // ==========================================================
   // FILTER STUDENTS
@@ -457,40 +382,34 @@ export default function Enrollment() {
   const filteredEnrollments = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return enrollments;
-    }
+    if (!query) return enrollments;
 
     return enrollments.filter((enrollment) => {
-      const studentName =
+      const studentName = String(
         enrollment.student_name ||
-        enrollment.student?.full_name ||
-        "";
+          enrollment.student?.full_name ||
+          ""
+      );
 
-      const admissionNumber =
+      const admissionNumber = String(
         enrollment.admission_number ||
-        enrollment.student?.admission_number ||
-        "";
+          enrollment.student?.admission_number ||
+          ""
+      );
 
-      const className =
+      const className = String(
         enrollment.class_name ||
-        enrollment.class_level?.name ||
-        "";
+          enrollment.class_level?.name ||
+          ""
+      );
 
       return (
-        studentName
-          .toLowerCase()
-          .includes(query) ||
-        admissionNumber
-          .toLowerCase()
-          .includes(query) ||
-        className
-          .toLowerCase()
-          .includes(query)
+        studentName.toLowerCase().includes(query) ||
+        admissionNumber.toLowerCase().includes(query) ||
+        className.toLowerCase().includes(query)
       );
     });
   }, [enrollments, search]);
-
 
   // ==========================================================
   // SELECT ALL
@@ -499,44 +418,26 @@ export default function Enrollment() {
   const allVisibleSelected =
     filteredEnrollments.length > 0 &&
     filteredEnrollments.every((enrollment) =>
-      selectedStudents.includes(
-        enrollment.student
-      )
+      selectedStudents.includes(enrollment.student)
     );
 
-
   const toggleSelectAll = () => {
-    if (allVisibleSelected) {
-      const visibleStudentIds =
-        filteredEnrollments.map(
-          (enrollment) =>
-            enrollment.student
-        );
+    const visibleStudentIds = filteredEnrollments.map(
+      (enrollment) => enrollment.student
+    );
 
+    if (allVisibleSelected) {
       setSelectedStudents((current) =>
-        current.filter(
-          (id) =>
-            !visibleStudentIds.includes(id)
-        )
+        current.filter((id) => !visibleStudentIds.includes(id))
       );
 
       return;
     }
 
-    const visibleStudentIds =
-      filteredEnrollments.map(
-        (enrollment) =>
-          enrollment.student
-      );
-
     setSelectedStudents((current) => [
-      ...new Set([
-        ...current,
-        ...visibleStudentIds,
-      ]),
+      ...new Set([...current, ...visibleStudentIds]),
     ]);
   };
-
 
   // ==========================================================
   // SELECT STUDENT
@@ -545,18 +446,12 @@ export default function Enrollment() {
   const toggleStudent = (studentId) => {
     setSelectedStudents((current) => {
       if (current.includes(studentId)) {
-        return current.filter(
-          (id) => id !== studentId
-        );
+        return current.filter((id) => id !== studentId);
       }
 
-      return [
-        ...current,
-        studentId,
-      ];
+      return [...current, studentId];
     });
   };
-
 
   // ==========================================================
   // CONTINUE TERM
@@ -564,9 +459,7 @@ export default function Enrollment() {
 
   const continueSelectedStudents = async () => {
     if (selectedStudents.length === 0) {
-      setError(
-        "Please select at least one student."
-      );
+      setError("Please select at least one student.");
       return;
     }
 
@@ -589,12 +482,9 @@ export default function Enrollment() {
 
           results.push(response.data);
         } catch (err) {
-          const student =
-            enrollments.find(
-              (enrollment) =>
-                enrollment.student ===
-                studentId
-            );
+          const student = enrollments.find(
+            (enrollment) => enrollment.student === studentId
+          );
 
           failures.push({
             student:
@@ -610,33 +500,23 @@ export default function Enrollment() {
       if (results.length > 0) {
         setSuccess(
           `${results.length} student${
-            results.length === 1
-              ? ""
-              : "s"
+            results.length === 1 ? "" : "s"
           } successfully continued to the next term.`
         );
       }
 
       if (failures.length > 0) {
-        const failureMessage =
+        setError(
           failures
-            .map(
-              (item) =>
-                `${item.student}: ${item.message}`
-            )
-            .join(" ");
-
-        setError(failureMessage);
+            .map((item) => `${item.student}: ${item.message}`)
+            .join(" ")
+        );
       }
 
       setSelectedStudents([]);
-
       await loadEnrollments();
     } catch (err) {
-      console.error(
-        "Failed to continue students:",
-        err
-      );
+      console.error("Failed to continue students:", err);
 
       setError(
         err?.response?.data?.detail ||
@@ -646,7 +526,6 @@ export default function Enrollment() {
       setContinuing(false);
     }
   };
-
 
   // ==========================================================
   // REFRESH
@@ -658,19 +537,13 @@ export default function Enrollment() {
       setError("");
       setSuccess("");
 
-      await Promise.all([
-        loadSessions(),
-        loadClasses(),
-      ]);
+      await Promise.all([loadSessions(), loadClasses()]);
 
       if (selectedSession) {
         await loadTerms(selectedSession);
       }
 
-      if (
-        selectedSession &&
-        selectedTerm
-      ) {
+      if (selectedSession && selectedTerm) {
         await loadEnrollments();
       }
     } finally {
@@ -678,23 +551,18 @@ export default function Enrollment() {
     }
   };
 
-
   // ==========================================================
   // CURRENT SESSION / TERM DISPLAY
   // ==========================================================
 
   const currentSession = sessions.find(
     (session) =>
-      String(getId(session)) ===
-      String(selectedSession)
+      String(getId(session)) === String(selectedSession)
   );
 
   const currentTerm = terms.find(
-    (term) =>
-      String(getId(term)) ===
-      String(selectedTerm)
+    (term) => String(getId(term)) === String(selectedTerm)
   );
-
 
   // ==========================================================
   // RENDER
@@ -702,34 +570,29 @@ export default function Enrollment() {
 
   return (
     <div className="space-y-6">
-      {/* ======================================================
-          HEADER
-      ====================================================== */}
+      {/* HEADER */}
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <div
-              className="
-                flex h-11 w-11 items-center justify-center
-                rounded-xl
-                bg-[var(--color-primary)]/10
-                text-[var(--color-primary)]
-              "
-            >
-              <UserCheck size={23} />
-            </div>
+        <div className="flex items-center gap-3">
+          <div
+            className="
+              flex h-11 w-11 shrink-0 items-center justify-center
+              rounded-xl bg-[var(--color-primary)]/10
+              text-[var(--color-primary)]
+            "
+          >
+            <UserCheck size={23} />
+          </div>
 
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--color-text)]">
-                Student Enrollment
-              </h1>
+          <div>
+            <h1 className="text-2xl font-bold text-[var(--color-text)]">
+              Student Enrollment
+            </h1>
 
-              <p className="mt-1 text-sm text-gray-500">
-                Manage student term enrollment and
-                continue students to the next term.
-              </p>
-            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage student term enrollment and continue students to
+              the next term.
+            </p>
           </div>
         </div>
 
@@ -739,44 +602,28 @@ export default function Enrollment() {
           disabled={refreshing}
           className="
             inline-flex items-center justify-center gap-2
-            rounded-lg
-            border border-gray-200
-            bg-[var(--color-card)]
-            px-4 py-2.5
-            text-sm font-medium
-            text-[var(--color-text)]
-            transition
-            hover:bg-gray-50
-            dark:border-gray-700
-            dark:hover:bg-gray-800
-            disabled:cursor-not-allowed
-            disabled:opacity-60
+            rounded-lg border border-gray-200
+            bg-[var(--color-card)] px-4 py-2.5
+            text-sm font-medium text-[var(--color-text)]
+            transition hover:bg-gray-50
+            dark:border-gray-700 dark:hover:bg-gray-800
+            disabled:cursor-not-allowed disabled:opacity-60
           "
         >
           <RefreshCw
             size={17}
-            className={
-              refreshing
-                ? "animate-spin"
-                : ""
-            }
+            className={refreshing ? "animate-spin" : ""}
           />
-
           Refresh
         </button>
       </div>
 
-
-      {/* ======================================================
-          CURRENT ACADEMIC PERIOD
-      ====================================================== */}
+      {/* CURRENT ACADEMIC PERIOD */}
 
       <div
         className="
-          rounded-xl border
-          border-[var(--color-primary)]/20
-          bg-[var(--color-primary)]/5
-          p-4
+          rounded-xl border border-[var(--color-primary)]/20
+          bg-[var(--color-primary)]/5 p-4
         "
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -789,9 +636,7 @@ export default function Enrollment() {
               {currentSession
                 ? getSessionName(currentSession)
                 : "Loading session..."}{" "}
-              {currentTerm
-                ? `• ${getTermName(currentTerm)}`
-                : ""}
+              {currentTerm ? `• ${getTermName(currentTerm)}` : ""}
             </p>
           </div>
 
@@ -802,19 +647,13 @@ export default function Enrollment() {
         </div>
       </div>
 
-
-      {/* ======================================================
-          FILTERS
-      ====================================================== */}
+      {/* FILTERS */}
 
       <div
         className="
-          rounded-xl border
-          border-gray-200
-          bg-[var(--color-card)]
-          p-5
-          shadow-sm
-          dark:border-gray-700
+          rounded-xl border border-gray-200
+          bg-[var(--color-card)] p-4 shadow-sm
+          dark:border-gray-700 sm:p-5
         "
       >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -829,23 +668,15 @@ export default function Enrollment() {
             }}
             disabled={loadingSessions}
           >
-            <option value="">
-              Select session
-            </option>
+            <option value="">Select session</option>
 
             {sessions.map((session) => (
-              <option
-                key={getId(session)}
-                value={getId(session)}
-              >
+              <option key={getId(session)} value={getId(session)}>
                 {getSessionName(session)}
-                {isCurrentSession(session)
-                  ? " — Current"
-                  : ""}
+                {isCurrentSession(session) ? " — Current" : ""}
               </option>
             ))}
           </FilterSelect>
-
 
           <FilterSelect
             label="Term"
@@ -854,30 +685,19 @@ export default function Enrollment() {
               setSelectedTerm(value);
               setSelectedStudents([]);
             }}
-            disabled={
-              loadingTerms ||
-              !selectedSession
-            }
+            disabled={loadingTerms || !selectedSession}
           >
             <option value="">
-              {loadingTerms
-                ? "Loading terms..."
-                : "Select term"}
+              {loadingTerms ? "Loading terms..." : "Select term"}
             </option>
 
             {terms.map((term) => (
-              <option
-                key={getId(term)}
-                value={getId(term)}
-              >
+              <option key={getId(term)} value={getId(term)}>
                 {getTermName(term)}
-                {isCurrentTerm(term)
-                  ? " — Current"
-                  : ""}
+                {isCurrentTerm(term) ? " — Current" : ""}
               </option>
             ))}
           </FilterSelect>
-
 
           <FilterSelect
             label="Class"
@@ -888,9 +708,7 @@ export default function Enrollment() {
             }}
             disabled={loadingClasses}
           >
-            <option value="">
-              All Classes
-            </option>
+            <option value="">All Classes</option>
 
             {classes.map((classLevel) => (
               <option
@@ -903,7 +721,6 @@ export default function Enrollment() {
           </FilterSelect>
         </div>
 
-
         {/* SEARCH */}
 
         <div className="mt-4">
@@ -915,8 +732,7 @@ export default function Enrollment() {
             <Search
               size={18}
               className="
-                absolute left-3 top-1/2
-                -translate-y-1/2
+                absolute left-3 top-1/2 -translate-y-1/2
                 text-gray-400
               "
             />
@@ -924,21 +740,14 @@ export default function Enrollment() {
             <input
               type="text"
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by student name, admission number, or class..."
               className="
-                w-full rounded-lg border
-                border-gray-200
-                bg-[var(--color-card)]
-                py-3 pl-10 pr-4
-                text-sm text-[var(--color-text)]
-                outline-none
-                transition
-                focus:border-[var(--color-primary)]
-                focus:ring-2
-                focus:ring-[var(--color-primary)]/20
+                w-full rounded-lg border border-gray-200
+                bg-[var(--color-card)] py-3 pl-10 pr-4
+                text-sm text-[var(--color-text)] outline-none
+                transition focus:border-[var(--color-primary)]
+                focus:ring-2 focus:ring-[var(--color-primary)]/20
                 dark:border-gray-700
               "
             />
@@ -946,48 +755,29 @@ export default function Enrollment() {
         </div>
       </div>
 
-
-      {/* ======================================================
-          MESSAGES
-      ====================================================== */}
+      {/* MESSAGES */}
 
       {success && (
-        <MessageBox type="success">
-          {success}
-        </MessageBox>
+        <MessageBox type="success">{success}</MessageBox>
       )}
 
-      {error && (
-        <MessageBox type="error">
-          {error}
-        </MessageBox>
-      )}
+      {error && <MessageBox type="error">{error}</MessageBox>}
 
-
-      {/* ======================================================
-          SUMMARY / ACTION BAR
-      ====================================================== */}
+      {/* SUMMARY / ACTION BAR */}
 
       <div
         className="
-          flex flex-col gap-4
-          rounded-xl border
-          border-gray-200
-          bg-[var(--color-card)]
-          p-4
-          shadow-sm
-          dark:border-gray-700
-          sm:flex-row
-          sm:items-center
-          sm:justify-between
+          flex flex-col gap-4 rounded-xl border
+          border-gray-200 bg-[var(--color-card)] p-4
+          shadow-sm dark:border-gray-700
+          sm:flex-row sm:items-center sm:justify-between
         "
       >
         <div className="flex items-center gap-3">
           <div
             className="
-              flex h-10 w-10 items-center justify-center
-              rounded-lg
-              bg-[var(--color-primary)]/10
+              flex h-10 w-10 shrink-0 items-center justify-center
+              rounded-lg bg-[var(--color-primary)]/10
               text-[var(--color-primary)]
             "
           >
@@ -996,11 +786,8 @@ export default function Enrollment() {
 
           <div>
             <p className="text-sm font-semibold text-[var(--color-text)]">
-              {filteredEnrollments.length}{" "}
-              student
-              {filteredEnrollments.length === 1
-                ? ""
-                : "s"}
+              {filteredEnrollments.length} student
+              {filteredEnrollments.length === 1 ? "" : "s"}
             </p>
 
             <p className="text-xs text-gray-500">
@@ -1009,68 +796,47 @@ export default function Enrollment() {
           </div>
         </div>
 
-
         <button
           type="button"
           onClick={continueSelectedStudents}
           disabled={
-            continuing ||
-            selectedStudents.length === 0
+            continuing || selectedStudents.length === 0
           }
           className="
             inline-flex items-center justify-center gap-2
-            rounded-lg
-            bg-[var(--color-primary)]
-            px-5 py-2.5
-            text-sm font-semibold
-            text-white
-            transition
-            hover:opacity-90
-            disabled:cursor-not-allowed
-            disabled:opacity-50
+            rounded-lg bg-[var(--color-primary)]
+            px-5 py-2.5 text-sm font-semibold text-white
+            transition hover:opacity-90
+            disabled:cursor-not-allowed disabled:opacity-50
           "
         >
           {continuing ? (
             <>
-              <Loader2
-                size={17}
-                className="animate-spin"
-              />
-
+              <Loader2 size={17} className="animate-spin" />
               Continuing...
             </>
           ) : (
             <>
               <UserCheck size={17} />
-
               Continue Selected
             </>
           )}
         </button>
       </div>
 
-
-      {/* ======================================================
-          STUDENT TABLE
-      ====================================================== */}
+      {/* STUDENT TABLE */}
 
       <div
         className="
-          overflow-hidden rounded-xl border
-          border-gray-200
-          bg-[var(--color-card)]
-          shadow-sm
+          overflow-hidden rounded-xl border border-gray-200
+          bg-[var(--color-card)] shadow-sm
           dark:border-gray-700
         "
       >
         {loadingEnrollments ? (
           <div className="flex min-h-[300px] items-center justify-center">
             <div className="flex items-center gap-3 text-sm text-gray-500">
-              <Loader2
-                size={20}
-                className="animate-spin"
-              />
-
+              <Loader2 size={20} className="animate-spin" />
               Loading students...
             </div>
           </div>
@@ -1078,11 +844,8 @@ export default function Enrollment() {
           <div className="flex min-h-[300px] flex-col items-center justify-center px-6 text-center">
             <div
               className="
-                mb-4 flex h-14 w-14
-                items-center justify-center
-                rounded-full
-                bg-gray-100
-                text-gray-400
+                mb-4 flex h-14 w-14 items-center justify-center
+                rounded-full bg-gray-100 text-gray-400
                 dark:bg-gray-800
               "
             >
@@ -1094,212 +857,202 @@ export default function Enrollment() {
             </h3>
 
             <p className="mt-1 max-w-md text-sm text-gray-500">
-              There are no student enrollments matching
-              the selected session, term, class, or
-              search criteria.
+              There are no student enrollments matching the selected
+              session, term, class, or search criteria.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px]">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full table-fixed text-left md:table-auto">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                  <th className="w-12 px-4 py-3 text-left">
+                  {/* SELECT ALL */}
+
+                  <th className="w-10 px-2 py-3 text-left sm:w-12 sm:px-4">
                     <input
                       type="checkbox"
                       checked={allVisibleSelected}
                       onChange={toggleSelectAll}
+                      aria-label="Select all visible students"
                       className="
-                        h-4 w-4 rounded
-                        border-gray-300
+                        h-4 w-4 rounded border-gray-300
                         text-[var(--color-primary)]
                         focus:ring-[var(--color-primary)]
                       "
                     />
                   </th>
 
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Student
+                  {/* STUDENT NAME — VISIBLE ON MOBILE AND DESKTOP */}
+
+                  <th className="w-[48%] px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 sm:px-4 md:w-auto">
+                    Student Name
                   </th>
 
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  {/* ADMISSION NUMBER — VISIBLE ON MOBILE AND DESKTOP */}
+
+                  <th className="px-2 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 sm:px-4">
                     Admission No.
                   </th>
 
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  {/* DESKTOP ONLY */}
+
+                  <th className="hidden px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
                     Class
                   </th>
 
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <th className="hidden px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
                     Roll No.
                   </th>
 
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <th className="hidden px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 md:table-cell">
                     Status
                   </th>
                 </tr>
               </thead>
 
               <tbody>
-                {filteredEnrollments.map(
-                  (enrollment) => {
-                    const studentId =
-                      enrollment.student;
+                {filteredEnrollments.map((enrollment) => {
+                  const studentId = enrollment.student;
 
-                    const studentName =
-                      enrollment.student_name ||
-                      enrollment.student?.full_name ||
-                      "Unknown Student";
+                  const studentName =
+                    enrollment.student_name ||
+                    enrollment.student?.full_name ||
+                    "Unknown Student";
 
-                    const admissionNumber =
-                      enrollment.admission_number ||
-                      enrollment.student
-                        ?.admission_number ||
-                      "—";
+                  const admissionNumber =
+                    enrollment.admission_number ||
+                    enrollment.student?.admission_number ||
+                    "—";
 
-                    const className =
-                      enrollment.class_name ||
-                      enrollment.class_level?.name ||
-                      "—";
+                  const className =
+                    enrollment.class_name ||
+                    enrollment.class_level?.name ||
+                    "—";
 
-                    const isSelected =
-                      selectedStudents.includes(
-                        studentId
-                      );
+                  const isSelected =
+                    selectedStudents.includes(studentId);
 
-                    return (
-                      <tr
-                        key={enrollment.id}
-                        className={`
-                          border-b border-gray-100
-                          transition
-                          dark:border-gray-800
-                          ${
-                            isSelected
-                              ? "bg-[var(--color-primary)]/5"
-                              : "hover:bg-gray-50 dark:hover:bg-gray-800/30"
-                          }
-                        `}
-                      >
-                        <td className="px-4 py-4">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() =>
-                              toggleStudent(
-                                studentId
-                              )
-                            }
+                  return (
+                    <tr
+                      key={enrollment.id}
+                      className={`
+                        border-b border-gray-100 transition
+                        dark:border-gray-800
+                        ${
+                          isSelected
+                            ? "bg-[var(--color-primary)]/5"
+                            : "hover:bg-gray-50 dark:hover:bg-gray-800/30"
+                        }
+                      `}
+                    >
+                      {/* SELECT STUDENT */}
+
+                      <td className="px-2 py-3 sm:px-4 sm:py-4">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleStudent(studentId)}
+                          aria-label={`Select ${studentName}`}
+                          className="
+                            h-4 w-4 rounded border-gray-300
+                            text-[var(--color-primary)]
+                            focus:ring-[var(--color-primary)]
+                          "
+                        />
+                      </td>
+
+                      {/* STUDENT NAME */}
+
+                      <td className="px-2 py-3 sm:px-4 sm:py-4">
+                        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                          <div
                             className="
-                              h-4 w-4 rounded
-                              border-gray-300
+                              flex h-8 w-8 shrink-0 items-center
+                              justify-center rounded-full
+                              bg-[var(--color-primary)]/10
+                              text-xs font-semibold
                               text-[var(--color-primary)]
-                              focus:ring-[var(--color-primary)]
+                              sm:h-9 sm:w-9 sm:text-sm
                             "
-                          />
-                        </td>
-
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="
-                                flex h-9 w-9
-                                shrink-0
-                                items-center justify-center
-                                rounded-full
-                                bg-[var(--color-primary)]/10
-                                text-sm font-semibold
-                                text-[var(--color-primary)]
-                              "
-                            >
-                              {studentName
-                                .charAt(0)
-                                .toUpperCase()}
-                            </div>
-
-                            <div>
-                              <p className="text-sm font-medium text-[var(--color-text)]">
-                                {studentName}
-                              </p>
-
-                              <p className="text-xs text-gray-500">
-                                {enrollment.term_name ||
-                                  ""}
-                              </p>
-                            </div>
+                          >
+                            {studentName.charAt(0).toUpperCase()}
                           </div>
-                        </td>
 
-                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
-                          {admissionNumber}
-                        </td>
+                          <div className="min-w-0">
+                            <p className="break-words text-xs font-medium text-[var(--color-text)] sm:text-sm">
+                              {studentName}
+                            </p>
 
-                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
-                          {className}
-                        </td>
+                            <p className="text-xs text-gray-500">
+                              {enrollment.term_name || ""}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
 
-                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
-                          {enrollment.roll_number ??
-                            "—"}
-                        </td>
+                      {/* ADMISSION NUMBER */}
 
-                        <td className="px-4 py-4">
-                          {enrollment.is_current ? (
-                            <span
-                              className="
-                                inline-flex items-center gap-1.5
-                                rounded-full
-                                bg-green-50
-                                px-2.5 py-1
-                                text-xs font-medium
-                                text-green-700
-                                dark:bg-green-900/20
-                                dark:text-green-400
-                              "
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                              Current
-                            </span>
-                          ) : (
-                            <span
-                              className="
-                                inline-flex items-center
-                                rounded-full
-                                bg-gray-100
-                                px-2.5 py-1
-                                text-xs font-medium
-                                text-gray-600
-                                dark:bg-gray-800
-                                dark:text-gray-400
-                              "
-                            >
-                              Not Current
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
+                      <td className="break-words px-2 py-3 text-xs text-gray-600 dark:text-gray-300 sm:px-4 sm:py-4 sm:text-sm">
+                        {admissionNumber}
+                      </td>
+
+                      {/* CLASS — DESKTOP ONLY */}
+
+                      <td className="hidden px-4 py-4 text-sm text-gray-600 dark:text-gray-300 md:table-cell">
+                        {className}
+                      </td>
+
+                      {/* ROLL NUMBER — DESKTOP ONLY */}
+
+                      <td className="hidden px-4 py-4 text-sm text-gray-600 dark:text-gray-300 md:table-cell">
+                        {enrollment.roll_number ?? "—"}
+                      </td>
+
+                      {/* STATUS — DESKTOP ONLY */}
+
+                      <td className="hidden px-4 py-4 md:table-cell">
+                        {enrollment.is_current ? (
+                          <span
+                            className="
+                              inline-flex items-center gap-1.5
+                              rounded-full bg-green-50
+                              px-2.5 py-1 text-xs font-medium
+                              text-green-700
+                              dark:bg-green-900/20 dark:text-green-400
+                            "
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                            Current
+                          </span>
+                        ) : (
+                          <span
+                            className="
+                              inline-flex items-center rounded-full
+                              bg-gray-100 px-2.5 py-1
+                              text-xs font-medium text-gray-600
+                              dark:bg-gray-800 dark:text-gray-400
+                            "
+                          >
+                            Not Current
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
 
-
-      {/* ======================================================
-          INFORMATION
-      ====================================================== */}
+      {/* INFORMATION */}
 
       <div
         className="
-          rounded-xl border
-          border-amber-200
-          bg-amber-50
-          p-4
-          dark:border-amber-900/40
-          dark:bg-amber-900/10
+          rounded-xl border border-amber-200
+          bg-amber-50 p-4
+          dark:border-amber-900/40 dark:bg-amber-900/10
         "
       >
         <div className="flex items-start gap-3">
@@ -1309,15 +1062,12 @@ export default function Enrollment() {
           />
 
           <div className="text-sm text-amber-800 dark:text-amber-300">
-            <p className="font-semibold">
-              Term progression
-            </p>
+            <p className="font-semibold">Term progression</p>
 
             <p className="mt-1">
-              Students move from First Term to Second
-              Term and from Second Term to Third Term.
-              Students already in Third Term must be
-              handled through the Promotion workflow.
+              Students move from First Term to Second Term and from
+              Second Term to Third Term. Students already in Third
+              Term must be handled through the Promotion workflow.
             </p>
           </div>
         </div>
@@ -1325,5 +1075,3 @@ export default function Enrollment() {
     </div>
   );
 }
-
-
