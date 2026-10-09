@@ -101,7 +101,6 @@ const routes = [
     path: "/school-admin/settings",
     label: "Settings",
     icon: "⚙",
-    bottom: true,
     children: [
       { path: "/school-admin/settings/school-information", label: "School Information" },
       { path: "/school-admin/settings/academic-settings", label: "Academic Settings" },
@@ -124,7 +123,8 @@ const isSectionActive = (route, pathname) => {
 
 const loadExpanded = () => {
   try {
-    return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {};
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
   } catch {
     return {};
   }
@@ -145,6 +145,7 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
     }
   }, [expanded]);
 
+  // Automatically expand the section containing the current page.
   useEffect(() => {
     const activeRoute = routes.find(
       (route) =>
@@ -153,18 +154,18 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
     );
 
     if (activeRoute) {
-      setExpanded((prev) =>
-        prev[activeRoute.path]
-          ? prev
-          : { ...prev, [activeRoute.path]: true }
+      setExpanded((previous) =>
+        previous[activeRoute.path]
+          ? previous
+          : { ...previous, [activeRoute.path]: true }
       );
     }
   }, [location.pathname]);
 
   const toggleSection = (path) => {
-    setExpanded((prev) => ({
-      ...prev,
-      [path]: !prev[path],
+    setExpanded((previous) => ({
+      ...previous,
+      [path]: !previous[path],
     }));
   };
 
@@ -187,6 +188,7 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
 
   return (
     <>
+      {/* Mobile backdrop */}
       {open && (
         <div
           className="fixed inset-0 z-30 bg-black/40 lg:hidden"
@@ -196,7 +198,7 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen h-[100dvh] w-64 flex-col overflow-hidden bg-[var(--color-sidebar)] shadow-lg transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-dvh min-h-0 w-64 flex-col overflow-hidden bg-[var(--color-sidebar)] shadow-lg transition-transform duration-300 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{
@@ -205,8 +207,8 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
         }}
         aria-label="School Admin navigation"
       >
-        {/* HEADER: remains visible */}
-        <div className="flex h-16 min-h-16 shrink-0 items-center border-b border-white/10 px-5">
+        {/* Fixed header */}
+        <header className="flex h-16 min-h-16 shrink-0 items-center border-b border-white/10 px-5">
           <div>
             <h1 className="text-lg font-bold text-white">
               EduManageERP
@@ -224,41 +226,24 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
           >
             ✕
           </button>
-        </div>
+        </header>
 
-        {/* NAVIGATION: scrolls independently */}
+        {/* The ONLY scrollable area.
+            All navigation sections, including Settings, live here. */}
         <nav
-          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-4"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 py-4"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "thin",
+          }}
+          aria-label="School Admin menu"
         >
           <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
             School Admin
           </div>
 
           <div className="space-y-1">
-            {routes
-              .filter((route) => !route.bottom)
-              .map((route) => (
-                <SidebarItem
-                  key={route.path}
-                  route={route}
-                  expanded={expanded}
-                  toggleSection={toggleSection}
-                  pathname={location.pathname}
-                  onNavigate={closeOnMobile}
-                />
-              ))}
-          </div>
-        </nav>
-
-        {/* BOTTOM ACTIONS: visible and independently scrollable if needed */}
-        <div
-          className="max-h-[45%] shrink-0 overflow-y-auto overscroll-contain border-t border-white/10 bg-[var(--color-sidebar)] px-3 pt-3 pb-3"
-          style={{ WebkitOverflowScrolling: "touch" }}
-        >
-          {routes
-            .filter((route) => route.bottom)
-            .map((route) => (
+            {routes.map((route) => (
               <SidebarItem
                 key={route.path}
                 route={route}
@@ -268,18 +253,26 @@ const SchoolAdminSidebar = ({ open, setOpen }) => {
                 onNavigate={closeOnMobile}
               />
             ))}
+          </div>
+        </nav>
 
+        {/* Fixed footer.
+            It is outside the scrollable navigation. */}
+        <footer className="relative z-10 shrink-0 border-t border-white/10 bg-[var(--color-sidebar)] px-3 py-3">
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-2 flex min-h-11 w-full shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-300 transition hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-gray-300 transition hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
           >
-            <span className="w-6 text-center" aria-hidden="true">
+            <span
+              className="w-6 shrink-0 text-center"
+              aria-hidden="true"
+            >
               ↪
             </span>
             <span>Logout</span>
           </button>
-        </div>
+        </footer>
       </aside>
     </>
   );
@@ -313,7 +306,7 @@ const SidebarItem = ({
           }`
         }
       >
-        <span className="w-6 shrink-0 text-center">
+        <span className="w-6 shrink-0 text-center" aria-hidden="true">
           {route.icon}
         </span>
         <span className="min-w-0">{route.label}</span>
@@ -327,18 +320,21 @@ const SidebarItem = ({
         type="button"
         onClick={() => toggleSection(route.path)}
         aria-expanded={isExpanded}
+        aria-controls={`sidebar-section-${route.path.replace(/[^a-zA-Z0-9]/g, "-")}`}
         className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition ${
           active
             ? "bg-[var(--color-primary)] text-white"
             : "text-gray-300 hover:bg-white/10 hover:text-white"
         }`}
       >
-        <span className="w-6 shrink-0 text-center">
+        <span className="w-6 shrink-0 text-center" aria-hidden="true">
           {route.icon}
         </span>
+
         <span className="min-w-0 flex-1">{route.label}</span>
+
         <span
-          className={`text-xs transition-transform ${
+          className={`shrink-0 text-xs transition-transform ${
             isExpanded ? "rotate-180" : ""
           }`}
           aria-hidden="true"
@@ -348,7 +344,10 @@ const SidebarItem = ({
       </button>
 
       {isExpanded && (
-        <div className="ml-6 mt-1 space-y-1 border-l border-white/10 pl-3">
+        <div
+          id={`sidebar-section-${route.path.replace(/[^a-zA-Z0-9]/g, "-")}`}
+          className="ml-6 mt-1 space-y-1 border-l border-white/10 pl-3"
+        >
           {route.children.map((child) => (
             <NavLink
               key={child.path}
