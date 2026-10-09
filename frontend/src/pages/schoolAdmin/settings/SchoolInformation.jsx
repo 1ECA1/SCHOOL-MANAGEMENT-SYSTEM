@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Building2,
@@ -50,11 +49,13 @@ const SchoolInformation = () => {
       setError("");
       setSuccess("");
 
-      const response = await api.get(
-        "/academics/schools/my-school/"
-      );
+      const response = await api.get("/academics/schools/");
 
-      const data = response.data;
+      const data = Array.isArray(response.data)
+        ? response.data[0]
+        : Array.isArray(response.data?.results)
+          ? response.data.results[0]
+          : response.data;
 
       setSchool(data);
 
@@ -66,8 +67,7 @@ const SchoolInformation = () => {
         email: data.email || "",
         website: data.website || "",
         principal_name: data.principal_name || "",
-        established_year:
-          data.established_year ?? "",
+        established_year: data.established_year ?? "",
         is_active: data.is_active ?? true,
       });
 
@@ -80,8 +80,7 @@ const SchoolInformation = () => {
       console.error("Failed to load school:", err);
 
       setError(
-        err?.response?.data?.detail ||
-          "Unable to load school information."
+        err?.response?.data?.detail || "Unable to load school information.",
       );
     } finally {
       setLoading(false);
@@ -101,10 +100,7 @@ const SchoolInformation = () => {
 
     setFormData((previous) => ({
       ...previous,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -140,50 +136,26 @@ const SchoolInformation = () => {
 
       const payload = new FormData();
 
-      payload.append(
-        "name",
-        formData.name.trim()
-      );
+      payload.append("name", formData.name.trim());
 
-      payload.append(
-        "address",
-        formData.address.trim()
-      );
+      payload.append("address", formData.address.trim());
 
-      payload.append(
-        "phone",
-        formData.phone.trim()
-      );
+      payload.append("phone", formData.phone.trim());
 
-      payload.append(
-        "email",
-        formData.email.trim()
-      );
+      payload.append("email", formData.email.trim());
 
-      payload.append(
-        "website",
-        formData.website.trim()
-      );
+      payload.append("website", formData.website.trim());
 
-      payload.append(
-        "principal_name",
-        formData.principal_name.trim()
-      );
+      payload.append("principal_name", formData.principal_name.trim());
 
       if (
         formData.established_year !== "" &&
         formData.established_year !== null
       ) {
-        payload.append(
-          "established_year",
-          formData.established_year
-        );
+        payload.append("established_year", formData.established_year);
       }
 
-      payload.append(
-        "is_active",
-        formData.is_active
-      );
+      payload.append("is_active", formData.is_active);
 
       if (logoFile) {
         payload.append("logo", logoFile);
@@ -196,7 +168,7 @@ const SchoolInformation = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       const updatedSchool = response.data;
@@ -210,12 +182,9 @@ const SchoolInformation = () => {
         phone: updatedSchool.phone || "",
         email: updatedSchool.email || "",
         website: updatedSchool.website || "",
-        principal_name:
-          updatedSchool.principal_name || "",
-        established_year:
-          updatedSchool.established_year ?? "",
-        is_active:
-          updatedSchool.is_active ?? true,
+        principal_name: updatedSchool.principal_name || "",
+        established_year: updatedSchool.established_year ?? "",
+        is_active: updatedSchool.is_active ?? true,
       });
 
       if (updatedSchool.logo) {
@@ -224,24 +193,14 @@ const SchoolInformation = () => {
 
       setLogoFile(null);
 
-      setSuccess(
-        "School information updated successfully."
-      );
+      setSuccess("School information updated successfully.");
     } catch (err) {
-      console.error(
-        "Failed to update school:",
-        err
-      );
+      console.error("Failed to update school:", err);
 
       const responseData = err?.response?.data;
 
-      if (
-        responseData &&
-        typeof responseData === "object"
-      ) {
-        const messages = Object.entries(
-          responseData
-        )
+      if (responseData && typeof responseData === "object") {
+        const messages = Object.entries(responseData)
           .map(([field, message]) => {
             if (Array.isArray(message)) {
               return `${field}: ${message.join(", ")}`;
@@ -251,14 +210,9 @@ const SchoolInformation = () => {
           })
           .join(" ");
 
-        setError(
-          messages ||
-            "Unable to update school information."
-        );
+        setError(messages || "Unable to update school information.");
       } else {
-        setError(
-          "Unable to update school information."
-        );
+        setError("Unable to update school information.");
       }
     } finally {
       setSaving(false);
@@ -273,13 +227,8 @@ const SchoolInformation = () => {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="flex items-center gap-3 text-[var(--color-text)]">
-          <Loader2
-            size={22}
-            className="animate-spin"
-          />
-          <span>
-            Loading school information...
-          </span>
+          <Loader2 size={22} className="animate-spin" />
+          <span>Loading school information...</span>
         </div>
       </div>
     );
@@ -293,8 +242,7 @@ const SchoolInformation = () => {
     return (
       <div className="space-y-4">
         <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
-          {error ||
-            "School information could not be loaded."}
+          {error || "School information could not be loaded."}
         </div>
 
         <button
@@ -326,8 +274,7 @@ const SchoolInformation = () => {
           </h1>
 
           <p className="mt-1 text-sm text-gray-500">
-            Manage your school's basic information,
-            contact details and profile.
+            Manage your school's basic information, contact details and profile.
           </p>
         </div>
 
@@ -363,10 +310,7 @@ const SchoolInformation = () => {
           FORM
       ===================================================== */}
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* ===================================================
             SCHOOL PROFILE
         =================================================== */}
@@ -384,8 +328,7 @@ const SchoolInformation = () => {
                 </h2>
 
                 <p className="text-sm text-gray-500">
-                  Basic identification information
-                  about the school.
+                  Basic identification information about the school.
                 </p>
               </div>
             </div>
@@ -458,9 +401,7 @@ const SchoolInformation = () => {
                 <input
                   type="number"
                   name="established_year"
-                  value={
-                    formData.established_year
-                  }
+                  value={formData.established_year}
                   onChange={handleChange}
                   min="1800"
                   max="2100"
@@ -488,8 +429,7 @@ const SchoolInformation = () => {
                 </h2>
 
                 <p className="text-sm text-gray-500">
-                  Contact details parents and users
-                  can use to reach the school.
+                  Contact details parents and users can use to reach the school.
                 </p>
               </div>
             </div>
@@ -582,9 +522,7 @@ const SchoolInformation = () => {
                 <input
                   type="text"
                   name="principal_name"
-                  value={
-                    formData.principal_name
-                  }
+                  value={formData.principal_name}
                   onChange={handleChange}
                   className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10"
                 />
@@ -638,9 +576,8 @@ const SchoolInformation = () => {
               </p>
 
               <p className="mt-1 text-sm text-gray-500">
-                An inactive school should not be
-                treated as an active school in the
-                system.
+                An inactive school should not be treated as an active school in
+                the system.
               </p>
             </div>
 
@@ -675,8 +612,7 @@ const SchoolInformation = () => {
                 </h2>
 
                 <p className="text-sm text-gray-500">
-                  Upload the official logo of the
-                  school.
+                  Upload the official logo of the school.
                 </p>
               </div>
             </div>
@@ -691,10 +627,7 @@ const SchoolInformation = () => {
                   className="h-full w-full object-contain"
                 />
               ) : (
-                <ImageIcon
-                  size={36}
-                  className="text-gray-300"
-                />
+                <ImageIcon size={36} className="text-gray-300" />
               )}
             </div>
 
@@ -711,8 +644,7 @@ const SchoolInformation = () => {
               </label>
 
               <p className="mt-2 text-xs text-gray-400">
-                Select an image file for the school
-                logo.
+                Select an image file for the school logo.
               </p>
             </div>
           </div>
@@ -730,10 +662,7 @@ const SchoolInformation = () => {
           >
             {saving ? (
               <>
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                />
+                <Loader2 size={18} className="animate-spin" />
                 Saving...
               </>
             ) : (
