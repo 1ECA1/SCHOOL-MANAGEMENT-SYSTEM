@@ -1,14 +1,18 @@
 from rest_framework import serializers
 
+from accounts.models import User
 from .models import Teacher, TeacherSubject, ClassTeacher
+
 
 
 class TeacherSerializer(serializers.ModelSerializer):
     full_name = serializers.ReadOnlyField()
+
     department_name = serializers.CharField(
         source="department.name",
         read_only=True,
     )
+
     school_name = serializers.CharField(
         source="school.name",
         read_only=True,
@@ -16,7 +20,6 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teacher
-
         fields = [
             "id",
             "school",
@@ -45,12 +48,48 @@ class TeacherSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+        extra_kwargs = {
+            # The authenticated School Admin's school is
+            # assigned by the backend.
+            "school": {"required": False},
+        }
+
         read_only_fields = [
             "id",
             "full_name",
             "created_at",
             "updated_at",
         ]
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+
+        if request and request.user.is_authenticated:
+            user = request.user
+
+            if user.role == User.Role.SCHOOL_ADMIN:
+                if not user.school_id:
+                    raise serializers.ValidationError({
+                        "school": (
+                            "Your administrator account "
+                            "has no assigned school."
+                        )
+                    })
+
+                # Never trust a school ID supplied by a
+                # School Admin's browser.
+                attrs["school"] = user.school
+
+        # School is required for other roles unless they
+        # already have an instance with a school.
+        if not attrs.get("school") and not (
+            self.instance and self.instance.school_id
+        ):
+            raise serializers.ValidationError({
+                "school": "School is required."
+            })
+
+        return attrs
 
 
 class TeacherSubjectSerializer(serializers.ModelSerializer):
