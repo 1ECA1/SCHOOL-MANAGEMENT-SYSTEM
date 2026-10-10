@@ -1131,7 +1131,7 @@ export default function Admission() {
         </div>
       </main>
 
-      <PublicFooter />
+      {/* <PublicFooter /> */}
     </div>
   );
 }

@@ -93,6 +93,12 @@ PAYSTACK_PUBLIC_KEY = os.environ.get(
     "",
 )
 
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+}
+
 
 # ============================================================
 # APPLICATIONS
@@ -111,6 +117,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",
+    "cloudinary_storage",
+    "cloudinary",
 
     # EduManage ERP apps
     "accounts",
@@ -294,7 +302,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {
         "BACKEND": (
-            "django.core.files.storage.FileSystemStorage"
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
         ),
     },
     "staticfiles": {
@@ -348,6 +356,7 @@ for origin in [
 ]:
     if origin and origin not in CORS_ALLOWED_ORIGINS:
         CORS_ALLOWED_ORIGINS.append(origin)
+
 
 if DEBUG:
     for origin in [
