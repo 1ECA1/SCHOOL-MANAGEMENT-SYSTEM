@@ -25,11 +25,13 @@ from students.models import (
     Student,
     StudentEnrollment,
     ParentGuardian,
+    StudentSubjectEnrollment,
 )
 
 from academics.models import (
     AcademicSession,
     Term,
+    ClassSubject,
 )
 
 from .models import (
@@ -1209,16 +1211,26 @@ class ApplicantDetailView(APIView):
 
             student_user.save()
 
+        
         # =========================================================
-        # FIND THE STUDENT'S ENROLLMENT
+        # FIND AND UPDATE THE STUDENT'S CURRENT ENROLLMENT
         # =========================================================
 
-        enrollment = None
+        # Prefer the current enrollment so edits affect the
+        # placement used by the active student portal.
+        enrollment = (
+            StudentEnrollment.objects
+            .filter(
+                student=student,
+                is_current=True,
+            )
+            .order_by("-id")
+            .first()
+        )
 
-        # First try to locate the enrollment that originally
-        # belonged to this application.
-        if old_session_id and old_term_id:
-
+        # Fall back to the application's previous session/term
+        # if the student has no current enrollment.
+        if enrollment is None and old_session_id and old_term_id:
             enrollment = (
                 StudentEnrollment.objects
                 .filter(
@@ -1230,67 +1242,236 @@ class ApplicantDetailView(APIView):
                 .first()
             )
 
-        # If it cannot be found, fall back to the current
-        # enrollment.
+        target_session_id = applicant.academic_session_id
+        target_term_id = applicant.term_id
+        target_class_id = applicant.class_level_id
+        target_roll_number = applicant.roll_number
+
+        # StudentEnrollment requires a term.
+        if not target_session_id or not target_term_id or not target_class_id:
+            transaction.set_rollback(True)
+
+            return Response(
+                {
+                    "detail": (
+                        "An academic session, term, and class "
+                        "must be selected for an admitted student."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Reject a destination already occupied by another
+        # enrollment for this student. Do this before changing
+        # the existing enrollment.
+        destination_enrollment = (
+            StudentEnrollment.objects
+            .filter(
+                student=student,
+                academic_session_id=target_session_id,
+                term_id=target_term_id,
+            )
+            .order_by("-id")
+            .first()
+        )
+
+        if (
+            destination_enrollment is not None
+            and (
+                enrollment is None
+                or destination_enrollment.id != enrollment.id
+            )
+        ):
+            transaction.set_rollback(True)
+
+            return Response(
+                {
+                    "detail": (
+                        "This student already has an enrollment "
+                        "for the selected academic session and term. "
+                        "Resolve the existing enrollment before "
+                        "changing the admission placement."
+                    ),
+                    "existing_enrollment_id": (
+                        destination_enrollment.id
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # ---------------------------------------------------------
+        # CASE A: No enrollment exists yet.
+        # Create one for the selected placement.
+        # ---------------------------------------------------------
+
         if enrollment is None:
+            enrollment = StudentEnrollment.objects.create(
+                student=student,
+                academic_session_id=target_session_id,
+                term_id=target_term_id,
+                class_level_id=target_class_id,
+                roll_number=target_roll_number,
+                is_current=True,
+                remarks="Enrollment created while updating admission.",
+            )
 
-            enrollment = (
-                StudentEnrollment.objects
+        # ---------------------------------------------------------
+        # CASE B: Session or term changed.
+        # Preserve the previous enrollment and create a new one.
+        # ---------------------------------------------------------
+
+        elif (
+            enrollment.academic_session_id != target_session_id
+            or enrollment.term_id != target_term_id
+        ):
+            # Capture the previous active subjects before creating
+            # the new enrollment. Only subjects assigned to the
+            # destination class will be carried forward.
+            previous_subjects = list(
+                StudentSubjectEnrollment.objects
                 .filter(
-                    student=student,
-                    is_current=True,
-                )
-                .order_by("-id")
-                .first()
-            )
-
-        # =========================================================
-        # UPDATE STUDENT ENROLLMENT
-        # =========================================================
-
-        if enrollment:
-
-            # If the application is being moved to another
-            # session/term/class, update the canonical enrollment.
-            enrollment.academic_session_id = (
-                applicant.academic_session_id
-            )
-
-            enrollment.term_id = (
-                applicant.term_id
-            )
-
-            enrollment.class_level_id = (
-                applicant.class_level_id
-            )
-
-            enrollment.roll_number = (
-                applicant.roll_number
-            )
-
-            enrollment.save()
-
-            # -----------------------------------------------------
-            # Keep StudentSubjectEnrollment metadata synchronized.
-            #
-            # The subject list itself is NOT automatically replaced.
-            # We only keep its session/term consistent with the
-            # enrollment.
-            # -----------------------------------------------------
-
-            if hasattr(
-                enrollment,
-                "subject_enrollments",
-            ):
-
-                enrollment.subject_enrollments.update(
+                    student_enrollment=enrollment,
                     academic_session_id=(
-                        applicant.academic_session_id
+                        enrollment.academic_session_id
                     ),
-                    term_id=(
-                        applicant.term_id
-                    ),
+                    term_id=enrollment.term_id,
+                    is_active=True,
                 )
+                .select_related("subject")
+            )
+
+            enrollment.is_current = False
+            enrollment.save(update_fields=["is_current"])
+
+            enrollment = StudentEnrollment.objects.create(
+                student=student,
+                academic_session_id=target_session_id,
+                term_id=target_term_id,
+                class_level_id=target_class_id,
+                roll_number=target_roll_number,
+                is_current=True,
+                remarks="New enrollment created after admission placement change.",
+            )
+
+            # Copy only subjects that are still assigned to the
+            # destination class. Do not rewrite historical subjects.
+            for previous_subject in previous_subjects:
+                class_subject = (
+                    ClassSubject.objects
+                    .filter(
+                        class_level_id=target_class_id,
+                        subject_id=previous_subject.subject_id,
+                        is_active=True,
+                        subject__is_active=True,
+                    )
+                    .first()
+                )
+
+                if class_subject is None:
+                    continue
+
+                StudentSubjectEnrollment.objects.get_or_create(
+                    student_enrollment=enrollment,
+                    subject_id=previous_subject.subject_id,
+                    academic_session_id=target_session_id,
+                    term_id=target_term_id,
+                    defaults={
+                        "is_core": class_subject.is_core,
+                        "is_active": True,
+                    },
+                )
+
+        # ---------------------------------------------------------
+        # CASE C: Same session and term.
+        # Update class and roll number on the existing enrollment.
+        # ---------------------------------------------------------
+
+        else:
+            class_changed = (
+                enrollment.class_level_id != target_class_id
+            )
+
+            enrollment.class_level_id = target_class_id
+            enrollment.roll_number = target_roll_number
+            enrollment.is_current = True
+
+            enrollment.save(
+                update_fields=[
+                    "class_level",
+                    "roll_number",
+                    "is_current",
+                ]
+            )
+
+            if class_changed:
+                class_subjects = list(
+                    ClassSubject.objects
+                    .filter(
+                        class_level_id=target_class_id,
+                        is_active=True,
+                        subject__is_active=True,
+                    )
+                )
+
+                assigned_subject_ids = {
+                    item.subject_id for item in class_subjects
+                }
+
+                # Deactivate subjects that are not assigned to
+                # the newly selected class. Keep their records.
+                StudentSubjectEnrollment.objects.filter(
+                    student_enrollment=enrollment,
+                    is_active=True,
+                ).exclude(
+                    subject_id__in=assigned_subject_ids,
+                ).update(is_active=False)
+
+                for class_subject in class_subjects:
+                    existing_subject = (
+                        StudentSubjectEnrollment.objects
+                        .filter(
+                            student_enrollment=enrollment,
+                            subject_id=class_subject.subject_id,
+                            academic_session_id=target_session_id,
+                            term_id=target_term_id,
+                        )
+                        .first()
+                    )
+
+                    if existing_subject is not None:
+                        # Restore subjects that belong to the new
+                        # class and update their legacy core flag.
+                        if (
+                            not existing_subject.is_active
+                            or existing_subject.is_core
+                            != class_subject.is_core
+                        ):
+                            existing_subject.is_active = True
+                            existing_subject.is_core = (
+                                class_subject.is_core
+                            )
+                            existing_subject.save(
+                                update_fields=[
+                                    "is_active",
+                                    "is_core",
+                                ]
+                            )
+
+                    elif (
+                        class_subject.assignment_type
+                        != "OPTIONAL"
+                    ):
+                        # Automatically add missing compulsory
+                        # subjects, but do not select optional
+                        # subjects on the student's behalf.
+                        StudentSubjectEnrollment.objects.create(
+                            student_enrollment=enrollment,
+                            subject_id=class_subject.subject_id,
+                            academic_session_id=target_session_id,
+                            term_id=target_term_id,
+                            is_core=class_subject.is_core,
+                            is_active=True,
+                        )
 
         # =========================================================
         # SYNCHRONIZE PARENT / GUARDIAN
