@@ -27,11 +27,44 @@ const ASSIGNMENT_TYPES = [
 ];
 
 function getList(data) {
-  if (Array.isArray(data)) {
-    return data;
+  if (Array.isArray(data)) return data;
+  return Array.isArray(data?.results) ? data.results : [];
+}
+
+/**
+ * Supports Django REST Framework relationships represented as:
+ * - a numeric ID
+ * - a numeric string
+ * - an object containing id or pk
+ * - null / undefined
+ */
+function getRelationId(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
   }
 
-  return data?.results || [];
+  if (typeof value === "object") {
+    return value.id ?? value.pk ?? null;
+  }
+
+  return value;
+}
+
+function getDepartmentName(item) {
+  if (!item) return "";
+
+  if (item.department_name) {
+    return item.department_name;
+  }
+
+  if (
+    item.department &&
+    typeof item.department === "object"
+  ) {
+    return item.department.name || "";
+  }
+
+  return "";
 }
 
 function AddClassSubject() {
@@ -54,6 +87,8 @@ function AddClassSubject() {
   });
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadData = async () => {
       try {
         setLoading(true);
@@ -64,133 +99,160 @@ function AddClassSubject() {
           getSubjects(),
         ]);
 
+        if (cancelled) return;
+
         setClassLevels(getList(classLevelsData));
         setSubjects(getList(subjectsData));
       } catch (err) {
-        console.error("Failed to load class-subject form data:", err);
+        if (cancelled) return;
+
+        console.error(
+          "Failed to load class-subject form data:",
+          err,
+        );
 
         setError(
           err.response?.data?.detail ||
             "Failed to load the class-subject form data.",
         );
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const selectedClass = useMemo(() => {
-    return classLevels.find(
-      (item) => String(item.id) === String(formData.class_level),
-    );
-  }, [classLevels, formData.class_level]);
+  const selectedClass = useMemo(
+    () =>
+      classLevels.find(
+        (item) =>
+          String(item.id) === String(formData.class_level),
+      ),
+    [classLevels, formData.class_level],
+  );
 
-  const selectedSubject = useMemo(() => {
-    return subjects.find(
-      (item) => String(item.id) === String(formData.subject),
-    );
-  }, [subjects, formData.subject]);
+  const selectedSubject = useMemo(
+    () =>
+      subjects.find(
+        (item) =>
+          String(item.id) === String(formData.subject),
+      ),
+    [subjects, formData.subject],
+  );
 
   const educationLevel = selectedClass?.education_level || "";
 
-  const classDepartmentId =
-    selectedClass?.department_id ||
-    selectedClass?.department?.id ||
-    selectedClass?.department?.pk ||
-    null;
+  const classSchoolId = getRelationId(selectedClass?.school);
 
-  const classDepartmentName =
-    selectedClass?.department_name ||
-    selectedClass?.department?.name ||
-    "";
+  const classDepartmentId = getRelationId(
+    selectedClass?.department_id ?? selectedClass?.department,
+  );
+
+  const classDepartmentName = getDepartmentName(selectedClass);
+
+  const availableAssignmentTypes = useMemo(() => {
+    if (!selectedClass) return [];
+
+    if (educationLevel === "SS") {
+      return ASSIGNMENT_TYPES;
+    }
+
+    return ASSIGNMENT_TYPES.filter(
+      (type) => type.value !== "DEPARTMENT_COMPULSORY",
+    );
+  }, [selectedClass, educationLevel]);
 
   const filteredSubjects = useMemo(() => {
-    if (!educationLevel) {
+    if (!selectedClass || !educationLevel) {
       return [];
     }
 
-    let availableSubjects = subjects.filter(
-      (subject) => subject.education_level === educationLevel,
-    );
+    let availableSubjects = subjects.filter((subject) => {
+      const subjectSchoolId = getRelationId(subject.school);
 
-    /*
-     * Primary and JSS subjects must not belong to a department.
-     */
-    if (educationLevel === "PRIMARY" || educationLevel === "JSS") {
+      const sameSchool =
+        classSchoolId !== null &&
+        subjectSchoolId !== null &&
+        String(subjectSchoolId) === String(classSchoolId);
+
+      const sameEducationLevel =
+        subject.education_level === educationLevel;
+
+      return sameSchool && sameEducationLevel;
+    });
+
+    const getSubjectDepartmentId = (subject) =>
+      getRelationId(
+        subject.department_id ?? subject.department,
+      );
+
+    // Primary and JSS subjects cannot belong to a department.
+    if (
+      educationLevel === "PRIMARY" ||
+      educationLevel === "JSS"
+    ) {
       availableSubjects = availableSubjects.filter(
         (subject) =>
-          !(
-            subject.department_id ||
-            subject.department?.id ||
-            subject.department?.pk
-          ),
+          !getSubjectDepartmentId(subject),
       );
     }
 
-    /*
-     * SS:
-     *
-     * GENERAL_COMPULSORY:
-     *   only subjects without a department.
-     *
-     * DEPARTMENT_COMPULSORY:
-     *   only subjects belonging to the selected class department.
-     *
-     * OPTIONAL:
-     *   all SS subjects are allowed by the current model rules.
-     */
+    // General Compulsory SS subjects must have no department.
     if (
       educationLevel === "SS" &&
       formData.assignment_type === "GENERAL_COMPULSORY"
     ) {
       availableSubjects = availableSubjects.filter(
         (subject) =>
-          !(
-            subject.department_id ||
-            subject.department?.id ||
-            subject.department?.pk
-          ),
+          !getSubjectDepartmentId(subject),
       );
     }
 
+    // Department Compulsory SS subjects must match the class department.
     if (
       educationLevel === "SS" &&
       formData.assignment_type === "DEPARTMENT_COMPULSORY"
     ) {
       availableSubjects = availableSubjects.filter((subject) => {
         const subjectDepartmentId =
-          subject.department_id ||
-          subject.department?.id ||
-          subject.department?.pk ||
-          null;
+          getSubjectDepartmentId(subject);
 
         return (
-          classDepartmentId &&
-          subjectDepartmentId &&
-          String(subjectDepartmentId) === String(classDepartmentId)
+          classDepartmentId !== null &&
+          subjectDepartmentId !== null &&
+          String(subjectDepartmentId) ===
+            String(classDepartmentId)
         );
       });
     }
 
+    // Optional subjects can belong to any department, but must match
+    // the selected class's school and education level.
     return availableSubjects;
   }, [
     subjects,
+    selectedClass,
     educationLevel,
-    formData.assignment_type,
+    classSchoolId,
     classDepartmentId,
+    formData.assignment_type,
   ]);
 
   useEffect(() => {
-    /*
-     * If the currently selected subject is no longer valid after
-     * changing the class or assignment type, clear it.
-     */
+    // Clear a subject that becomes invalid after a class or assignment
+    // type change.
     if (
       formData.subject &&
       !filteredSubjects.some(
-        (subject) => String(subject.id) === String(formData.subject),
+        (subject) =>
+          String(subject.id) === String(formData.subject),
       )
     ) {
       setFormData((current) => ({
@@ -200,17 +262,44 @@ function AddClassSubject() {
     }
   }, [filteredSubjects, formData.subject]);
 
+  useEffect(() => {
+    // Department Compulsory is not valid for Primary or JSS.
+    if (
+      selectedClass &&
+      educationLevel !== "SS" &&
+      formData.assignment_type === "DEPARTMENT_COMPULSORY"
+    ) {
+      setFormData((current) => ({
+        ...current,
+        assignment_type: "GENERAL_COMPULSORY",
+        subject: "",
+      }));
+    }
+  }, [
+    selectedClass,
+    educationLevel,
+    formData.assignment_type,
+  ]);
+
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
 
     setFormData((current) => ({
       ...current,
       [name]: type === "checkbox" ? checked : value,
+      ...(name === "class_level" ||
+      name === "assignment_type"
+        ? { subject: "" }
+        : {}),
     }));
 
     setFieldErrors((current) => ({
       ...current,
       [name]: "",
+      ...(name === "class_level" ||
+      name === "assignment_type"
+        ? { subject: "" }
+        : {}),
     }));
 
     setError("");
@@ -228,61 +317,80 @@ function AddClassSubject() {
     }
 
     if (!formData.assignment_type) {
-      errors.assignment_type = "Please select an assignment type.";
+      errors.assignment_type =
+        "Please select an assignment type.";
     }
 
     if (selectedClass && selectedSubject) {
+      const subjectSchoolId = getRelationId(
+        selectedSubject.school,
+      );
+
+      const subjectDepartmentId = getRelationId(
+        selectedSubject.department_id ??
+          selectedSubject.department,
+      );
+
+      // Verify that the selected subject belongs to the class's school.
       if (
-        selectedClass.education_level !== selectedSubject.education_level
+        classSchoolId === null ||
+        subjectSchoolId === null ||
+        String(classSchoolId) !== String(subjectSchoolId)
+      ) {
+        errors.subject =
+          "The selected subject must belong to the same school as the class.";
+      }
+
+      // Verify education level.
+      if (
+        selectedClass.education_level !==
+        selectedSubject.education_level
       ) {
         errors.subject =
           "The subject education level must match the class education level.";
       }
 
-      const subjectDepartmentId =
-        selectedSubject.department_id ||
-        selectedSubject.department?.id ||
-        selectedSubject.department?.pk ||
-        null;
-
-      /*
-       * PRIMARY / JSS
-       */
+      // PRIMARY / JSS rules.
       if (
         selectedClass.education_level === "PRIMARY" ||
         selectedClass.education_level === "JSS"
       ) {
-        if (subjectDepartmentId) {
+        if (subjectDepartmentId !== null) {
           errors.subject =
             "Primary and JSS subjects cannot belong to a department.";
         }
 
-        if (formData.assignment_type === "DEPARTMENT_COMPULSORY") {
+        if (
+          formData.assignment_type ===
+          "DEPARTMENT_COMPULSORY"
+        ) {
           errors.assignment_type =
-            "Department compulsory subjects are only available for SS classes.";
+            "Department Compulsory is only available for SS classes.";
         }
       }
 
-      /*
-       * SS
-       */
+      // SS rules.
       if (selectedClass.education_level === "SS") {
-        if (formData.assignment_type === "GENERAL_COMPULSORY") {
-          if (subjectDepartmentId) {
-            errors.subject =
-              "This subject belongs to a department and cannot be used as a General Compulsory subject.";
-          }
+        if (
+          formData.assignment_type === "GENERAL_COMPULSORY" &&
+          subjectDepartmentId !== null
+        ) {
+          errors.subject =
+            "This subject belongs to a department and cannot be used as a General Compulsory subject.";
         }
 
-        if (formData.assignment_type === "DEPARTMENT_COMPULSORY") {
-          if (!classDepartmentId) {
+        if (
+          formData.assignment_type === "DEPARTMENT_COMPULSORY"
+        ) {
+          if (classDepartmentId === null) {
             errors.class_level =
               "The selected SS class must have a department.";
-          } else if (!subjectDepartmentId) {
+          } else if (subjectDepartmentId === null) {
             errors.subject =
               "A Department Compulsory subject must belong to a department.";
           } else if (
-            String(classDepartmentId) !== String(subjectDepartmentId)
+            String(classDepartmentId) !==
+            String(subjectDepartmentId)
           ) {
             errors.subject =
               "The subject must belong to the same department as the selected class.";
@@ -313,11 +421,7 @@ function AddClassSubject() {
         subject: Number(formData.subject),
         assignment_type: formData.assignment_type,
 
-        /*
-         * Legacy field.
-         * Compulsory assignments remain core.
-         * Optional assignments are not core.
-         */
+        // Preserve the backend's legacy field.
         is_core: formData.assignment_type !== "OPTIONAL",
 
         is_active: formData.is_active,
@@ -327,11 +431,17 @@ function AddClassSubject() {
 
       navigate("/school-admin/academics/class-subjects");
     } catch (err) {
-      console.error("Failed to create class-subject assignment:", err);
+      console.error(
+        "Failed to create class-subject assignment:",
+        err,
+      );
 
       const responseData = err.response?.data;
 
-      if (responseData && typeof responseData === "object") {
+      if (
+        responseData &&
+        typeof responseData === "object"
+      ) {
         const backendErrors = {};
 
         Object.entries(responseData).forEach(([key, value]) => {
@@ -347,7 +457,11 @@ function AddClassSubject() {
         setFieldErrors(backendErrors);
 
         if (responseData.detail) {
-          setError(responseData.detail);
+          setError(
+            Array.isArray(responseData.detail)
+              ? responseData.detail.join(" ")
+              : String(responseData.detail),
+          );
         } else if (responseData.non_field_errors) {
           setError(
             Array.isArray(responseData.non_field_errors)
@@ -358,7 +472,9 @@ function AddClassSubject() {
           setError("Please correct the errors below.");
         }
       } else {
-        setError("Failed to assign the subject to the class.");
+        setError(
+          "Failed to assign the subject to the class.",
+        );
       }
     } finally {
       setSaving(false);
@@ -424,8 +540,8 @@ function AddClassSubject() {
         </h1>
 
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 sm:text-base">
-          Assign a subject to a class and define how the subject should be
-          treated.
+          Assign a subject to a class and define how the subject
+          should be treated.
         </p>
       </div>
 
@@ -435,7 +551,9 @@ function AddClassSubject() {
           role="alert"
           className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
         >
-          <p className="font-semibold">Unable to assign subject</p>
+          <p className="font-semibold">
+            Unable to assign subject
+          </p>
           <p className="mt-1 text-sm">{error}</p>
         </div>
       )}
@@ -477,26 +595,29 @@ function AddClassSubject() {
               >
                 <option value="">Select class</option>
 
-                {classLevels.map((classLevel) => (
-                  <option
-                    key={classLevel.id}
-                    value={classLevel.id}
-                    disabled={classLevel.is_active === false}
-                  >
-                    {classLevel.name}
-                    {classLevel.education_level
-                      ? ` — ${classLevel.education_level}`
-                      : ""}
-                    {classLevel.department_name
-                      ? ` — ${classLevel.department_name}`
-                      : classLevel.department?.name
-                        ? ` — ${classLevel.department.name}`
+                {classLevels.map((classLevel) => {
+                  const departmentName =
+                    getDepartmentName(classLevel);
+
+                  return (
+                    <option
+                      key={classLevel.id}
+                      value={classLevel.id}
+                      disabled={classLevel.is_active === false}
+                    >
+                      {classLevel.name}
+                      {classLevel.education_level
+                        ? ` — ${classLevel.education_level}`
                         : ""}
-                    {classLevel.is_active === false
-                      ? " (Inactive)"
-                      : ""}
-                  </option>
-                ))}
+                      {departmentName
+                        ? ` — ${departmentName}`
+                        : ""}
+                      {classLevel.is_active === false
+                        ? " (Inactive)"
+                        : ""}
+                    </option>
+                  );
+                })}
               </select>
 
               {fieldErrors.class_level && (
@@ -517,6 +638,13 @@ function AddClassSubject() {
                         Department: {classDepartmentName}
                       </span>
                     )}
+
+                    {!classDepartmentName &&
+                      classDepartmentId !== null && (
+                        <span className="rounded-full bg-slate-200 px-2.5 py-1 font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-300">
+                          Department ID: {classDepartmentId}
+                        </span>
+                      )}
                   </div>
                 </div>
               )}
@@ -525,7 +653,8 @@ function AddClassSubject() {
             {/* Assignment Type */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-[var(--color-text)]">
-                Assignment Type <span className="text-red-500">*</span>
+                Assignment Type{" "}
+                <span className="text-red-500">*</span>
               </label>
 
               <div className="grid gap-3 md:grid-cols-3">
@@ -535,8 +664,10 @@ function AddClassSubject() {
 
                   const disabled =
                     !selectedClass ||
-                    (type.value === "DEPARTMENT_COMPULSORY" &&
-                      selectedClass.education_level !== "SS");
+                    !availableAssignmentTypes.some(
+                      (availableType) =>
+                        availableType.value === type.value,
+                    );
 
                   return (
                     <label
@@ -581,29 +712,29 @@ function AddClassSubject() {
 
               {!selectedClass && (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Select a class first to choose the available assignment
-                  types.
+                  Select a class first to choose the available
+                  assignment types.
                 </p>
               )}
 
               {selectedClass?.education_level === "PRIMARY" && (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Primary classes can use General Compulsory or Optional
-                  subjects.
+                  Primary classes can use General Compulsory or
+                  Optional subjects.
                 </p>
               )}
 
               {selectedClass?.education_level === "JSS" && (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  JSS classes can use General Compulsory or Optional
-                  subjects.
+                  JSS classes can use General Compulsory or
+                  Optional subjects.
                 </p>
               )}
 
               {selectedClass?.education_level === "SS" && (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  SS classes can use General Compulsory, Department
-                  Compulsory, or Optional subjects.
+                  SS classes can use General Compulsory,
+                  Department Compulsory, or Optional subjects.
                 </p>
               )}
             </div>
@@ -639,15 +770,18 @@ function AddClassSubject() {
 
                 {filteredSubjects.map((subject) => {
                   const departmentName =
-                    subject.department_name ||
-                    subject.department?.name ||
-                    "";
+                    getDepartmentName(subject);
 
                   return (
-                    <option key={subject.id} value={subject.id}>
+                    <option
+                      key={subject.id}
+                      value={subject.id}
+                    >
                       {subject.name}
                       {subject.code ? ` (${subject.code})` : ""}
-                      {departmentName ? ` — ${departmentName}` : ""}
+                      {departmentName
+                        ? ` — ${departmentName}`
+                        : ""}
                     </option>
                   );
                 })}
@@ -659,12 +793,14 @@ function AddClassSubject() {
                 </p>
               )}
 
-              {selectedClass && filteredSubjects.length === 0 && (
-                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                  No subjects match this class and assignment type. Check
-                  your subjects and department configuration.
-                </p>
-              )}
+              {selectedClass &&
+                filteredSubjects.length === 0 && (
+                  <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                    No subjects match this class and assignment
+                    type. Check the school's subjects, education
+                    levels, and department configuration.
+                  </p>
+                )}
 
               {selectedSubject && (
                 <div className="mt-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800/60">
@@ -675,12 +811,10 @@ function AddClassSubject() {
                       </span>
                     )}
 
-                    {selectedSubject.department_name ||
-                    selectedSubject.department?.name ? (
+                    {getDepartmentName(selectedSubject) ? (
                       <span className="rounded-full bg-slate-200 px-2.5 py-1 font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-300">
                         Department:{" "}
-                        {selectedSubject.department_name ||
-                          selectedSubject.department.name}
+                        {getDepartmentName(selectedSubject)}
                       </span>
                     ) : (
                       <span className="rounded-full bg-slate-200 px-2.5 py-1 font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-300">
@@ -709,8 +843,9 @@ function AddClassSubject() {
                   </span>
 
                   <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
-                    Active assignments are available for normal academic
-                    use. You can deactivate this assignment later.
+                    Active assignments are available for normal
+                    academic use. You can deactivate this assignment
+                    later.
                   </span>
                 </span>
               </label>
@@ -734,7 +869,11 @@ function AddClassSubject() {
                 saving ||
                 !formData.class_level ||
                 !formData.subject ||
-                filteredSubjects.length === 0
+                !filteredSubjects.some(
+                  (subject) =>
+                    String(subject.id) ===
+                    String(formData.subject),
+                )
               }
               className="w-full rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-slate-900 sm:w-auto"
             >
